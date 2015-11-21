@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GameofFlags</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="rozsirena_realita">Rozšířená realita</string>
+    <string name="prihlasovani">Přihlašování</string>
+    <string name="nastaveni">Nastavení</string>
+    <string name="act2_webView">Aktivita 2 - WebView </string>
+
+    <string name="profile_picture_desc">Profile picture</string>
+    <string name="welcome">Welcome to Gitkit Demo</string>
+    <string name="sign_in_label">Sign in</string>
+    <string name="manage_account_label">Manage account</string>
+    <string name="sign_out_label">Sign out</string>
+    <string name="fb_app_id">570243409796633</string>
+</resources>

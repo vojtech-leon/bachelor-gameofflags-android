@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tady to je aktivita pro zabírání vlajky"
+        android:id="@+id/textView2"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="0dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zpět na WebView"
+        android:id="@+id/buttonZpet"
+        android:layout_gravity="right"
+        android:onClick="zpetButton"
+        android:layout_marginLeft="473dp"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentEnd="true" />
+    <TextView
+        android:id="@+id/mainText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hello_world"
+        android:layout_marginLeft="0dp"
+        android:layout_below="@+id/buttonZpet"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
