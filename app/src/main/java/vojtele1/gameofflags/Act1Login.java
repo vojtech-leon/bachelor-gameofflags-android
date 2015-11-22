@@ -205,7 +205,8 @@ public class Act1Login extends Activity implements View.OnClickListener {
                             for (int i = 0; i < players.length(); i++) {
                                 JSONObject player = players.getJSONObject(i);
                                 nickname = player.getString("nickname");
-                                Toast.makeText(Act1Login.this, nickname, Toast.LENGTH_LONG).show();
+                              //  Toast.makeText(Act1Login.this, nickname, Toast.LENGTH_LONG).show();
+                                // TODO zmena jmena po "registraci", treba overeni, jestli se jmenuje user(default)
                             }
 
                         } catch (JSONException e) {

@@ -33,9 +33,9 @@ public class Act4Settings extends AppCompatActivity {
     TextView fraction_name, fraction_when;
     Button buttonChangeFraction;
 
-    String changeFraction = "http://192.168.1.101/gameofflags/www/android/changeFraction";
-    String getPlayerFraction = "http://192.168.1.101/gameofflags/www/android/getPlayerFraction";
-    String getFractionName = "http://192.168.1.101/gameofflags/www/android/getFractionName";
+    String changeFraction = "http://192.168.1.101/gameofflags/www/android/changefraction";
+    String getPlayerFraction = "http://192.168.1.101/gameofflags/www/android/getplayerfraction";
+    String getFractionName = "http://192.168.1.101/gameofflags/www/android/getfractionname";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +49,7 @@ public class Act4Settings extends AppCompatActivity {
         fraction_when = (TextView) findViewById(R.id.fraction_when);
         buttonChangeFraction = (Button) findViewById(R.id.buttonChangeFraction);
 
+        playerFraction = "3";
         vytahniData();
     }
     public void logout(View view) {
@@ -72,10 +73,7 @@ public class Act4Settings extends AppCompatActivity {
 
                                 JSONObject player = players.getJSONObject(0);
                                 playerFraction = player.getString("ID_fraction");
-                            fraction_when.setText(player.getString("ID_fraction"));
-                          //      playerFractionWhen = player.getString("changeFractionWhen");
-                            Toast.makeText(Act4Settings.this, "ahoj", Toast.LENGTH_LONG).show();
-
+                            //    playerFractionWhen = player.getString("changeFractionWhen");
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -112,11 +110,12 @@ public class Act4Settings extends AppCompatActivity {
 
                         try {
                             JSONArray fractions = response.getJSONArray("fraction");
-                                JSONObject fraction = fractions.getJSONObject(0);
+                            JSONObject fraction = fractions.getJSONObject(0);
 
-                                // nastavi nazev frakce
-                                fraction_name.setText(fraction.getString("name"));
+                            // nastavi nazev frakce
+                            fraction_name.setText(fraction.getString("name"));
 
+                            Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -131,9 +130,10 @@ public class Act4Settings extends AppCompatActivity {
         });
 
         requestQueue.add(jsObjRequest3);
-    }
-    public void changeFraction() {
 
+
+    }
+    public void changeFraction(View view) {
 
         //------------------------------
         if (playerFraction == "1") {
@@ -149,7 +149,7 @@ public class Act4Settings extends AppCompatActivity {
         params2.put("userId", userId);
         params2.put("ID_fraction", playerFraction);
 
-        CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST,  changeFraction, params2,
+        CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, changeFraction, params2,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -164,7 +164,5 @@ public class Act4Settings extends AppCompatActivity {
         });
 
         requestQueue.add(jsObjRequest2);
-
-
     }
 }

@@ -88,12 +88,12 @@ public class Act2WebView extends AppCompatActivity {
 
                         try {
                             JSONArray players = response.getJSONArray("player");
-                            for (int i = 0; i < players.length(); i++) {
-                                JSONObject player = players.getJSONObject(i);
+
+                                JSONObject player = players.getJSONObject(0);
                                 player_score.setText(player.getString("score"));
                                 player_level.setText(player.getString("level"));
 
-                            }
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
