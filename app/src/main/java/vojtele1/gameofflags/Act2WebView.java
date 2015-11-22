@@ -76,7 +76,7 @@ public class Act2WebView extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void vytahniData() {
+    private void vytahniData() {
         Map<String, String> params = new HashMap();
         params.put("userId", userId);
 
