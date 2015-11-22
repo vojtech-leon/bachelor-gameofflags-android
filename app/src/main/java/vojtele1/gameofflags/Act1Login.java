@@ -41,7 +41,12 @@ public class Act1Login extends Activity implements View.OnClickListener {
 
     private String nickname;
     RequestQueue requestQueue;
-    String loginPlayer = "http://192.168.1.101/gameofflags/www/android/loginplayer";
+    // pokud jsem doma, tak:
+    //String adresa = "http://192.168.1.101/gameofflags/www/android/";
+    // jinak
+    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
+
+    String loginPlayer = adresa + "loginplayer";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

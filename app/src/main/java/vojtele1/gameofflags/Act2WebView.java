@@ -33,8 +33,13 @@ public class Act2WebView extends AppCompatActivity {
     RequestQueue requestQueue;
     String userId;
 
-    String webViewPlayer = "http://192.168.1.101/gameofflags/www/android/webviewplayer";
-    String webViewScoreFraction = "http://192.168.1.101/gameofflags/www/android/webviewscorefraction";
+    // pokud jsem doma, tak:
+    //String adresa = "http://192.168.1.101/gameofflags/www/android/";
+    // jinak
+    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
+
+    String webViewPlayer = adresa + "webviewplayer";
+    String webViewScoreFraction = adresa + "webviewscorefraction";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

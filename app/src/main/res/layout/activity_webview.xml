@@ -16,15 +16,14 @@
         android:layout_alignParentStart="true" />
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:id="@+id/buttonQR"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:onClick="qrButton"
-        android:background="@drawable/button_qr"
-        android:layout_below="@+id/webViewMap"
-        android:layout_alignStart="@+id/fraction2_score" />
+        android:background="@drawable/ic_camera"
+        android:layout_below="@+id/webViewMap" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -76,19 +75,18 @@
         android:text="Prevzato"
         android:id="@+id/player_score"
         android:layout_below="@+id/fraction1_score"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignBottom="@+id/player_level" />
 
     <ImageButton
-        android:layout_width="wrap_content"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:id="@+id/buttonSettings"
         android:layout_below="@+id/fraction2_score"
         android:layout_alignParentEnd="true"
         android:onClick="settingsButton"
-        android:background="@drawable/button_settings"
-        android:layout_toEndOf="@+id/fraction2_name"
-        android:layout_alignBottom="@+id/player_level"
-        android:layout_alignStart="@+id/fraction2_score" />
+        android:background="@drawable/ic_settings"
+        android:layout_alignBottom="@+id/player_level" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -105,9 +103,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/webViewMap"
-        android:layout_below="@+id/player_score"
         android:layout_alignParentStart="true"
         android:layout_above="@+id/textViewQR"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/player_score" />
 
 </RelativeLayout>

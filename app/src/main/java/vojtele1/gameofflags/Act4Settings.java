@@ -33,9 +33,14 @@ public class Act4Settings extends AppCompatActivity {
     TextView fraction_name, fraction_when;
     Button buttonChangeFraction;
 
-    String changeFraction = "http://192.168.1.101/gameofflags/www/android/changefraction";
-    String getPlayerFraction = "http://192.168.1.101/gameofflags/www/android/getplayerfraction";
-    String getFractionName = "http://192.168.1.101/gameofflags/www/android/getfractionname";
+    // pokud jsem doma, tak:
+    //String adresa = "http://192.168.1.101/gameofflags/www/android/";
+    // jinak
+    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
+
+    String changeFraction = adresa + "changefraction";
+    String getPlayerFraction = adresa + "getplayerfraction";
+    String getFractionName = adresa + "getfractionname";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
