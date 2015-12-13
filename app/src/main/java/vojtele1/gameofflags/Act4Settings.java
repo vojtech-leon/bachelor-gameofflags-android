@@ -3,6 +3,7 @@ package vojtele1.gameofflags;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.Time;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,6 +19,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +81,23 @@ public class Act4Settings extends AppCompatActivity {
 
                                 JSONObject player = players.getJSONObject(0);
                                 playerFraction = player.getString("ID_fraction");
-                            //    playerFractionWhen = player.getString("changeFractionWhen");
+                                JSONObject time = player.getJSONObject("changeFractionWhen");
+                                playerFractionWhen = time.getString("date");
+
+                            //zmena formatu casu
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            try {
+                                Date date = sdf.parse(playerFractionWhen);
+                                System.out.println("Date ->" + date);
+
+                                fraction_when.setText(date.toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+
+                            zmenaVypisuNazvuFrakce();
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -93,50 +112,6 @@ public class Act4Settings extends AppCompatActivity {
         });
 
         requestQueue.add(jsObjRequest);
-/*
-        // pokud nebyla menena frakce, tak napis nikdy
-        if (playerFractionWhen == "0000-00-00 00:00:00") {
-            fraction_when.setText("nikdy");
-        } else {
-            // TODO zmena vypisu casu
-            fraction_when.setText(playerFractionWhen);
-        }
-*/
-        // vytahne nazev frakce
-
-        Map<String, String> params3 = new HashMap();
-        params3.put("ID_fraction", playerFraction);
-
-        CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST,  getFractionName, params3,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-
-                        try {
-                            JSONArray fractions = response.getJSONArray("fraction");
-                            JSONObject fraction = fractions.getJSONObject(0);
-
-                            // nastavi nazev frakce
-                            fraction_name.setText(fraction.getString("name"));
-
-                            Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-
-            }
-        });
-
-        requestQueue.add(jsObjRequest3);
-
-
     }
     public void changeFraction(View view) {
 
@@ -169,5 +144,40 @@ public class Act4Settings extends AppCompatActivity {
         });
 
         requestQueue.add(jsObjRequest2);
+        zmenaVypisuNazvuFrakce();
+    }
+
+    public void zmenaVypisuNazvuFrakce() {
+        Map<String, String> params3 = new HashMap();
+        params3.put("ID_fraction", playerFraction);
+
+        CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST,  getFractionName, params3,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+
+                        try {
+                            JSONArray fractions = response.getJSONArray("fraction");
+                            JSONObject fraction = fractions.getJSONObject(0);
+
+                            // nastavi nazev frakce
+                            fraction_name.setText(fraction.getString("name"));
+
+                            Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+
+            }
+        });
+
+        requestQueue.add(jsObjRequest3);
     }
 }

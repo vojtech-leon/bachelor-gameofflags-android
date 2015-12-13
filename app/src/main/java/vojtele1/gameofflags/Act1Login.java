@@ -35,6 +35,7 @@ import java.util.Map;
 public class Act1Login extends Activity implements View.OnClickListener {
 
     private String userId;
+    private String token;
 
     private GitkitClient client;
 
@@ -73,12 +74,19 @@ public class Act1Login extends Activity implements View.OnClickListener {
                 // Finally, save the Session Token or Cookie to maintain your user's session.
                 String uspech = "nic";
 
-                uspech = "Email: " + idToken.getEmail() + "\n" + "LocalId: " + idToken.getLocalId() + "\n"
-                        + "ProviderId: " + idToken.getProviderId();
+                uspech = "Email: " + user.getEmail() + "\n"
+                        + "LocalId: " + user.getLocalId() + "\n"
+                        + "ProviderId: " + idToken.getProviderId() + "\n"
+                        + "Auth: " + idToken.getKeyId() + "\n"
+                        + "expired-kdy: " + idToken.getExpireAt() + "\n"
+                        + "issueAt: " + idToken.getIssueAt();
+
+                token = idToken.getTokenString();
+                System.out.println(token);
 
                 userId = idToken.getLocalId();
 
-                Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_SHORT).show();
+                Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_LONG).show();
 
                 novyHrac();
 
@@ -192,6 +200,7 @@ public class Act1Login extends Activity implements View.OnClickListener {
         Intent intent = new Intent(this, Act2WebView.class);
         intent.putExtra("userId", userId);
         startActivity(intent);
+
     }
 
 

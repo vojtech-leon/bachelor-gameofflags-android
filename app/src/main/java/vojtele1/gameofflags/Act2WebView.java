@@ -1,11 +1,14 @@
 package vojtele1.gameofflags;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,9 +30,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Act2WebView extends AppCompatActivity {
-    TextView fraction1_score, fraction1_name, fraction2_score, fraction2_name, player_score, player_level;
+    TextView fraction1_score, fraction2_score, player_score, player_level;
     ImageButton buttonQR, buttonSettings;
-    android.webkit.WebView webViewMap;
+    Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
+    android.webkit.WebView webView;
     RequestQueue requestQueue;
     String userId;
 
@@ -37,6 +41,8 @@ public class Act2WebView extends AppCompatActivity {
     //String adresa = "http://192.168.1.101/gameofflags/www/android/";
     // jinak
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
+
+    String mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j1np.png";
 
     String webViewPlayer = adresa + "webviewplayer";
     String webViewScoreFraction = adresa + "webviewscorefraction";
@@ -46,26 +52,34 @@ public class Act2WebView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
         // vytahne id z activity loginu
-       userId = getIntent().getStringExtra("userId");
+        userId = getIntent().getStringExtra("userId");
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         fraction1_score = (TextView) findViewById(R.id.fraction1_score);
-        fraction1_name = (TextView) findViewById(R.id.fraction1_name);
         fraction2_score = (TextView) findViewById(R.id.fraction2_score);
-        fraction2_name = (TextView) findViewById(R.id.fraction2_name);
         player_score = (TextView) findViewById(R.id.player_score);
         player_level = (TextView) findViewById(R.id.player_level);
         buttonQR = (ImageButton) findViewById(R.id.buttonQR);
         buttonSettings = (ImageButton) findViewById(R.id.buttonSettings);
-        webViewMap = (android.webkit.WebView) findViewById(R.id.webViewMap);
+        webView = (android.webkit.WebView) findViewById(R.id.webViewMap);
+
+        buttonLayer1 = (Button) findViewById(R.id.buttonLayer1);
+        buttonLayer2 = (Button) findViewById(R.id.buttonLayer2);
+        buttonLayer3 = (Button) findViewById(R.id.buttonLayer3);
+        buttonLayer4 = (Button) findViewById(R.id.buttonLayer4);
 
         // Enable Javascript
-        WebSettings webSettings = webViewMap.getSettings();
+        WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webViewMap.loadUrl("http://beacon.uhk.cz/fimnav-webview/?map=j2np");
+        // zmena velikosti obsahu, aby se vesel cely na sirku
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+
+        webView.loadUrl(mapa);
+
         // Force links and redirects to open in the WebView instead of in a browser
-        webViewMap.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient());
         vytahniData();
     }
 
@@ -173,11 +187,23 @@ public class Act2WebView extends AppCompatActivity {
 
             }
         });
-
         requestQueue.add(jsObjRequest3);
-
-
     }
 
-
+    public void layer1Button(View view) {
+        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j1np.png";
+        webView.loadUrl(mapa);
+    }
+    public void layer2Button(View view) {
+        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j2np.png";
+        webView.loadUrl(mapa);
+    }
+    public void layer3Button(View view) {
+        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j3np.png";
+        webView.loadUrl(mapa);
+    }
+    public void layer4Button(View view) {
+        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j4np.png";
+        webView.loadUrl(mapa);
+    }
 }

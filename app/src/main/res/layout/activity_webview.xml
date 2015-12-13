@@ -35,12 +35,12 @@
         android:layout_alignParentStart="true" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="nazev1"
         android:id="@+id/fraction1_name"
         android:layout_alignParentTop="true"
+        android:background="#ff0000"
         android:layout_toStartOf="@+id/space" />
 
     <Space
@@ -60,13 +60,13 @@
         android:layout_alignParentEnd="true" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="nazev2"
         android:id="@+id/fraction2_name"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/space" />
+        android:layout_toEndOf="@+id/space"
+        android:background="#0000ff" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -106,6 +106,52 @@
         android:layout_alignParentStart="true"
         android:layout_above="@+id/textViewQR"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/player_score" />
+        android:layout_below="@+id/buttonLayer1" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1. patro"
+        android:id="@+id/buttonLayer1"
+        android:layout_below="@+id/player_score"
+        android:layout_alignParentStart="true"
+        android:onClick="layer1Button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2. patro"
+        android:id="@+id/buttonLayer2"
+        android:layout_alignTop="@+id/buttonLayer1"
+        android:layout_toStartOf="@+id/space2"
+        android:onClick="layer2Button"
+        android:layout_alignParentEnd="false"
+        android:layout_toEndOf="@id/buttonLayer1" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="4. patro"
+        android:id="@+id/buttonLayer4"
+        android:layout_alignTop="@+id/buttonLayer3"
+        android:layout_alignParentEnd="true"
+        android:onClick="layer4Button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3. patro"
+        android:id="@+id/buttonLayer3"
+        android:layout_alignTop="@+id/buttonLayer2"
+        android:layout_toEndOf="@+id/space2"
+        android:onClick="layer3Button"
+        android:layout_toStartOf="@id/buttonLayer4" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_alignTop="@+id/buttonLayer2"
+        android:id="@+id/space2"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
