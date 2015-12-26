@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="gitkit"
-                    android:scheme="com.googleusercontent.apps.755616529844-899f6vrtajnhdkoidssi0v5g5u3tculn" />
+                    android:scheme="com.googleusercontent.apps.331684455779-48r6bj5pjeads9k5cafmqqu1j98nskrp" />
             </intent-filter>
         </activity>
         <activity
@@ -49,7 +49,8 @@
             android:label="@string/nastaveni"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name="com.facebook.LoginActivity"/>
+        <activity android:name="com.facebook.FacebookActivity"/>
+
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -62,13 +63,13 @@
             android:value="false" />
         <meta-data
             android:name="identitytoolkit.api_key"
-            android:value="AIzaSyCRuv3uS_x6p4_2cCHdY0MVjnes3AyIg5M" />
+            android:value="AIzaSyCq8NwAC7xqlHPsK5AZiQRXhIq5tDgrAcs" />
         <meta-data
             android:name="identitytoolkit.server_client_id"
-            android:value="755616529844-899f6vrtajnhdkoidssi0v5g5u3tculn.apps.googleusercontent.com" />
+            android:value="331684455779-48r6bj5pjeads9k5cafmqqu1j98nskrp.apps.googleusercontent.com" />
         <meta-data
             android:name="identitytoolkit.server_widget_url"
-            android:value="https://localhost/callback" />
+            android:value="http://gameofflags-vojtele1.rhcloud.com/gitkit/gitkit.php" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
     </application>
 
