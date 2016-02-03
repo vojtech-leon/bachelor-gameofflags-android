@@ -75,6 +75,9 @@ public class Act2WebView extends AppCompatActivity {
         // zmena velikosti obsahu, aby se vesel cely na sirku
         webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
+        // Zapnuti zoom controls
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setSupportZoom(true);
 
         webView.loadUrl(mapa);
 

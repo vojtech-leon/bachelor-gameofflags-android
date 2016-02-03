@@ -1,7 +1,10 @@
 package vojtele1.gameofflags;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Time;
 import android.view.View;
@@ -19,10 +22,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by Leon on 21.10.2015.
@@ -35,6 +41,7 @@ public class Act4Settings extends AppCompatActivity {
     String playerFractionWhen;
     TextView fraction_name, fraction_when;
     Button buttonChangeFraction;
+    Long dateFractionChange;
 
     // pokud jsem doma, tak:
     //String adresa = "http://192.168.1.101/gameofflags/www/android/";
@@ -86,16 +93,21 @@ public class Act4Settings extends AppCompatActivity {
 
                             //zmena formatu casu
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
                             try {
                                 Date date = sdf.parse(playerFractionWhen);
+                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
+                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                // datum pro zmenu frakce
+                                dateFractionChange = date.getTime();
+                                String cas = sdf2.format(date).toString();
                                 System.out.println("Date ->" + date);
-
-                                fraction_when.setText(date.toString());
+                                fraction_when.setText(cas.toString());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
 
-
+                            // nastavi nazev frakce
                             zmenaVypisuNazvuFrakce();
 
                         } catch (JSONException e) {
@@ -114,37 +126,94 @@ public class Act4Settings extends AppCompatActivity {
         requestQueue.add(jsObjRequest);
     }
     public void changeFraction(View view) {
+        // ziskani aktualniho casu
+        Long dateNow = new Date().getTime();
+        System.out.println("DateNow -> " + dateNow);
+        System.out.println("DateFractionChange -> " + dateFractionChange);
 
-        //------------------------------
-        if (playerFraction == "1") {
-            playerFraction = "2";
-        } else {
-            playerFraction = "1";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
+
+        // pokud se frakce menila pred mene jak tydnem, tak ji nelze zmenit
+        if (dateNow < dateFractionChange+7*86400000) {
+            new AlertDialog.Builder(Act4Settings.this)
+                    .setTitle("Frakci nelze změnit!")
+                    .setMessage("Změna možná: "+ sdf.format(dateFractionChange+7*86400000).toString())
+                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
+        else {
+            // informuje hrace o zmene frakce
+            new AlertDialog.Builder(Act4Settings.this)
+                    .setTitle("Změnit frakci")
+                    .setMessage("Opravdu chcete změnit frakci?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            // pokud je id frakce 1, zmeni ho na 2 a naopak
+                            if (playerFraction == "1") {
+                                playerFraction = "2";
+                            } else {
+                                playerFraction = "1";
+                            }
+
+                            Map<String, String> params2 = new HashMap();
+                            params2.put("userId", userId);
+                            params2.put("ID_fraction", playerFraction);
+
+                            CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, changeFraction, params2,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            System.out.println(response.toString());
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    System.out.append(error.getMessage());
+
+                                }
+                            });
+
+                            requestQueue.add(jsObjRequest2);
+
+                            // zpomaleni kodu kvuli nacitani aktualnich dat (obcas se nestiha nacist)
+                            // 100 ms ve vetsine pripadu postaci
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // obnovi data ve vypisu
+                                    vytahniData();
+                                    //zobrazi zpravu o uspesne zmene frakce
+                                    new AlertDialog.Builder(Act4Settings.this)
+                                            .setTitle("Změna frakce")
+                                            .setMessage("Frakce byla změněna.")
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                }
+                            }, 100);
+
+
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // pokud nechce zmenit frakci, tak nic nedelat
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
 
-        //-----------------------------------
-
-
-        Map<String, String> params2 = new HashMap();
-        params2.put("userId", userId);
-        params2.put("ID_fraction", playerFraction);
-
-        CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, changeFraction, params2,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-
-            }
-        });
-
-        requestQueue.add(jsObjRequest2);
-        zmenaVypisuNazvuFrakce();
     }
 
     public void zmenaVypisuNazvuFrakce() {
@@ -164,7 +233,7 @@ public class Act4Settings extends AppCompatActivity {
                             // nastavi nazev frakce
                             fraction_name.setText(fraction.getString("name"));
 
-                            Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
+                            //Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
