@@ -20,7 +20,7 @@ import android.widget.Toast;
  */
 public class Act3AR extends Activity {
 
-    String userId;
+    String token;
 
     TextView mainText;
     WifiManager mainWifi;
@@ -31,8 +31,8 @@ public class Act3AR extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
         mainText = (TextView) findViewById(R.id.mainText);
-        // vytahne id z activity loginu
-        userId = getIntent().getStringExtra("userId");
+        // vytahne token z activity loginu
+        token = getIntent().getStringExtra("token");
 
         // Initiate wifi service manager
         mainWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -102,7 +102,7 @@ public class Act3AR extends Activity {
     }
     public void zpetButton(View view) {
         Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("userId", userId);
+        intent.putExtra("token", token);
         startActivity(intent);
     }
 }

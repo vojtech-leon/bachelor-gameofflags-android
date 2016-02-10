@@ -35,7 +35,7 @@ public class Act2WebView extends AppCompatActivity {
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
     android.webkit.WebView webView;
     RequestQueue requestQueue;
-    String userId;
+    String token;
 
     // pokud jsem doma, tak:
     //String adresa = "http://192.168.1.101/gameofflags/www/android/";
@@ -51,8 +51,8 @@ public class Act2WebView extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
-        // vytahne id z activity loginu
-        userId = getIntent().getStringExtra("userId");
+        // vytahne token z activity loginu
+        token = getIntent().getStringExtra("token");
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
@@ -84,23 +84,25 @@ public class Act2WebView extends AppCompatActivity {
         // Force links and redirects to open in the WebView instead of in a browser
         webView.setWebViewClient(new WebViewClient());
         vytahniData();
+
+        System.out.println("Act2: " + token);
     }
 
     public void settingsButton(View view) {
         Intent intent = new Intent(this, Act4Settings.class);
-        intent.putExtra("userId", userId);
+        intent.putExtra("token", token);
         startActivity(intent);
     }
 
     public void qrButton(View view) {
         Intent intent = new Intent(this, Act3AR.class);
-        intent.putExtra("userId", userId);
+        intent.putExtra("token", token);
         startActivity(intent);
     }
 
     private void vytahniData() {
         Map<String, String> params = new HashMap();
-        params.put("userId", userId);
+        params.put("token", token);
 
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  webViewPlayer, params,
                 new Response.Listener<JSONObject>() {

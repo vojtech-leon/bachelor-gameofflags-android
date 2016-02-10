@@ -35,16 +35,16 @@ import java.util.TimeZone;
  */
 public class Act4Settings extends AppCompatActivity {
 
-    String userId;
+    String token;
     RequestQueue requestQueue;
     String playerFraction;
     String playerFractionWhen;
     TextView fraction_name, fraction_when;
     Button buttonChangeFraction;
-    Long dateFractionChange;
+    Long dateFractionChange = 0L;
 
     // pokud jsem doma, tak:
-    //String adresa = "http://192.168.1.101/gameofflags/www/android/";
+    //String adresa = "http://192.168.0.100/gameofflags/www/android/";
     // jinak
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
@@ -55,8 +55,8 @@ public class Act4Settings extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        // vytahne id z activity loginu
-        userId = getIntent().getStringExtra("userId");
+        // vytahne token z activity loginu
+        token = getIntent().getStringExtra("token");
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
@@ -66,6 +66,8 @@ public class Act4Settings extends AppCompatActivity {
 
         playerFraction = "3";
         vytahniData();
+
+        System.out.println("Act2: " + token);
     }
     public void logout(View view) {
         Intent intent = new Intent(this, Act1Login.class);
@@ -75,7 +77,7 @@ public class Act4Settings extends AppCompatActivity {
 
         // zjisti frakci a cas posledni zmeny
         Map<String, String> params = new HashMap();
-        params.put("userId", userId);
+        params.put("token", token);
 
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  getPlayerFraction, params,
                 new Response.Listener<JSONObject>() {
@@ -161,7 +163,7 @@ public class Act4Settings extends AppCompatActivity {
                             }
 
                             Map<String, String> params2 = new HashMap();
-                            params2.put("userId", userId);
+                            params2.put("token", token);
                             params2.put("ID_fraction", playerFraction);
 
                             CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, changeFraction, params2,

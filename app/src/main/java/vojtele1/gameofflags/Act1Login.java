@@ -34,7 +34,6 @@ import java.util.Map;
  */
 public class Act1Login extends Activity implements View.OnClickListener {
 
-    private String userId;
     private String token;
 
     private GitkitClient client;
@@ -83,8 +82,6 @@ public class Act1Login extends Activity implements View.OnClickListener {
 
                 token = idToken.getTokenString();
                 System.out.println(token);
-
-                userId = idToken.getLocalId();
 
                 Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_LONG).show();
 
@@ -198,7 +195,7 @@ public class Act1Login extends Activity implements View.OnClickListener {
     }
     public void pokracujWebView(View view) {
         Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("userId", userId);
+        intent.putExtra("token", token);
         startActivity(intent);
 
     }
@@ -206,7 +203,7 @@ public class Act1Login extends Activity implements View.OnClickListener {
 
     private void novyHrac() {
         Map<String, String> params = new HashMap();
-        params.put("userId", userId);
+        params.put("token", token);
 
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  loginPlayer, params,
                 new Response.Listener<JSONObject>() {
