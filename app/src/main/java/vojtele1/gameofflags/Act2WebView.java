@@ -1,9 +1,18 @@
 package vojtele1.gameofflags;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -27,7 +36,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import vojtele1.gameofflags.dataLayer.BleScan;
+import vojtele1.gameofflags.dataLayer.CellScan;
+import vojtele1.gameofflags.dataLayer.Fingerprint;
+import vojtele1.gameofflags.dataLayer.WifiScan;
+import vojtele1.gameofflags.database.Scans;
+import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.scanners.DeviceInformation;
+import vojtele1.gameofflags.utils.scanners.ScanResultListener;
+import vojtele1.gameofflags.utils.scanners.Scanner;
 
 public class Act2WebView extends AppCompatActivity {
     TextView fraction1_score, fraction2_score, player_score, player_level;
@@ -37,15 +57,24 @@ public class Act2WebView extends AppCompatActivity {
     RequestQueue requestQueue;
     String token;
 
-    // pokud jsem doma, tak:
-    //String adresa = "http://192.168.1.101/gameofflags/www/android/";
-    // jinak
+    WifiManager wm;
+    Scanner scanner;
+    Scans scans;
+    int fingerprint, idScan, odeslano, cas, position = -1;
+    Cursor scan;
+
+    static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
+    String qr = "1";
+
+
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
     String mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j1np.png";
 
     String webViewPlayer = adresa + "webviewplayer";
     String webViewScoreFraction = adresa + "webviewscorefraction";
+    String sendScan = adresa + "sendscan";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,16 +115,21 @@ public class Act2WebView extends AppCompatActivity {
         vytahniData();
 
         System.out.println("Act2: " + token);
+
+        // Initiate wifi service manager
+        wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        scanner = new Scanner(this);
+        scans = new Scans(this);
+        scan = scans.getScans();
+
+        idScan = scan.getColumnIndex("_id");
+        fingerprint = scan.getColumnIndex("fingerprint");
+        odeslano = scan.getColumnIndex("odeslano");
+        cas = scan.getColumnIndex("date");
     }
 
     public void settingsButton(View view) {
         Intent intent = new Intent(this, Act4Settings.class);
-        intent.putExtra("token", token);
-        startActivity(intent);
-    }
-
-    public void qrButton(View view) {
-        Intent intent = new Intent(this, Act3AR.class);
         intent.putExtra("token", token);
         startActivity(intent);
     }
@@ -210,5 +244,129 @@ public class Act2WebView extends AppCompatActivity {
     public void layer4Button(View view) {
         mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j4np.png";
         webView.loadUrl(mapa);
+    }
+
+    public void qrButton(View view) {
+        try {
+            Intent intent = new Intent(ACTION_SCAN);
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, 0);
+        } catch (ActivityNotFoundException anfe) {
+            showDialog(Act2WebView.this, "No Scanner Found", "Download a scanner code activity?", "Yes", "No").show();
+        }
+    }
+    private static AlertDialog showDialog(final Activity act, CharSequence title, CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
+        downloadDialog.setTitle(title);
+        downloadDialog.setMessage(message);
+        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Uri uri = Uri.parse("market://search?q=pname:" + "com.google.zxing.client.android");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    act.startActivity(intent);
+                } catch (ActivityNotFoundException anfe) {
+
+                }
+            }
+        });
+        downloadDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        return downloadDialog.show();
+    }
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+               // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+
+              //  Toast.makeText(Act2WebView.this, "Content: " + contents + "\n" + " Format: " + format, Toast.LENGTH_LONG).show();
+              //  if (contents.equals("Game of Flags - Tady je vlajka čislo 1.")) {
+                    scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
+                        @Override
+                        public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
+                                    writePoint(wifiScans, bleScans, cellScans);
+
+                                    // posle vsechny scany, i ty, ktere se drive neposlaly
+                                    poslaniScanuVse();
+                                }
+                            });
+                        }
+                    });
+               // }
+            }
+        }
+    }
+    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans) {
+        Fingerprint p = new Fingerprint();
+        p.setWifiScans(wifiScans);
+        p.setBleScans(bleScans); // naplnime daty z Bluetooth
+        p.setCellScans(cellScans);
+        new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
+        scans.insertScan(p.toString());
+    }
+    public void poslaniScanu() {
+
+        Map<String, String> params = new HashMap();
+        params.put("token", token);
+        params.put("qr", qr);
+        params.put("fingerprint", scan.getString(fingerprint));
+        params.put("scanWhen", scan.getString(cas));
+
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  sendScan, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+
+                        try {
+                            JSONArray scansJson = response.getJSONArray("scan");
+                            JSONObject scanJson = scansJson.getJSONObject(0);
+                            if (scanJson.getString("scanWhen") != null) {
+                                scans.updateScan(scanJson.getString("scanWhen"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+
+            }
+        });
+        requestQueue.add(jsObjRequest);
+    }
+    public void poslaniScanuVse() {
+        scan = scans.getScans();
+        String text_cely = "Posílání: \n";
+        String text;
+        if (scan.getCount() < 1) {
+            System.out.println("Není tu co poslat.");
+        } else {
+            while (scan.moveToNext()) {
+                if (scan.getString(odeslano).equals("1")) {
+                    scans.deleteScan(scan.getLong(idScan));
+                    position = position - 1;
+
+                    //System.out.println("Scan je už poslán: " + scan.getString(0));
+                    text = "Mažu id: " + scan.getString(0) + "\n";
+                    text_cely = text_cely.concat(text);
+                } else {
+                    poslaniScanu();
+                  //  System.out.println("Posílám id: " + scan.getString(0));
+                    text = "Posílám id: " + scan.getString(0) + "\n";
+                    text_cely = text_cely.concat(text);
+                }
+            }
+            System.out.println(text_cely);
+        }
     }
 }

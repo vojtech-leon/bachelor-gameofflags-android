@@ -43,9 +43,7 @@ public class Act4Settings extends AppCompatActivity {
     Button buttonChangeFraction;
     Long dateFractionChange = 0L;
 
-    // pokud jsem doma, tak:
-    //String adresa = "http://192.168.0.100/gameofflags/www/android/";
-    // jinak
+
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
     String changeFraction = adresa + "changefraction";

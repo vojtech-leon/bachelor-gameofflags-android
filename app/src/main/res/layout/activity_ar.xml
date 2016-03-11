@@ -31,4 +31,15 @@
         android:layout_marginLeft="0dp"
         android:layout_below="@+id/buttonZpet"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scanner"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentStart="true"
+        android:onClick="scanQR"
+        android:text="Skenuj"
+        android:textSize="18dp"
+        />
 </RelativeLayout>

@@ -2,10 +2,14 @@ package vojtele1.gameofflags;
 
 import java.util.List;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -20,86 +24,58 @@ import android.widget.Toast;
  */
 public class Act3AR extends Activity {
 
+    static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     String token;
 
     TextView mainText;
-    WifiManager mainWifi;
-    WifiReceiver receiverWifi;
-    List<ScanResult> wifiList;
-    StringBuilder sb = new StringBuilder();
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
         mainText = (TextView) findViewById(R.id.mainText);
         // vytahne token z activity loginu
         token = getIntent().getStringExtra("token");
-
-        // Initiate wifi service manager
-        mainWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-
-        // Check for wifi is disabled
-        if (mainWifi.isWifiEnabled() == false)
-        {
-            // If wifi disabled then enable it
-            Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled",
-                    Toast.LENGTH_LONG).show();
-
-            mainWifi.setWifiEnabled(true);
+    }
+    public void scanQR(View v) {
+        try {
+            Intent intent = new Intent(ACTION_SCAN);
+            intent.putExtra("SCAN_MODE", "SCAN_MODE");
+            startActivityForResult(intent, 0);
+        } catch (ActivityNotFoundException anfe) {
+            showDialog(Act3AR.this, "No Scanner Found", "Download a scanner code activity?", "Yes", "No").show();
         }
-
-        // wifi scaned value broadcast receiver
-        receiverWifi = new WifiReceiver();
-
-        // Register broadcast receiver
-        // Broacast receiver will automatically call when number of wifi connections changed
-        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        mainWifi.startScan();
-        mainText.setText("Starting Scan...");
     }
+    private static AlertDialog showDialog(final Activity act, CharSequence title, CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
+        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
+        downloadDialog.setTitle(title);
+        downloadDialog.setMessage(message);
+        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Uri uri = Uri.parse("market://search?q=pname:" + "com.google.zxing.client.android");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    act.startActivity(intent);
+                } catch (ActivityNotFoundException anfe) {
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 0, 0, "Refresh");
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        mainWifi.startScan();
-        mainText.setText("Starting Scan");
-        return super.onMenuItemSelected(featureId, item);
-    }
-
-    protected void onPause() {
-        unregisterReceiver(receiverWifi);
-        super.onPause();
-    }
-
-    protected void onResume() {
-        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-        super.onResume();
-    }
-
-    // Broadcast receiver class called its receive method
-    // when number of wifi connections changed
-
-    class WifiReceiver extends BroadcastReceiver {
-
-        // This method call when number of wifi connections changed
-        public void onReceive(Context c, Intent intent) {
-
-            sb = new StringBuilder();
-            wifiList = mainWifi.getScanResults();
-            sb.append("\n        Number Of Wifi connections :"+wifiList.size()+"\n\n");
-
-            for(int i = 0; i < wifiList.size(); i++){
-
-                sb.append(new Integer(i+1).toString() + ". ");
-                sb.append((wifiList.get(i)).toString());
-                sb.append("\n\n");
+                }
             }
+        });
+        downloadDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        return downloadDialog.show();
+    }
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
 
-            mainText.setText(sb);
+                mainText.setText("Content: " + contents + "\n" + " Format: " + format);
+            }
         }
     }
+
     public void zpetButton(View view) {
         Intent intent = new Intent(this, Act2WebView.class);
         intent.putExtra("token", token);
