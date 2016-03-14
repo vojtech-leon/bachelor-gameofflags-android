@@ -75,8 +75,7 @@
         android:text="Prevzato"
         android:id="@+id/player_score"
         android:layout_below="@+id/fraction1_score"
-        android:layout_alignParentStart="true"
-        android:layout_alignBottom="@+id/player_level" />
+        android:layout_toEndOf="@+id/textView5" />
 
     <ImageButton
         android:layout_width="40dp"
@@ -95,9 +94,7 @@
         android:text="Level"
         android:id="@+id/player_level"
         android:layout_below="@+id/fraction2_score"
-        android:layout_toStartOf="@+id/buttonSettings"
-        android:layout_alignParentEnd="false"
-        android:layout_alignParentStart="false" />
+        android:layout_toEndOf="@+id/textView6" />
 
     <WebView
         android:layout_width="match_parent"
@@ -153,5 +150,23 @@
         android:layout_alignTop="@+id/buttonLayer2"
         android:id="@+id/space2"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Bodů: "
+        android:id="@+id/textView5"
+        android:layout_below="@+id/fraction1_score"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Level: "
+        android:id="@+id/textView6"
+        android:layout_below="@+id/fraction2_score"
+        android:layout_alignStart="@id/fraction2_name" />
 
 </RelativeLayout>

@@ -68,7 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Pokračuj na webView"
+        android:text="Pokračuj"
         android:onClick="pokracujWebView"
         android:background="#ff9a38"
         android:textColor="#ffffff" />

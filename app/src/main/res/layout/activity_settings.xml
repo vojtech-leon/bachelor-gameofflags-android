@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="nazev"
+        android:text=""
         android:id="@+id/fraction_name"
         android:layout_alignTop="@+id/textView3"
         android:layout_toEndOf="@+id/textView3" />
@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="cas_zmeny"
+        android:text=""
         android:id="@+id/fraction_when"
         android:layout_below="@+id/fraction_name"
         android:layout_toEndOf="@+id/textView4" />

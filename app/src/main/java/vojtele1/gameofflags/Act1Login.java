@@ -1,6 +1,8 @@
 package vojtele1.gameofflags;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,11 +43,13 @@ public class Act1Login extends Activity implements View.OnClickListener {
 
 
     private String nickname;
+    private String newNickname;
     RequestQueue requestQueue;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
     String loginPlayer = adresa + "loginplayer";
+    String changePlayerName = adresa + "changeplayername";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +86,9 @@ public class Act1Login extends Activity implements View.OnClickListener {
                 token = idToken.getTokenString();
                 System.out.println(token);
 
-                Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_LONG).show();
+             //   Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_LONG).show();
 
-                novyHrac();
+                loginHrac();
 
 
             }
@@ -199,7 +204,7 @@ public class Act1Login extends Activity implements View.OnClickListener {
     }
 
 
-    private void novyHrac() {
+    private void loginHrac() {
         Map<String, String> params = new HashMap();
         params.put("token", token);
 
@@ -214,8 +219,8 @@ public class Act1Login extends Activity implements View.OnClickListener {
                             for (int i = 0; i < players.length(); i++) {
                                 JSONObject player = players.getJSONObject(i);
                                 nickname = player.getString("nickname");
-                              //  Toast.makeText(Act1Login.this, nickname, Toast.LENGTH_LONG).show();
-                                // TODO zmena jmena po "registraci", treba overeni, jestli se jmenuje user(default)
+                                if (nickname.equals("user"))
+                                zmenaJmena();
                             }
 
                         } catch (JSONException e) {
@@ -232,6 +237,66 @@ public class Act1Login extends Activity implements View.OnClickListener {
         });
 
         requestQueue.add(jsObjRequest);
+    }
+    private void zmenaJmena() {
+        final EditText editText = new EditText(Act1Login.this);
 
+        new AlertDialog.Builder(Act1Login.this)
+                .setTitle("Zadejte svůj nick:")
+                .setView(editText)
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        newNickname = editText.getText().toString();
+                        zmenaJmenaRequest();
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+
+    }
+    private void zmenaJmenaRequest() {
+        Map<String, String> params = new HashMap();
+        params.put("token", token);
+        params.put("nickname", newNickname);
+
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changePlayerName, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+
+                        try {
+                            JSONArray players = response.getJSONArray("player");
+                            for (int i = 0; i < players.length(); i++) {
+                                JSONObject player = players.getJSONObject(i);
+                                nickname = player.getString("nickname");
+
+                                if (!nickname.equals("user")) {
+                                    new AlertDialog.Builder(Act1Login.this)
+                                            .setTitle("")
+                                            .setMessage("Vítej ve hře, " + nickname + "!")
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                }
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+
+            }
+        });
+
+        requestQueue.add(jsObjRequest);
     }
 }

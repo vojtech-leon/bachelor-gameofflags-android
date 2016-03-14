@@ -86,34 +86,34 @@ public class Act4Settings extends AppCompatActivity {
                         try {
                             JSONArray players = response.getJSONArray("player");
 
-                                JSONObject player = players.getJSONObject(0);
-                                playerFraction = player.getString("ID_fraction");
-                                JSONObject time = player.getJSONObject("changeFractionWhen");
-                                playerFractionWhen = time.getString("date");
-
-                            //zmena formatu casu
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
-                            try {
-                                Date date = sdf.parse(playerFractionWhen);
-                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
-                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
-                                // datum pro zmenu frakce
-                                dateFractionChange = date.getTime();
-                                String cas = sdf2.format(date).toString();
-                                System.out.println("Date ->" + date);
-                                fraction_when.setText(cas.toString());
-                            } catch (Exception e) {
+                            JSONObject player = players.getJSONObject(0);
+                            playerFraction = player.getString("ID_fraction");
+                            JSONObject time = player.getJSONObject("changeFractionWhen");
+                            playerFractionWhen = time.getString("date");
+                            if (playerFractionWhen.equals("-0001-11-30 00:00:00.000000")) {
+                                fraction_when.setText("Nikdy.");
+                            } else {
+                                //zmena formatu casu
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
+                                try {
+                                    Date date = sdf.parse(playerFractionWhen);
+                                    // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
+                                    date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                    // datum pro zmenu frakce
+                                    dateFractionChange = date.getTime();
+                                    String cas = sdf2.format(date).toString();
+                                    System.out.println("Date ->" + date);
+                                    fraction_when.setText(cas.toString());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                                // nastavi nazev frakce
+                                zmenaVypisuNazvuFrakce();
+                            }catch(JSONException e){
                                 e.printStackTrace();
                             }
-
-                            // nastavi nazev frakce
-                            zmenaVypisuNazvuFrakce();
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
                     }
                 }, new Response.ErrorListener() {
             @Override

@@ -74,6 +74,7 @@ public class Act2WebView extends AppCompatActivity {
     String webViewPlayer = adresa + "webviewplayer";
     String webViewScoreFraction = adresa + "webviewscorefraction";
     String sendScan = adresa + "sendscan";
+    String changePlayerScore = adresa + "changeplayerscore";
 
 
     @Override
@@ -283,7 +284,11 @@ public class Act2WebView extends AppCompatActivity {
                // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
 
               //  Toast.makeText(Act2WebView.this, "Content: " + contents + "\n" + " Format: " + format, Toast.LENGTH_LONG).show();
-              //  if (contents.equals("Game of Flags - Tady je vlajka čislo 1.")) {
+                if (contents.equals("Game of Flags - Tady je vlajka číslo 1.") ||
+                        contents.equals("Game of Flags - Tady je vlajka číslo 2.") ||
+                       // contents.equals("Game of Flags - Tady je vlajka číslo 3.") ||
+                        contents.equals("Game of Flags - Tady je vlajka číslo 4.")) {
+              //  if (contents.equals("text")) {
                     scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
                         @Override
                         public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
@@ -295,11 +300,22 @@ public class Act2WebView extends AppCompatActivity {
 
                                     // posle vsechny scany, i ty, ktere se drive neposlaly
                                     poslaniScanuVse();
+                                    zmenaScore();
                                 }
                             });
                         }
                     });
-               // }
+                } else {
+                    new AlertDialog.Builder(Act2WebView.this)
+                            .setTitle("Nepodváděj!")
+                            .setMessage("Toto není správný qr kód.")
+                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                }
             }
         }
     }
@@ -368,5 +384,44 @@ public class Act2WebView extends AppCompatActivity {
             }
             System.out.println(text_cely);
         }
+    }
+    private void zmenaScore() {
+        Map<String, String> params = new HashMap();
+        params.put("token", token);
+
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changePlayerScore, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("zmena score: " + response.toString());
+
+                        try {
+                            JSONArray playersJson = response.getJSONArray("player");
+                            JSONObject playerJson = playersJson.getJSONObject(0);
+                            if (playerJson.getString("score") != null) {
+
+                                vytahniData();
+
+                                new AlertDialog.Builder(Act2WebView.this)
+                                        .setTitle("")
+                                        .setMessage("Vlajka byla zabrána!")
+                                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+            }
+        });
+        requestQueue.add(jsObjRequest);
     }
 }

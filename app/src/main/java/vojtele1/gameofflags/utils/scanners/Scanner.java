@@ -61,6 +61,7 @@ public class Scanner {
 
     ProgressDialog progressDialog;
     Timer timer;
+    CountDownTimer cdt;
 
     public Scanner(Context context) {
         this.context = context;
@@ -180,7 +181,7 @@ public class Scanner {
             if (btAdapter != null && !btAdapter.isEnabled()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("BlueTooth vypnut");
-                builder.setMessage("BT je vypnut. Přejete si ho zapnout?");
+                builder.setMessage("BT je vypnut. Pro skenování musí být zapnut.");
                 builder.setPositiveButton("Ano", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -333,6 +334,8 @@ public class Scanner {
             @Override
             public void onCancel(DialogInterface dialog) {
                 stopScan();
+                // pokud by nekdo zrusil scan a zacal znova, cdt by stale dobihal
+                cdt.cancel();
             }
         });
         updateProgressDialogFlag();
@@ -348,7 +351,7 @@ public class Scanner {
                 @Override
                 public void run() {
                     // -1500 aby se tam na chvíli zobrazilo hotovo, jinak to jen problikne
-                    new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
+                    cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
 
                         public void onTick(long millisUntilFinished) {
 
@@ -358,7 +361,8 @@ public class Scanner {
                         public void onFinish() {
                             progressDialog.setMessage("Hotovo!");
                         }
-                    }.start();
+                    };
+                    cdt.start();
                 }
             });
         }
