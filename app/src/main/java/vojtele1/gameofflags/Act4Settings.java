@@ -40,7 +40,6 @@ public class Act4Settings extends AppCompatActivity {
     String playerFraction;
     String playerFractionWhen;
     TextView fraction_name, fraction_when;
-    Button buttonChangeFraction;
     Long dateFractionChange = 0L;
 
 
@@ -60,14 +59,13 @@ public class Act4Settings extends AppCompatActivity {
 
         fraction_name = (TextView) findViewById(R.id.fraction_name);
         fraction_when = (TextView) findViewById(R.id.fraction_when);
-        buttonChangeFraction = (Button) findViewById(R.id.buttonChangeFraction);
 
         playerFraction = "3";
         vytahniData();
 
         System.out.println("Act2: " + token);
     }
-    public void logout(View view) {
+    public void logoutButton(View view) {
         Intent intent = new Intent(this, Act1Login.class);
         startActivity(intent);
     }
@@ -248,5 +246,10 @@ public class Act4Settings extends AppCompatActivity {
         });
 
         requestQueue.add(jsObjRequest3);
+    }
+    public void backButton(View view) {
+        Intent intent = new Intent(this, Act2WebView.class);
+        intent.putExtra("token", token);
+        startActivity(intent);
     }
 }

@@ -20,14 +20,15 @@ android {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.mcxiaoke.volley:library:1.0.18'
-    compile 'com.google.android.gms:play-services-plus:8.3.0'
-    compile 'com.google.android.gms:play-services-identity:8.3.0'
+    compile 'com.google.android.gms:play-services-plus:8.4.0'
+    compile 'com.google.android.gms:play-services-identity:8.4.0'
+    compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.facebook.android:facebook-android-sdk:4.8.1'
-  //  compile project(':identitytoolkit_fb')
-    compile project(':identitytoolkit_fbv4')
     compile project(':identitytoolkit-api11')
+
 
     compile 'org.altbeacon:android-beacon-library:2.7'
 }

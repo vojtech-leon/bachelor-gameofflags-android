@@ -11,8 +11,6 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/identitytoolkit-api11" />
-            <option value="$PROJECT_DIR$/identitytoolkit_fb" />
-            <option value="$PROJECT_DIR$/identitytoolkit_fbv4" />
           </set>
         </option>
       </GradleProjectSettings>

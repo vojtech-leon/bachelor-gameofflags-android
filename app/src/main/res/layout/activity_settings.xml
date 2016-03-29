@@ -34,7 +34,7 @@
         android:id="@+id/buttonLogout"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:onClick="logout" />
+        android:onClick="logoutButton" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -72,5 +72,14 @@
         android:id="@+id/fraction_when"
         android:layout_below="@+id/fraction_name"
         android:layout_toEndOf="@+id/textView4" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zpět"
+        android:id="@+id/buttonBack"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="backButton"/>
 
 </RelativeLayout>

@@ -5,8 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/gameofflags.iml" filepath="$PROJECT_DIR$/gameofflags.iml" />
       <module fileurl="file://$PROJECT_DIR$/identitytoolkit-api11/identitytoolkit-api11.iml" filepath="$PROJECT_DIR$/identitytoolkit-api11/identitytoolkit-api11.iml" />
-      <module fileurl="file://$PROJECT_DIR$/identitytoolkit_fb/identitytoolkit_fb.iml" filepath="$PROJECT_DIR$/identitytoolkit_fb/identitytoolkit_fb.iml" />
-      <module fileurl="file://$PROJECT_DIR$/identitytoolkit_fbv4/identitytoolkit_fbv4.iml" filepath="$PROJECT_DIR$/identitytoolkit_fbv4/identitytoolkit_fbv4.iml" />
     </modules>
   </component>
 </project>

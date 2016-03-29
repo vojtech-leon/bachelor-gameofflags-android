@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="vojtele1.gameofflags"
-    android:versionCode="1"
-    android:versionName="1.0.0" >
+    package="vojtele1.gameofflags" >
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
@@ -15,12 +13,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -30,7 +27,7 @@
 
         <activity
             android:name=".Act1Login"
-            android:label="@string/prihlasovani"
+            android:label="@string/act_login"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -48,17 +45,17 @@
         </activity>
         <activity
             android:name=".Act2WebView"
-            android:label="@string/act2_webView"
+            android:label="@string/act_map"
             android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".Act3AR"
-            android:label="@string/rozsirena_realita"
+            android:label="@string/act_qrreader"
             android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".Act4Settings"
-            android:label="@string/nastaveni"
+            android:label="@string/act_settings"
             android:screenOrientation="portrait" >
         </activity>
         <activity android:name="com.facebook.FacebookActivity"/>
@@ -83,6 +80,8 @@
             android:name="identitytoolkit.server_widget_url"
             android:value="http://gameofflags-vojtele1.rhcloud.com/gitkit/gitkit.php" />
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
+
+        <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="barcode"/>
     </application>
 
 </manifest>

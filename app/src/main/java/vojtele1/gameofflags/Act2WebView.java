@@ -248,34 +248,9 @@ public class Act2WebView extends AppCompatActivity {
     }
 
     public void qrButton(View view) {
-        try {
-            Intent intent = new Intent(ACTION_SCAN);
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 0);
-        } catch (ActivityNotFoundException anfe) {
-            showDialog(Act2WebView.this, "No Scanner Found", "Download a scanner code activity?", "Yes", "No").show();
-        }
-    }
-    private static AlertDialog showDialog(final Activity act, CharSequence title, CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
-        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
-        downloadDialog.setTitle(title);
-        downloadDialog.setMessage(message);
-        downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Uri uri = Uri.parse("market://search?q=pname:" + "com.google.zxing.client.android");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                try {
-                    act.startActivity(intent);
-                } catch (ActivityNotFoundException anfe) {
-
-                }
-            }
-        });
-        downloadDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialogInterface, int i) {
-            }
-        });
-        return downloadDialog.show();
+        Intent intent = new Intent(this, Act3AR.class);
+        intent.putExtra("token", token);
+        startActivityForResult(intent, 0);
     }
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == 0) {
@@ -316,6 +291,10 @@ public class Act2WebView extends AppCompatActivity {
                             })
                             .show();
                 }
+            } else if (resultCode == RESULT_CANCELED) {
+                // To Handle cancel
+                Toast.makeText(Act2WebView.this, "Zabrání se nepodařilo.", Toast.LENGTH_LONG).show();
+                Log.i("App", "Scan unsuccessful");
             }
         }
     }

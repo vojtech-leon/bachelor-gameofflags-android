@@ -1,1 +1,1 @@
-include ':app', ':identitytoolkit_fb', ':identitytoolkit-api11', ':identitytoolkit_fbv4'
+include ':app', ':identitytoolkit-api11'

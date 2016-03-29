@@ -4,10 +4,10 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="rozsirena_realita">Rozšířená realita</string>
-    <string name="prihlasovani">Přihlašování</string>
-    <string name="nastaveni">Nastavení</string>
-    <string name="act2_webView">Aktivita 2 - WebView </string>
+    <string name="act_qrreader">Čtení QR kódu</string>
+    <string name="act_login">Přihlašování</string>
+    <string name="act_settings">Nastavení</string>
+    <string name="act_map">Mapa</string>
 
     <string name="profile_picture_desc">Profile picture</string>
     <string name="welcome">Vítejte v Game of Flags!</string>
