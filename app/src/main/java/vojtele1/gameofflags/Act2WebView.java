@@ -1,34 +1,28 @@
 package vojtele1.gameofflags;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -56,14 +50,12 @@ public class Act2WebView extends AppCompatActivity {
     android.webkit.WebView webView;
     RequestQueue requestQueue;
     String token;
-
     WifiManager wm;
     Scanner scanner;
     Scans scans;
     int fingerprint, idScan, odeslano, cas, position = -1;
     Cursor scan;
 
-    static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     String qr = "1";
 
 
@@ -263,7 +255,6 @@ public class Act2WebView extends AppCompatActivity {
                         contents.equals("Game of Flags - Tady je vlajka číslo 2.") ||
                        // contents.equals("Game of Flags - Tady je vlajka číslo 3.") ||
                         contents.equals("Game of Flags - Tady je vlajka číslo 4.")) {
-              //  if (contents.equals("text")) {
                     scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
                         @Override
                         public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
@@ -291,10 +282,6 @@ public class Act2WebView extends AppCompatActivity {
                             })
                             .show();
                 }
-            } else if (resultCode == RESULT_CANCELED) {
-                // To Handle cancel
-                Toast.makeText(Act2WebView.this, "Zabrání se nepodařilo.", Toast.LENGTH_LONG).show();
-                Log.i("App", "Scan unsuccessful");
             }
         }
     }
@@ -380,7 +367,7 @@ public class Act2WebView extends AppCompatActivity {
                             if (playerJson.getString("score") != null) {
 
                                 vytahniData();
-
+// TODO zmena vlajky
                                 new AlertDialog.Builder(Act2WebView.this)
                                         .setTitle("")
                                         .setMessage("Vlajka byla zabrána!")

@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
@@ -27,10 +28,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vojtele1.gameofflags.Act2WebView;
 import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.StepDetector;
 
 
 /**
@@ -63,6 +66,8 @@ public class Scanner {
     Timer timer;
     CountDownTimer cdt;
 
+    StepDetector stepDetector;
+
     public Scanner(Context context) {
         this.context = context;
         init();
@@ -82,12 +87,12 @@ public class Scanner {
             public void onReceive(Context context, Intent intent) {
                 Log.d(C.LOG_WIFISCAN, "Number of wifi networks scanned: " + wm.getScanResults().size() + ", " + (running ? "Scanning again" : "Finished scanning"));
                 wifiScans.addAll(convertWifiResults(wm.getScanResults()));
-                updateProgressDialog();
                 if (cont) {
                     wm.startScan();
                 }
             }
         };
+        stepDetector = new StepDetector(context);
     }
 
     /**
@@ -119,8 +124,6 @@ public class Scanner {
         running = true;
         cont = true; //nastav aby se synchronni skenovani cyklicky spoustela znovu
 
-       // TODO zmena progressDialogu na odpocet zabrani vlajky
-       // progressDialog = showProgressDialog();
         progressDialog = showProgressDialogFlag();
 
         wifiScans.clear();
@@ -144,7 +147,6 @@ public class Scanner {
                             List<NeighboringCellInfo> cells = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getNeighboringCellInfo();
                             if (cells != null) {
                                 cellScans.addAll(convertCellResults(cells));
-                                updateProgressDialog();
                             }
                             if (!cont) {
                                 cancel();
@@ -180,8 +182,8 @@ public class Scanner {
             final BluetoothAdapter btAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
             if (btAdapter != null && !btAdapter.isEnabled()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("BlueTooth vypnut");
-                builder.setMessage("BT je vypnut. Pro skenování musí být zapnut.");
+                builder.setTitle("Bluetooth");
+                builder.setMessage("BT je vypnut. Pro zabírání musí být zapnut.");
                 builder.setPositiveButton("Ano", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -224,41 +226,6 @@ public class Scanner {
         beaconConsumer.unBind();
         running = false;
     }
-
-    /**
-     * Vytvori a zobrazi progressDialog pro informovani o postupu skenovani
-     *
-     * @return zobrazeny progressDialog
-     */
-    private ProgressDialog showProgressDialog() {
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setTitle("Skenuji… ani se nehni");
-        progressDialog.show();
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                stopScan();
-            }
-        });
-        updateProgressDialog();
-        return progressDialog;
-    }
-
-    /**
-     * Updatuje zobrazovane hodnoty v progressDialogu pokud ten neni null.
-     */
-    private void updateProgressDialog() {
-    /*    if (progressDialog != null) {
-            ((Activity) context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressDialog.setMessage("BluetoothLE: " + bleScans.size() + "\nWifi: " + wifiScans.size() + "\nCellular BTS: " + cellScans.size());
-                }
-            });
-        }*/
-    }
-
     /**
      * Prevede list ScanResultu na list WifiScanu (custom trida) s prevodem timestampu vzhledem k pocatku skenovani. Nepridava do celkoveho Listu skenu
      *
@@ -270,9 +237,7 @@ public class Scanner {
         for (ScanResult scan : scanResults) {
             WifiScan wifiScan = new WifiScan(scan.SSID, scan.BSSID, scan.level, scan.frequency);
   //        wifiScan.setTime((scan.timestamp / 1000) - (startTime)); //scan.timestamp ne nekterych telefonech/verzich/??? hazi nesmysly a na jinych zase funguje perfektne
-  //        wifiScan.setTime(SystemClock.uptimeMillis() - startTime);
-            // TODO zde jsem si upravil timestamp, hazelo to podivna cisla
-            wifiScan.setTime(System.currentTimeMillis()/1000 - SystemClock.elapsedRealtime() + (scan.timestamp / 1000));
+            wifiScan.setTime(SystemClock.uptimeMillis() - startTime);
 
             wifiScans.add(wifiScan);
             Log.d(C.LOG_WIFISCAN, scan.toString());
@@ -294,7 +259,6 @@ public class Scanner {
         bleScan.setMinor(scan.getId3().toInt());
         bleScan.setTime(SystemClock.uptimeMillis() - startTime);
         bleScans.add(bleScan);
-        updateProgressDialog();
         Log.d(C.LOG_BLESCAN, bleScan.toString());
     }
 
@@ -354,8 +318,23 @@ public class Scanner {
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
 
                         public void onTick(long millisUntilFinished) {
-
-                            progressDialog.setMessage("Zbývá: " + millisUntilFinished / 1000f);
+                            // TODO animace zabirani vlajky
+                            if (stepDetector.pohyb()) {
+                                cdt.cancel();
+                                stopScan();
+                                new AlertDialog.Builder(context)
+                                        .setTitle("Nepodváděj!")
+                                        .setMessage("Příliš jsi se pohl!")
+                                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .show();
+                                //  }
+                            } else {
+                                progressDialog.setMessage("Zbývá: " + millisUntilFinished / 1000f);
+                            }
                         }
 
                         public void onFinish() {
