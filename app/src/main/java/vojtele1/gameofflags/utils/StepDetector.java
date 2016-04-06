@@ -1,12 +1,10 @@
 package vojtele1.gameofflags.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Bundle;
 
 /**
  * Created by Leon on 30.03.2016.
@@ -45,9 +43,12 @@ public class StepDetector implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    /**
+     * Vraci true/false, pokud je/neni zaznamenan pohyb
+     * @return
+     */
     public boolean pohyb() {
         if (krok != 0.0) {
-            System.out.println("pohnul se");
             activityRunning = false;
             krok = 0;
             return true;

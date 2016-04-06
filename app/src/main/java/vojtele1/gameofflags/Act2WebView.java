@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +15,6 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,9 +26,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
@@ -53,7 +53,7 @@ public class Act2WebView extends AppCompatActivity {
     WifiManager wm;
     Scanner scanner;
     Scans scans;
-    int fingerprint, idScan, odeslano, cas, position = -1;
+    int fingerprint, idScan, odeslano, cas, position = -1, flag;
     Cursor scan;
 
     String qr = "1";
@@ -67,6 +67,8 @@ public class Act2WebView extends AppCompatActivity {
     String webViewScoreFraction = adresa + "webviewscorefraction";
     String sendScan = adresa + "sendscan";
     String changePlayerScore = adresa + "changeplayerscore";
+    String changeFlagOwner = adresa + "changeflagowner";
+    String getFlagWhen = adresa + "getflagwhen";
 
 
     @Override
@@ -119,6 +121,7 @@ public class Act2WebView extends AppCompatActivity {
         fingerprint = scan.getColumnIndex("fingerprint");
         odeslano = scan.getColumnIndex("odeslano");
         cas = scan.getColumnIndex("date");
+        flag = scan.getColumnIndex("flag");
     }
 
     public void settingsButton(View view) {
@@ -255,22 +258,15 @@ public class Act2WebView extends AppCompatActivity {
                         contents.equals("Game of Flags - Tady je vlajka číslo 2.") ||
                        // contents.equals("Game of Flags - Tady je vlajka číslo 3.") ||
                         contents.equals("Game of Flags - Tady je vlajka číslo 4.")) {
-                    scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
-                        @Override
-                        public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
-                                    writePoint(wifiScans, bleScans, cellScans);
 
-                                    // posle vsechny scany, i ty, ktere se drive neposlaly
-                                    poslaniScanuVse();
-                                    zmenaScore();
-                                }
-                            });
-                        }
-                    });
+                    // TODO toto je urceni id vlajky pro databazi
+                    if (contents.equals("Game of Flags - Tady je vlajka číslo 1.")) flag = 1;
+                    if (contents.equals("Game of Flags - Tady je vlajka číslo 2.")) flag = 2;
+                    if (contents.equals("Game of Flags - Tady je vlajka číslo 4.")) flag = 3;
+
+                    ziskVlajkyKdy();
+
+
                 } else {
                     new AlertDialog.Builder(Act2WebView.this)
                             .setTitle("Nepodváděj!")
@@ -285,19 +281,19 @@ public class Act2WebView extends AppCompatActivity {
             }
         }
     }
-    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans) {
+    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flag) {
         Fingerprint p = new Fingerprint();
         p.setWifiScans(wifiScans);
         p.setBleScans(bleScans); // naplnime daty z Bluetooth
         p.setCellScans(cellScans);
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
-        scans.insertScan(p.toString());
+        scans.insertScan(p.toString(), flag);
     }
     public void poslaniScanu() {
 
         Map<String, String> params = new HashMap();
         params.put("token", token);
-        params.put("qr", qr);
+        params.put("flag", String.valueOf(flag));
         params.put("fingerprint", scan.getString(fingerprint));
         params.put("scanWhen", scan.getString(cas));
 
@@ -367,7 +363,7 @@ public class Act2WebView extends AppCompatActivity {
                             if (playerJson.getString("score") != null) {
 
                                 vytahniData();
-// TODO zmena vlajky
+
                                 new AlertDialog.Builder(Act2WebView.this)
                                         .setTitle("")
                                         .setMessage("Vlajka byla zabrána!")
@@ -378,6 +374,131 @@ public class Act2WebView extends AppCompatActivity {
                                         })
                                         .show();
                             }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+            }
+        });
+        requestQueue.add(jsObjRequest);
+    }
+
+    private void zmenaVlastnikaVlajky() {
+        Map<String, String> params = new HashMap();
+        params.put("token", token);
+        params.put("flag", String.valueOf(flag));
+
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changeFlagOwner, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("zmena vlastnika vlajky: " + response.toString());
+
+                        try {
+                            JSONArray flagsJson = response.getJSONArray("flag");
+                            JSONObject flagJson = flagsJson.getJSONObject(0);
+                            if (flagJson.getString("ID_flag") != null) {
+                                zmenaScore();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+            }
+        });
+        requestQueue.add(jsObjRequest);
+    }
+    private void ziskVlajkyKdy() {
+        Map<String, String> params = new HashMap();
+        params.put("token", token);
+        params.put("flag", String.valueOf(flag));
+
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  getFlagWhen, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("ziskani vlajky kdy a ja naposled?: " + response.toString());
+
+                        try {
+                            JSONArray flagsJson = response.getJSONArray("flag");
+                            JSONObject flagJson = flagsJson.getJSONObject(0);
+                            JSONObject time = flagJson.getJSONObject("flagWhen");
+                            String flagWhen = time.getString("date");
+                            String flagMe = flagJson.getString("flagMe");
+                            String fractionMe = flagJson.getString("fractionMe");
+
+                            //zmena formatu casu
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            try {
+                                Date date = sdf.parse(flagWhen);
+                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
+                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                long dateFlagChange = date.getTime();
+                                // ziskani aktualniho casu
+                                Long dateNow = new Date().getTime();
+                                SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
+
+                                // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
+                                if (flagMe.equals("true")) {
+                                    new AlertDialog.Builder(Act2WebView.this)
+                                            .setTitle("Vlajku nemůžeš změnit!")
+                                            .setMessage("Tuto vlajku jsi již zabral.")
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                } else if (fractionMe.equals("true")) {
+                                    new AlertDialog.Builder(Act2WebView.this)
+                                            .setTitle("Vlajku nemůžeš změnit!")
+                                            .setMessage("Tuto vlajku již tvoje frakce vlastní.")
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                } else if (dateNow < dateFlagChange+600000) {
+                                    new AlertDialog.Builder(Act2WebView.this)
+                                            .setTitle("Vlajku ještě nelze změnit!")
+                                            .setMessage("Změna možná: "+ sdf2.format(dateFlagChange+600000).toString())
+                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                } else {
+                                    scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
+                                        @Override
+                                        public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
+                                                    writePoint(wifiScans, bleScans, cellScans, flag);
+
+                                                    // posle vsechny scany, i ty, ktere se drive neposlaly
+                                                    poslaniScanuVse();
+                                                    zmenaVlastnikaVlajky();
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

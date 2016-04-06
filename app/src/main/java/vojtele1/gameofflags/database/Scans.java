@@ -24,6 +24,7 @@ public class Scans {
     public static final String COLUMN_Fingerprint = "fingerprint";
     public static final String COLUMN_Date = "date";
     public static final String COLUMN_Odeslano = "odeslano";
+    public static final String COLUMN_Flag = "flag";
 
     private SQLiteOpenHelper openHelper;
     static class DatabaseHelper extends SQLiteOpenHelper {
@@ -38,7 +39,8 @@ public class Scans {
                     + COLUMN_ID + " INTEGER PRIMARY KEY,"
                     + COLUMN_Fingerprint + " TEXT NOT NULL,"
                     + COLUMN_Date + " DATETIME NOT NULL,"
-                    + COLUMN_Odeslano + " BOOLEAN NOT NULL"
+                    + COLUMN_Odeslano + " BOOLEAN NOT NULL,"
+                    + COLUMN_Flag + " INTEGER NOT NULL"
                     + ");");
         }
 
@@ -58,7 +60,7 @@ public class Scans {
         openHelper = new DatabaseHelper(ctx);
     }
     public static final String[] columns = { COLUMN_ID, COLUMN_Fingerprint, COLUMN_Date,
-            COLUMN_Odeslano };
+            COLUMN_Odeslano, COLUMN_Flag };
 
     protected static final String ORDER_BY = COLUMN_ID + " DESC";
 
@@ -82,13 +84,14 @@ public class Scans {
         db.delete(TB_NAME, COLUMN_ID + "= ?", selectionArgs);
     }
 
-    public void insertScan(String fingerprint) {
+    public void insertScan(String fingerprint, int flag) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         Date date = new Date();
         ContentValues values = new ContentValues();
         values.put(COLUMN_Fingerprint, fingerprint);
         values.put(COLUMN_Date, date.getTime());  // je to v ms
         values.put(COLUMN_Odeslano, false);
+        values.put(COLUMN_Flag, flag);
 
         db.insert(TB_NAME, null, values);
     }
