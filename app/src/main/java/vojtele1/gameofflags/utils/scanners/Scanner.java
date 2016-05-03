@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import vojtele1.gameofflags.Act2WebView;
 import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.WifiScan;
@@ -52,7 +51,7 @@ public class Scanner {
     /**
      * zda prave probiha sken
      */
-    boolean running;
+    public boolean running;
     /**
      * zda ma byt znovu spusteno cyklicke synchronni skenovani (wifi a gsm)
      */
@@ -65,6 +64,7 @@ public class Scanner {
     ProgressDialog progressDialog;
     Timer timer;
     CountDownTimer cdt;
+    public AlertDialog alertDialog;
 
     StepDetector stepDetector;
 
@@ -181,19 +181,19 @@ public class Scanner {
         if (ble) { //pokud nas zajima zapnuti BT
             final BluetoothAdapter btAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
             if (btAdapter != null && !btAdapter.isEnabled()) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Bluetooth");
-                builder.setMessage("BT je vypnut. Pro zabírání musí být zapnut.");
-                builder.setPositiveButton("Ano", new DialogInterface.OnClickListener() {
+                alertDialog = new AlertDialog.Builder(context)
+                .setTitle("Bluetooth")
+                .setMessage("BT je vypnut. Pro zabírání musí být zapnut. Zapínám")
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (!btAdapter.enable()) {
                             Toast.makeText(context, "Chyba při zapínání BT", Toast.LENGTH_SHORT).show();
                         }
+                        alertDialog = null;
                     }
-                });
-                builder.setNegativeButton("Ne", null);
-                builder.show();
+                })
+                .show();
                 return false; //zajima nas zapnuti BT ale ten je off -> navrat false protoze se musi pockat na jeho asynchronni zapnuti
             }
         }
@@ -222,6 +222,10 @@ public class Scanner {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
+        if (cdt != null) {
+            // pokud by nekdo zrusil scan a zacal znova, cdt by stale dobihal
+            cdt.cancel();
+        }
         context.unregisterReceiver(wifiBroadcastReceiver);
         beaconConsumer.unBind();
         running = false;
@@ -236,7 +240,7 @@ public class Scanner {
         List<WifiScan> wifiScans = new ArrayList<>();
         for (ScanResult scan : scanResults) {
             WifiScan wifiScan = new WifiScan(scan.SSID, scan.BSSID, scan.level, scan.frequency);
-  //        wifiScan.setTime((scan.timestamp / 1000) - (startTime)); //scan.timestamp ne nekterych telefonech/verzich/??? hazi nesmysly a na jinych zase funguje perfektne
+            //        wifiScan.setTime((scan.timestamp / 1000) - (startTime)); //scan.timestamp ne nekterych telefonech/verzich/??? hazi nesmysly a na jinych zase funguje perfektne
             wifiScan.setTime(SystemClock.uptimeMillis() - startTime);
 
             wifiScans.add(wifiScan);
@@ -298,8 +302,6 @@ public class Scanner {
             @Override
             public void onCancel(DialogInterface dialog) {
                 stopScan();
-                // pokud by nekdo zrusil scan a zacal znova, cdt by stale dobihal
-                cdt.cancel();
             }
         });
         updateProgressDialogFlag();
@@ -314,20 +316,22 @@ public class Scanner {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    stepDetector.enableStepDetector(true);
                     // -1500 aby se tam na chvíli zobrazilo hotovo, jinak to jen problikne
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
 
                         public void onTick(long millisUntilFinished) {
                             // TODO animace zabirani vlajky
                             if (stepDetector.pohyb()) {
-                                cdt.cancel();
                                 stopScan();
-                                new AlertDialog.Builder(context)
+                                alertDialog = new AlertDialog.Builder(context)
                                         .setTitle("Nepodváděj!")
                                         .setMessage("Příliš jsi se pohl!")
                                         .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
                                                 dialog.dismiss();
+                                                alertDialog = null;
+                                                stepDetector.enableStepDetector(false);
                                             }
                                         })
                                         .show();

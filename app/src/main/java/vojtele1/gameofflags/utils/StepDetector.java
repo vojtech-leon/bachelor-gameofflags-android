@@ -24,10 +24,6 @@ public class StepDetector implements SensorEventListener {
         activityRunning = true;
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         stepDetector = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-        // kontrola jestli zarizeni ma sensor
-        if (stepDetector != null) {
-            sensorManager.registerListener(this, stepDetector, SensorManager.SENSOR_DELAY_UI);
-        }
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -48,13 +44,23 @@ public class StepDetector implements SensorEventListener {
      * @return
      */
     public boolean pohyb() {
-        if (krok != 0.0) {
+        if (krok > 1.0) {
             activityRunning = false;
-            krok = 0;
             return true;
         }
 
         activityRunning = true;
         return false;
+    }
+    public void enableStepDetector(boolean enable) {
+        if (enable) {
+            // kontrola jestli zarizeni ma sensor
+            if (stepDetector != null) {
+                sensorManager.registerListener(this, stepDetector, SensorManager.SENSOR_DELAY_UI);
+            }
+        } else {
+            sensorManager.unregisterListener(this, stepDetector);
+            krok = 0;
+        }
     }
 }
