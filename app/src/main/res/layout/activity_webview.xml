@@ -78,7 +78,7 @@
         android:layout_toEndOf="@+id/textView5" />
 
     <ImageButton
-        android:layout_width="40dp"
+        android:layout_width="35dp"
         android:layout_height="wrap_content"
         android:id="@+id/buttonSettings"
         android:layout_below="@+id/fraction2_score"

@@ -1,6 +1,9 @@
 package vojtele1.gameofflags;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -22,6 +25,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import vojtele1.gameofflags.utils.C;
 
 
 public class Act2WebView extends AppCompatActivity {
@@ -65,13 +70,13 @@ public class Act2WebView extends AppCompatActivity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         // zmena velikosti obsahu, aby se vesel cely na sirku
-        webSettings.setUseWideViewPort(true);
         webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
         // Zapnuti zoom controls
         webSettings.setBuiltInZoomControls(true);
         webSettings.setSupportZoom(true);
 
-        webView.loadUrl(mapa);
+        webView.loadUrl("file:///android_asset/j1np.html");
 
         // Force links and redirects to open in the WebView instead of in a browser
         webView.setWebViewClient(new WebViewClient());
@@ -182,20 +187,35 @@ public class Act2WebView extends AppCompatActivity {
     }
 
     public void layer1Button(View view) {
-        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j1np.png";
-        webView.loadUrl(mapa);
+        webView.loadUrl("file:///android_asset/j1np.html");
+        showPoint(1, 500, 500, "J1NP");
     }
     public void layer2Button(View view) {
-        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j2np.png";
-        webView.loadUrl(mapa);
+        webView.loadUrl("file:///android_asset/j2np.png");
+        showPoint(2, 600, 600, "J2NP");
     }
     public void layer3Button(View view) {
-        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j3np.png";
-        webView.loadUrl(mapa);
+        webView.loadUrl("file:///android_asset/j3np.html");
+        CountDownTimer cdt = new CountDownTimer(200, 200) {
+
+            public void onTick(long millisUntilFinished) {
+
+
+            }
+
+            public void onFinish() {
+                showPoint(3, 700, 700, "J3NP");
+                showPoint(2,600,760,"J2NP");
+                showPoint(1,700,800,"J1NP");
+            }
+        };
+        cdt.start();
+
     }
     public void layer4Button(View view) {
         mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j4np.png";
         webView.loadUrl(mapa);
+        showPoint(4,800,800,"J4NP");
     }
 
     public void qrButton(View view) {
@@ -213,6 +233,22 @@ public class Act2WebView extends AppCompatActivity {
                 // To Handle cancel
                 System.out.println("Act 2 - Zabrání vlajky se nepodařilo.");
             }
+        }
+    }
+    private void showPoint(int id, int x, int y, String level) {
+        switch (level) {
+            case "J1NP":
+                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"red\"" + ")");
+                break;
+            case "J2NP":
+                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"blue\"" + ")");
+                break;
+            case "J3NP":
+                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"green\"" + ")");
+                break;
+            case "J4NP":
+                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"black\"" + ")");
+                break;
         }
     }
 }
