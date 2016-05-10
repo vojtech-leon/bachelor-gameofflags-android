@@ -46,7 +46,6 @@ import vojtele1.gameofflags.dataLayer.Fingerprint;
 import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.database.Scans;
 import vojtele1.gameofflags.utils.C;
-import vojtele1.gameofflags.utils.StepDetector;
 import vojtele1.gameofflags.utils.scanners.DeviceInformation;
 import vojtele1.gameofflags.utils.scanners.ScanResultListener;
 import vojtele1.gameofflags.utils.scanners.Scanner;
@@ -60,10 +59,8 @@ public class Act3AR extends AppCompatActivity {
     BarcodeDetector barcodeDetector;
     CameraSource cameraSource;
     ArrayList<String> qrCodes;
-    CountDownTimer cdt;
-    boolean visibleQR;
     int notVisibleSecond;
-    boolean vim = true, scanFinished;
+    boolean knowFlagInfo = true, scanFinished;
     boolean alreadyVisibleQR;
 
     RequestQueue requestQueue;
@@ -83,7 +80,7 @@ public class Act3AR extends AppCompatActivity {
     String sendScan = adresa + "sendscan";
     String changePlayerScore = adresa + "changeplayerscore";
     String changeFlagOwner = adresa + "changeflagowner";
-    String getFlagWhen = adresa + "getflagwhen";
+    String getFlagInfoUser = adresa + "getflaginfouser";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,11 +105,11 @@ public class Act3AR extends AppCompatActivity {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
-        qrCodes = new ArrayList<>();
-        qrCodes.add("Game of Flags - Tady je vlajka číslo 1.");
-        qrCodes.add("Game of Flags - Tady je vlajka číslo 2.");
-        qrCodes.add("Game of Flags - Tady je vlajka číslo 3.");
-        qrCodes.add("Game of Flags - Tady je vlajka číslo 4.");
+        qrCodes = new ArrayList<>(); // niz se k id pricita +1, takze id se tvari jako 1,2,3...
+        qrCodes.add("http://beacon.uhk.cz/qr/1");
+        qrCodes.add("http://beacon.uhk.cz/qr/2");
+        qrCodes.add("http://beacon.uhk.cz/qr/3");
+        qrCodes.add("http://beacon.uhk.cz/qr/4");
 
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeDetector = new BarcodeDetector.Builder(this)
@@ -168,10 +165,9 @@ public class Act3AR extends AppCompatActivity {
                         System.out.println(barcodes.size());
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
                         flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
-                        System.out.println("vim: " + vim + "scan-running: " + scanner.running + "scan-alert: " + scanner.alertDialog);
-                        if (!scanner.running && scanner.alertDialog == null && vim) {
+                        if (!scanner.running && scanner.alertDialog == null && knowFlagInfo) {
                             ziskVlajkyKdy();
-                            vim = false;
+                            knowFlagInfo = false;
                         }
 
                         alreadyVisibleQR = true;
@@ -182,6 +178,21 @@ public class Act3AR extends AppCompatActivity {
                             if (notVisibleSecond == 3) {
                                 scanner.stopScan();
                                 alreadyVisibleQR = false;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        alertDialog = new AlertDialog.Builder(Act3AR.this)
+                                                .setTitle("")
+                                                .setMessage("Nesmíš ztratit vlajku z dohledu!")
+                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
+                                                        alertDialog = null;
+                                                    }
+                                                })
+                                                .show();
+                                    }
+                                });
                             }
                             else {
                                 notVisibleSecond++;
@@ -325,7 +336,7 @@ public class Act3AR extends AppCompatActivity {
                             JSONObject playerJson = playersJson.getJSONObject(0);
                             if (playerJson.getString("score") != null) {
 
-                                new AlertDialog.Builder(Act3AR.this)
+                                alertDialog = new AlertDialog.Builder(Act3AR.this)
                                         .setTitle("")
                                         .setMessage("Vlajka byla zabrána!")
                                         .setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -357,7 +368,7 @@ public class Act3AR extends AppCompatActivity {
     private void zmenaVlastnikaVlajky() {
         Map<String, String> params = new HashMap();
         params.put("token", token);
-        params.put("flag", flagId);
+        params.put("ID_flag", flagId);
 
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changeFlagOwner, params,
                 new Response.Listener<JSONObject>() {
@@ -386,9 +397,9 @@ public class Act3AR extends AppCompatActivity {
     private void ziskVlajkyKdy() {
         Map<String, String> params = new HashMap();
         params.put("token", token);
-        params.put("flag", flagId);
+        params.put("ID_flag", flagId);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  getFlagWhen, params,
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -412,7 +423,7 @@ public class Act3AR extends AppCompatActivity {
                                 // ziskani aktualniho casu
                                 Long dateNow = new Date().getTime();
                                 SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
-                                vim = true;
+                                knowFlagInfo = true;
                                     // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
                                     if (flagMe.equals("true")) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
@@ -479,7 +490,7 @@ public class Act3AR extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-                vim = true;
+                knowFlagInfo = true;
             }
         });
         requestQueue.add(jsObjRequest);

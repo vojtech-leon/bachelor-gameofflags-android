@@ -6,11 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.text.format.Time;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,13 +19,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+
+import vojtele1.gameofflags.geofence.Geofencing;
 
 /**
  * Created by Leon on 21.10.2015.
@@ -42,6 +39,7 @@ public class Act4Settings extends AppCompatActivity {
     TextView fraction_name, fraction_when;
     Long dateFractionChange = 0L;
 
+    Geofencing geofencing;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
@@ -63,7 +61,7 @@ public class Act4Settings extends AppCompatActivity {
         playerFraction = "3";
         vytahniData();
 
-        System.out.println("Act2: " + token);
+        geofencing = new Geofencing(this);
     }
     public void logoutButton(View view) {
         Intent intent = new Intent(this, Act1Login.class);
@@ -251,5 +249,13 @@ public class Act4Settings extends AppCompatActivity {
         Intent intent = new Intent(this, Act2WebView.class);
         intent.putExtra("token", token);
         startActivity(intent);
+    }
+
+    public void removeGeofencesButtonHandler(View view) {
+        geofencing.removeGeofencesButtonHandler(view);
+    }
+
+    public void addGeofencesButtonHandler(View view) {
+        geofencing.addGeofencesButtonHandler(view);
     }
 }

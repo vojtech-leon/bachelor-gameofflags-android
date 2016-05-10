@@ -23,8 +23,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import vojtele1.gameofflags.utils.C;
 
@@ -36,13 +41,12 @@ public class Act2WebView extends AppCompatActivity {
     android.webkit.WebView webView;
     RequestQueue requestQueue;
     String token;
+    String floor;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-
-    String mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j1np.png";
-
     String webViewPlayer = adresa + "webviewplayer";
     String webViewScoreFraction = adresa + "webviewscorefraction";
+    String getFlagInfo = adresa + "getflaginfo";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +81,12 @@ public class Act2WebView extends AppCompatActivity {
         webSettings.setSupportZoom(true);
 
         webView.loadUrl("file:///android_asset/j1np.html");
+        floor = "J1NP";
 
         // Force links and redirects to open in the WebView instead of in a browser
         webView.setWebViewClient(new WebViewClient());
-        vytahniData();
 
-        System.out.println("Act2: " + token);
+        vytahniData();
     }
 
     public void settingsButton(View view) {
@@ -92,9 +96,9 @@ public class Act2WebView extends AppCompatActivity {
     }
 
     private void vytahniData() {
+
         Map<String, String> params = new HashMap();
         params.put("token", token);
-
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  webViewPlayer, params,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -119,7 +123,6 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-
             }
         });
 
@@ -127,7 +130,6 @@ public class Act2WebView extends AppCompatActivity {
 
         Map<String, String> params2 = new HashMap();
         params2.put("ID_fraction", "1");
-
         CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -150,7 +152,6 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-
             }
         });
 
@@ -158,7 +159,6 @@ public class Act2WebView extends AppCompatActivity {
 
         Map<String, String> params3 = new HashMap();
         params3.put("ID_fraction", "2");
-
         CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -180,42 +180,32 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-
             }
         });
         requestQueue.add(jsObjRequest3);
+        showFlags(floor);
+
     }
 
     public void layer1Button(View view) {
         webView.loadUrl("file:///android_asset/j1np.html");
-        showPoint(1, 500, 500, "J1NP");
+        floor = "J1NP";
+        vytahniData();
     }
     public void layer2Button(View view) {
-        webView.loadUrl("file:///android_asset/j2np.png");
-        showPoint(2, 600, 600, "J2NP");
+        webView.loadUrl("file:///android_asset/j2np.html");
+        floor = "J2NP";
+        vytahniData();
     }
     public void layer3Button(View view) {
         webView.loadUrl("file:///android_asset/j3np.html");
-        CountDownTimer cdt = new CountDownTimer(200, 200) {
-
-            public void onTick(long millisUntilFinished) {
-
-
-            }
-
-            public void onFinish() {
-                showPoint(3, 700, 700, "J3NP");
-                showPoint(2,600,760,"J2NP");
-                showPoint(1,700,800,"J1NP");
-            }
-        };
-        cdt.start();
-
+        floor = "J3NP";
+        vytahniData();
     }
     public void layer4Button(View view) {
-        mapa = "http://gameofflags-vojtele1.rhcloud.com/images/j4np.png";
-        webView.loadUrl(mapa);
-        showPoint(4,800,800,"J4NP");
+        webView.loadUrl("file:///android_asset/j4np.html");
+        floor = "J4NP";
+        vytahniData();
     }
 
     public void qrButton(View view) {
@@ -235,19 +225,80 @@ public class Act2WebView extends AppCompatActivity {
             }
         }
     }
-    private void showPoint(int id, int x, int y, String level) {
-        switch (level) {
+
+    private void showPoint(int id, int x, int y, String color) {
+        webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"" + color + "\")");
+    }
+
+    private void showFlag(final int idFlag, final int x, final int y) {
+        Map<String, String> params = new HashMap();
+        params.put("ID_flag", String.valueOf(idFlag));
+        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfo, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+                        try {
+                            JSONArray flagsJson = response.getJSONArray("flag");
+                            JSONObject flagJson = flagsJson.getJSONObject(0);
+                            JSONObject time = flagJson.getJSONObject("flagWhen");
+                            String flagWhen = time.getString("date");
+                            String idFraction = flagJson.getString("ID_fraction");
+                            //zmena formatu casu
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            try {
+                                Date date = sdf.parse(flagWhen);
+                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
+                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                long dateFlagChange = date.getTime();
+                                // ziskani aktualniho casu
+                                Long dateNow = new Date().getTime();
+                                if (dateNow < dateFlagChange + 600000) {
+                                    if (idFraction == "1") {
+                                        showPoint(idFlag, x, y, "#FF8080");
+                                    } else {
+                                        showPoint(idFlag, x, y, "#8080FF");
+                                    }
+                                } else {
+                                    if (idFraction == "1") {
+                                        showPoint(idFlag, x, y, "#FF0000");
+                                    } else {
+                                        showPoint(idFlag, x, y, "#0000FF");
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+            }
+        });
+        requestQueue.add(jsObjRequest);
+    }
+
+    private void showFlags(String floor) {
+        switch (floor) {
             case "J1NP":
-                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"red\"" + ")");
                 break;
             case "J2NP":
-                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"blue\"" + ")");
                 break;
             case "J3NP":
-                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"green\"" + ")");
+                // vlajka u kabinetu Kriz
+                showFlag(1,1850,850);
+                // vlajka u kabinetu Maly
+                showFlag(2,1800,2420);
+                // vlajka mezi Kriz/Maly
+                showFlag(3,1700,1370);
+                // vlajka naproti kabinetu Horalek
+                showFlag(4,480,1175);
                 break;
             case "J4NP":
-                webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"black\"" + ")");
                 break;
         }
     }

@@ -82,4 +82,22 @@
         android:layout_alignParentEnd="true"
         android:onClick="backButton"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/remove_geofences"
+        android:id="@+id/remove_geofences_button"
+        android:layout_above="@+id/buttonChangeFraction"
+        android:layout_alignEnd="@+id/buttonBack"
+        android:onClick="removeGeofencesButtonHandler" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_geofences"
+        android:id="@+id/add_geofences_button"
+        android:layout_above="@+id/buttonChangeFraction"
+        android:layout_alignParentStart="true"
+        android:onClick="addGeofencesButtonHandler" />
+
 </RelativeLayout>
