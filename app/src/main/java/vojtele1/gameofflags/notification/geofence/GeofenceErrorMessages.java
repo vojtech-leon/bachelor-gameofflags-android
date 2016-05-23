@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package vojtele1.gameofflags.geofence;
+package vojtele1.gameofflags.notification.geofence;
 
 import android.content.Context;
 import android.content.res.Resources;

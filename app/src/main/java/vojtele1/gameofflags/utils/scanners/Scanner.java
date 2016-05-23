@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
@@ -19,6 +20,11 @@ import android.os.SystemClock;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
@@ -28,6 +34,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vojtele1.gameofflags.R;
 import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.WifiScan;
@@ -100,10 +107,11 @@ public class Scanner {
      *
      * @param time               - jak dlouho ma byt sken spusten
      * @param scanResultListener - listener, ktery ma byt informovan o dokonceni skenovani a obdrzet vysledky
+     * @param frakce1 - jestli dany hrac patri do frakce1
      * @return - zda bylo skenovani uspesne spusteno. False kdyz jsou nektere adaptery vypnute nebo skenovani uz bezi
      */
-    public boolean startScan(int time, ScanResultListener scanResultListener) {
-        return startScan(time, true, true, true, scanResultListener);
+    public boolean startScan(int time, ScanResultListener scanResultListener, boolean frakce1, ViewGroup root) {
+        return startScan(time, true, true, true, scanResultListener, frakce1, root);
     }
 
     /**
@@ -116,7 +124,7 @@ public class Scanner {
      * @param scanResultListener - listener, ktery ma byt informovan o dokonceni skenovani a obdrzet vysledky. Pro adaptery, na kterych nemelo byt skenovano vraci prazdny list a ne null
      * @return - zda bylo skenovani uspesne spusteno. False kdyz jsou nektere adaptery vypnute nebo skenovani uz bezi
      */
-    public boolean startScan(final int time, boolean wifi, boolean ble, boolean cell, final ScanResultListener scanResultListener) {
+    public boolean startScan(final int time, boolean wifi, boolean ble, boolean cell, final ScanResultListener scanResultListener, boolean frakce1, ViewGroup root) {
         ble = ble && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE); //vyradime ble pokud ho zarizeni nema.
         if (running || !enableHW(wifi, ble)) {
             return false; //pokud jeste nedobehlo probihajici skenovani (nebo problemy pri zapinani HW), NEstartuj nove a vrat false
@@ -124,7 +132,7 @@ public class Scanner {
         running = true;
         cont = true; //nastav aby se synchronni skenovani cyklicky spoustela znovu
 
-        progressDialog = showProgressDialogFlag();
+        progressDialog = showProgressDialogFlag(frakce1, root);
 
         wifiScans.clear();
         bleScans.clear();
@@ -226,6 +234,7 @@ public class Scanner {
             // pokud by nekdo zrusil scan a zacal znova, cdt by stale dobihal
             cdt.cancel();
         }
+        stepDetector.enableStepDetector(false);
         context.unregisterReceiver(wifiBroadcastReceiver);
         beaconConsumer.unBind();
         running = false;
@@ -289,21 +298,48 @@ public class Scanner {
     }
 
     /**
-     * Vytvori a zobrazi progressDialog pro informovani o postupu zabirani vlajky
+     * Vytvori a zobrazi progressDialog s animaci zabirani vlajky
      *
      * @return zobrazeny progressDialog
      */
-    private ProgressDialog showProgressDialogFlag() {
+    private ProgressDialog showProgressDialogFlag(boolean frakce1, ViewGroup root) {
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View layout = inflater.inflate(R.layout.flags,
+                root);
+
+        ImageView imageView = (ImageView) layout.findViewById(R.id.imageView4);
+
         progressDialog = new ProgressDialog(context);
-        progressDialog.setTitle("Zabírám vlajku, nehýbej se!");
+
         progressDialog.show();
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        progressDialog.setCancelable(false);
+
+        //progressDialog.setCanceledOnTouchOutside(false);
+        /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 stopScan();
             }
-        });
+        });*/
+
+
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        progressDialog.setContentView(layout);
+        AlphaAnimation animation;
+
+        if (frakce1) {
+            animation = new AlphaAnimation(1.0f, 0.0f);
+        } else {
+            animation = new AlphaAnimation(0.0f, 1.0f);
+        }
+        animation.setDuration(C.SCAN_COLLECTOR_TIME);
+        animation.setFillAfter(true);
+        imageView.startAnimation(animation);
+
+
         updateProgressDialogFlag();
         return progressDialog;
     }
@@ -321,7 +357,6 @@ public class Scanner {
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
 
                         public void onTick(long millisUntilFinished) {
-                            // TODO animace zabirani vlajky
                             if (stepDetector.pohyb()) {
                                 stopScan();
                                 alertDialog = new AlertDialog.Builder(context)
@@ -331,11 +366,9 @@ public class Scanner {
                                             public void onClick(DialogInterface dialog, int which) {
                                                 dialog.dismiss();
                                                 alertDialog = null;
-                                                stepDetector.enableStepDetector(false);
                                             }
                                         })
                                         .show();
-                                //  }
                             } else {
                                 progressDialog.setMessage("Zbývá: " + millisUntilFinished / 1000f);
                             }

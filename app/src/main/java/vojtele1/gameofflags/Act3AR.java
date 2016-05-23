@@ -16,6 +16,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -81,6 +82,7 @@ public class Act3AR extends AppCompatActivity {
     String changePlayerScore = adresa + "changeplayerscore";
     String changeFlagOwner = adresa + "changeflagowner";
     String getFlagInfoUser = adresa + "getflaginfouser";
+    String getPlayerFraction = adresa + "getplayerfraction";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,7 +172,6 @@ public class Act3AR extends AppCompatActivity {
                             knowFlagInfo = false;
                         }
 
-                        alreadyVisibleQR = true;
                         notVisibleSecond = 0;
 
                     } else {
@@ -227,8 +228,8 @@ public class Act3AR extends AppCompatActivity {
 
     /**
      * Zapne BT a Wifi pokud je aktivita aktivni. Pokud bylo BT nebo Wifi zaple, zustane zaple.
-     * @param enable
-     * @return
+     * @param enable jestli se ma bt a wifi zapnout/vypnout
+     * @return true
      */
     public boolean changeBTWifiState(boolean enable) {
         if (enable) {
@@ -412,6 +413,7 @@ public class Act3AR extends AppCompatActivity {
                             String flagWhen = time.getString("date");
                             String flagMe = flagJson.getString("flagMe");
                             String fractionMe = flagJson.getString("fractionMe");
+                            String fractionId = flagJson.getString("ID_fraction");
 
                             //zmena formatu casu
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -459,6 +461,10 @@ public class Act3AR extends AppCompatActivity {
                                                 })
                                                 .show();
                                     } else {
+                                        alreadyVisibleQR = true;
+
+                                        ViewGroup root = (ViewGroup) findViewById(R.id.flags);
+
                                         scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
                                             @Override
                                             public void onScanFinished(final List<WifiScan> wifiScans, final List<BleScan> bleScans, final List<CellScan> cellScans) {
@@ -475,7 +481,7 @@ public class Act3AR extends AppCompatActivity {
                                                     }
                                                 });
                                             }
-                                        });
+                                        }, fractionId.equals("1"), root); // zde se predava hracova frakce a view pro vykresleni spravne animace
                                     }
 
                             } catch (Exception e) {

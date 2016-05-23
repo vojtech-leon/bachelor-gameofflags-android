@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package vojtele1.gameofflags.geofence;
+package vojtele1.gameofflags.notification.geofence;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vojtele1.gameofflags.R;
-import vojtele1.gameofflags.geofence.GeofenceErrorMessages;
+import vojtele1.gameofflags.notification.geofence.GeofenceErrorMessages;
 
 /**
  * Listener for geofence transition changes.
@@ -124,7 +124,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
 
-        return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
+        return geofenceTransitionString + " na " + triggeringGeofencesIdsString + "!";
     }
 
     /**
@@ -151,6 +151,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
         // Get a notification builder that's compatible with platform versions >= 4
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
+        // umozni viceradkove notifikace
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(notificationDetails);
+        bigTextStyle.bigText(getString(R.string.geofence_transition_notification_text));
+
+        builder.setStyle(bigTextStyle);
+
         // Define the notification settings.
         builder.setSmallIcon(R.drawable.ic_launcher)
                 // In a real app, you may want to use a library like Volley
@@ -160,10 +167,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 .setColor(Color.RED)
                 .setContentTitle(notificationDetails)
                 .setContentText(getString(R.string.geofence_transition_notification_text))
+                .setTicker("Game of Flags tě potřebuje!")
                 .setContentIntent(notificationPendingIntent);
 
         // Dismiss notification once the user touches it.
         builder.setAutoCancel(true);
+
+        builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
 
         // Get an instance of the Notification manager
         NotificationManager mNotificationManager =

@@ -83,7 +83,8 @@
 
         <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="barcode"/>
 
-        <service android:name=".geofence.GeofenceTransitionsIntentService" />
+        <service android:name=".notification.geofence.GeofenceTransitionsIntentService" />
+        <receiver android:name=".notification.AlarmReceiver" />
     </application>
 
 </manifest>

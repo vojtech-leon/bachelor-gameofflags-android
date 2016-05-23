@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package vojtele1.gameofflags.geofence;
+package vojtele1.gameofflags.notification.geofence;
 
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -80,7 +77,7 @@ public class Geofencing implements
     /**
      * Used to keep track of whether geofences were added.
      */
-    private boolean mGeofencesAdded;
+    public boolean mGeofencesAdded;
 
     /**
      * Used when requesting to add or remove geofences.
@@ -240,13 +237,6 @@ public class Geofencing implements
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putBoolean(C.GEOFENCES_ADDED_KEY, mGeofencesAdded);
             editor.apply();
-
-            Toast.makeText(
-                    context,
-                    context.getString(mGeofencesAdded ? R.string.geofences_added :
-                            R.string.geofences_removed),
-                    Toast.LENGTH_SHORT
-            ).show();
         } else {
             // Get the status code for the error and log it using a user-friendly message.
             String errorMessage = GeofenceErrorMessages.getErrorString(context,
@@ -278,7 +268,7 @@ public class Geofencing implements
      * the user's location.
      */
     public void populateGeofenceList() {
-        for (Map.Entry<String, LatLng> entry : C.BAY_AREA_LANDMARKS.entrySet()) {
+        for (Map.Entry<String, LatLng> entry : C.GEOFENCING_LANDMARKS.entrySet()) {
 
             mGeofenceList.add(new Geofence.Builder()
                     // Set the request ID of the geofence. This is a string to identify this
@@ -292,12 +282,10 @@ public class Geofencing implements
                             C.GEOFENCE_RADIUS_IN_METERS
                     )
 
-                            // Set the expiration duration of the geofence. This geofence gets automatically
-                            // removed after this period of time.
-                            //TODO zmena  .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                            // Set the expiration duration of the geofence. This geofence gets never expired
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
                             // Set the transition types of interest. Alerts are only generated for these
-                            // transition. We track entry and exit transitions in this sample.
+                            // transition. We track entry transition in this sample.
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                             // Create the geofence.
                     .build());

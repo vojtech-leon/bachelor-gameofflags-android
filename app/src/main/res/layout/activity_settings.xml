@@ -13,28 +13,26 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Settings"
         android:id="@+id/textView"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp" />
+        android:layout_alignBottom="@+id/buttonBack"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Zmena frakce"
+        android:text="Změna frakce"
         android:id="@+id/buttonChangeFraction"
-        android:layout_above="@+id/buttonLogout"
-        android:layout_alignStart="@+id/buttonLogout"
-        android:onClick="changeFraction"/>
+        android:onClick="changeFraction"
+        android:layout_below="@+id/add_remove_notification_button"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Odhlasit"
+        android:text="Odhlásit"
         android:id="@+id/buttonLogout"
-        android:layout_centerVertical="true"
+        android:onClick="logoutButton"
         android:layout_centerHorizontal="true"
-        android:onClick="logoutButton" />
+        android:layout_below="@+id/buttonChangeFraction" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -85,19 +83,10 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/remove_geofences"
-        android:id="@+id/remove_geofences_button"
-        android:layout_above="@+id/buttonChangeFraction"
-        android:layout_alignEnd="@+id/buttonBack"
-        android:onClick="removeGeofencesButtonHandler" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_geofences"
-        android:id="@+id/add_geofences_button"
-        android:layout_above="@+id/buttonChangeFraction"
-        android:layout_alignParentStart="true"
-        android:onClick="addGeofencesButtonHandler" />
+        android:text="@string/button_notification_add"
+        android:id="@+id/add_remove_notification_button"
+        android:onClick="addRemoveNotificationButton"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

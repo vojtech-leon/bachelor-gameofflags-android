@@ -15,12 +15,12 @@
     <string name="fb_app_id">919073338174996</string>
 
 
-    <!-- Buttons strings -->
-    <string name="add_geofences">Add geofences</string>
-    <string name="remove_geofences">Remove geofences</string>
+    <!-- Button string -->
+    <string name="notification_added">Notifikace přidány</string>
+    <string name="notification_removed">Notifikace odebrány</string>
 
-    <string name="geofences_added">Geofences added</string>
-    <string name="geofences_removed">Geofences removed</string>
+    <string name="button_notification_add">Zapnout notifikace</string>
+    <string name="button_notification_remove">Vypnout notifikace</string>
 
     <!-- Error strings -->
     <string name="not_connected">GoogleApiClient no yet connected. Try again.</string>
@@ -37,9 +37,8 @@
     </string>
 
     <!-- Transition type strings -->
-    <string name="geofence_transition_entered">Entered</string>
-    <string name="geofence_transition_exited">Exited</string>
-    <string name="unknown_geofence_transition">Unknown Transition</string>
+    <string name="geofence_transition_entered">Vítej zpět!</string>
+    <string name="unknown_geofence_transition">Unknown Transition - nahlaste adminovi</string>
 
-    <string name="geofence_transition_notification_text">Click notification to return to app</string>
+    <string name="geofence_transition_notification_text">Pomož své frakci získat dominanci ve všech patrech!</string>
 </resources>
