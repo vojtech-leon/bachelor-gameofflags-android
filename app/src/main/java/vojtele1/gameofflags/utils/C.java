@@ -29,6 +29,11 @@ public class C {
      */
     public static int SCAN_FINDER_TIME = 5000;
 
+    /**
+     * Jak dlouho ma byt vlajka immuni proti dalsimu zabrani
+     */
+    public static int FLAG_IMMUNE_TIME = 600000;
+
     public static final String PACKAGE_NAME = "vojtele1.gameofflags";
 
     public static final String SHARED_PREFERENCES_NAME = PACKAGE_NAME + ".SHARED_PREFERENCES_NAME";
@@ -36,6 +41,8 @@ public class C {
     public static final String GEOFENCES_ADDED_KEY = PACKAGE_NAME + ".GEOFENCES_ADDED_KEY";
 
     public static final String NOTIFICATION_ADDED_KEY = PACKAGE_NAME + ".NOTIFICATION_ADDED_KEY";
+
+    public static final String PLAYER_FRACTION = PACKAGE_NAME + ".PLAYER_FRACTION";
 
     public static final float GEOFENCE_RADIUS_IN_METERS = 1600; // 1 mile, 1.6 km
 
@@ -98,6 +105,17 @@ public class C {
         MAC_EDUROAM.add("00:24:14:3a:ac:7f");
         MAC_EDUROAM.add("00:21:a0:f9:54:cf");
     }
+
+    public static final ArrayList<String> QR_CODES = new ArrayList<>();
+    static {
+        QR_CODES.add("http://beacon.uhk.cz/qr/1");
+        QR_CODES.add("http://beacon.uhk.cz/qr/2");
+        QR_CODES.add("http://beacon.uhk.cz/qr/3");
+        QR_CODES.add("http://beacon.uhk.cz/qr/4");
+    }
+
+
+
 
     public static boolean isLocationEnabled(Context context) {
         int locationMode = 0;

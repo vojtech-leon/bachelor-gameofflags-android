@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vojtele1.gameofflags.R;
+import vojtele1.gameofflags.notification.Notification;
 import vojtele1.gameofflags.notification.geofence.GeofenceErrorMessages;
 
 /**
@@ -47,6 +48,7 @@ import vojtele1.gameofflags.notification.geofence.GeofenceErrorMessages;
 public class GeofenceTransitionsIntentService extends IntentService {
 
     protected static final String TAG = "GeofenceTransitionsIS";
+    Notification notification;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -94,8 +96,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
             );
 
             // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
+            //sendNotification(geofenceTransitionDetails);
             Log.i(TAG, geofenceTransitionDetails);
+            // posila stejne notifikace z alertManageru i z geofencingu
+            notification = new Notification(this);
+            notification.notifikuj();
+
         } else {
             // Log the error.
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
@@ -124,7 +130,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
 
-        return geofenceTransitionString + " na " + triggeringGeofencesIdsString + "!";
+        return geofenceTransitionString + triggeringGeofencesIdsString + "!";
     }
 
     /**

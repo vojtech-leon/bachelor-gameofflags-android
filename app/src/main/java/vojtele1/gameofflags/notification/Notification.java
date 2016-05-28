@@ -2,13 +2,12 @@ package vojtele1.gameofflags.notification;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 
 import com.android.volley.Request;
@@ -22,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import vojtele1.gameofflags.Act1Login;
@@ -31,23 +29,20 @@ import vojtele1.gameofflags.R;
 import vojtele1.gameofflags.utils.C;
 
 /**
- * Created by Leon on 14.05.2016.
+ * Trida zajistuje zjisteni score obou frakci a nasledne poslani/neposlani notifikace. Hracovu
+ * frakci bere ze sharedPreferences.
+ * Created by Leon on 28.05.2016.
  */
-public class AlarmReceiver extends BroadcastReceiver {
+public class Notification {
 
     RequestQueue requestQueue;
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
     String webViewScoreFraction = adresa + "webviewscorefraction";
-
     int fraction1Score, fraction2Score, counterError;
     boolean knowScoreF1, knowScoreF2;
     boolean knowResponseF1, knowResponseF2;
-
     String message;
     Context context;
-
-    int pocitadloScanu;
-    WifiManager wifiManager;
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
      */
@@ -57,52 +52,23 @@ public class AlarmReceiver extends BroadcastReceiver {
      */
     private String mPlayerFraction;
 
-    Notification notification;
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
+    public Notification(Context context) {
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
-
-        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
         // Retrieve an instance of the SharedPreferences object.
         mSharedPreferences = context.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
 
         // Get the value of mPlayerFraction from SharedPreferences. Set to 0 (chyba) as a default.
         mPlayerFraction = mSharedPreferences.getString(C.PLAYER_FRACTION, "0");
-
-        notification = new Notification(context);
-
-
-        System.out.println("onReceive přijat");
-        if (wifiManager.isWifiEnabled()) {
-
-            wifiManager.startScan();
-            List<ScanResult> results = wifiManager.getScanResults();
-            for (ScanResult result : results) {
-                System.out.println("Access Point MacAddr: " + result.BSSID);
-                //if (result.BSSID.equals("c8:3a:35:11:c6:70")) {
-                if (C.MAC_EDUROAM.contains(result.BSSID)) {
-                    System.out.println("Nasel jsem spravnou mac");
-                    // posle notifikace stejne i pro geofencing
-                    notification.notifikuj();
-                    break;
-                } else if (results.size() == pocitadloScanu){
-                    System.out.println("není tu macovka");
-                } else {
-                    System.out.println("To není správna mac, jdu dal");
-                }
-                pocitadloScanu++;
-            }
-        } else {
-            System.out.println("není zaplá wifi, tezko to zjistim");
-        }
-
+    }
+    public void notifikuj() {
+        getFractionScore(knowScoreF1, knowScoreF2);
+        zjisti();
     }
     private void zjisti() {
-        Handler handler = new Handler();
+        // Looper.getMainLooper() je potreba kvuli service(geofencing), protoze service neni UI
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -116,15 +82,19 @@ public class AlarmReceiver extends BroadcastReceiver {
                         zjisti();
                     }  else { // vim score, tvorim zpravu pro notifikaci
                         int playerFractionScore, opositeFractionScore;
-                        if (mPlayerFraction.equals("0")) {
-                            System.out.println("Alarm notifikace - neznam hracovu frakci.");
-                            return; // neni potreba pokracovat
-                        } else if (mPlayerFraction.equals("1")) {
-                            playerFractionScore = fraction1Score;
-                            opositeFractionScore = fraction2Score;
-                        } else { // takze je "2"
-                            playerFractionScore = fraction2Score;
-                            opositeFractionScore = fraction1Score;
+                        switch (mPlayerFraction) {
+                            case "0":
+                                System.out.println("Alarm notifikace - neznam hracovu frakci.");
+                                return; // neni potreba pokracovat
+
+                            case "1":
+                                playerFractionScore = fraction1Score;
+                                opositeFractionScore = fraction2Score;
+                                break;
+                            default:  // takze je "2"
+                                playerFractionScore = fraction2Score;
+                                opositeFractionScore = fraction1Score;
+                                break;
                         }
 
                         if (playerFractionScore > opositeFractionScore + 1) {// tedy vedou minimalne o 2 body
@@ -140,45 +110,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                             message = "Tvá frakce nepatrně prohrává, pomož jí dohnat ztrátu!";
                         }
 
-
                         System.out.println("vim vse, notifikuji");
                         createNotification(context, "Game of Flags", message, "Game of Flags tě potřebuje!");
                     }
-                    } else {
+                } else {
                     zjisti();
                 }
             }
         }, 1000);
-    }
-    private void createNotification(Context context, String msg, String msgText, String msgAlert) {
-
-        PendingIntent notificationIntent = PendingIntent.getActivity(context, 0,
-                new Intent(context, Act1Login.class), PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder mBuilder = new
-                NotificationCompat.Builder(context)
-                .setContentTitle(msg)
-                .setContentText(msgText)
-                .setTicker(msgAlert)
-                .setSmallIcon(R.drawable.ic_launcher);
-
-        // umozni viceradkove notifikace
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle(msg);
-        bigTextStyle.bigText(msgText);
-
-        mBuilder.setStyle(bigTextStyle);
-
-        mBuilder.setContentIntent(notificationIntent);
-
-        mBuilder.setDefaults(NotificationCompat.DEFAULT_SOUND);
-
-        mBuilder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(0, mBuilder.build());
-
     }
     private void getFractionScore(boolean f1, boolean f2) {
         if (!f1) {
@@ -244,5 +183,40 @@ public class AlarmReceiver extends BroadcastReceiver {
             });
             requestQueue.add(jsObjRequest3);
         }
+    }
+    private void createNotification(Context context, String msg, String msgText, String msgAlert) {
+
+        PendingIntent notificationIntent = PendingIntent.getActivity(context, 0,
+                new Intent(context, Act1Login.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder mBuilder = new
+                NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_launcher)
+                        // In a real app, you may want to use a library like Volley
+                        // to decode the Bitmap.
+                // ta ikona, co je stale videt
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.drawable.ic_launcher))
+                .setContentTitle(msg)
+                .setContentText(msgText)
+                .setTicker(msgAlert);
+
+        // umozni viceradkove notifikace
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(msg);
+        bigTextStyle.bigText(msgText);
+
+        mBuilder.setStyle(bigTextStyle);
+
+        mBuilder.setContentIntent(notificationIntent);
+
+        mBuilder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+
+        mBuilder.setAutoCancel(true);
+
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(0, mBuilder.build());
+
     }
 }

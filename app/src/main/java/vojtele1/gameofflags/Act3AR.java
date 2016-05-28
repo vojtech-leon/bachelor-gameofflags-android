@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,7 +33,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +57,6 @@ public class Act3AR extends AppCompatActivity {
     SurfaceView cameraView;
     BarcodeDetector barcodeDetector;
     CameraSource cameraSource;
-    ArrayList<String> qrCodes;
     int notVisibleSecond;
     boolean knowFlagInfo = true, scanFinished;
     boolean alreadyVisibleQR;
@@ -68,7 +65,7 @@ public class Act3AR extends AppCompatActivity {
     String token, flagId;
     Scanner scanner;
     Scans scans;
-    int fingerprint, idScan, odeslano, cas, position = -1, flag;
+    int fingerprint, idScan, odeslano, cas, position = -1, flagDB;
     Cursor scan;
     AlertDialog alertDialog;
 
@@ -82,7 +79,6 @@ public class Act3AR extends AppCompatActivity {
     String changePlayerScore = adresa + "changeplayerscore";
     String changeFlagOwner = adresa + "changeflagowner";
     String getFlagInfoUser = adresa + "getflaginfouser";
-    String getPlayerFraction = adresa + "getplayerfraction";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,17 +97,11 @@ public class Act3AR extends AppCompatActivity {
         fingerprint = scan.getColumnIndex("fingerprint");
         odeslano = scan.getColumnIndex("odeslano");
         cas = scan.getColumnIndex("date");
-        flag = scan.getColumnIndex("flagId");
+        flagDB = scan.getColumnIndex("flag");
 
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-
-        qrCodes = new ArrayList<>(); // niz se k id pricita +1, takze id se tvari jako 1,2,3...
-        qrCodes.add("http://beacon.uhk.cz/qr/1");
-        qrCodes.add("http://beacon.uhk.cz/qr/2");
-        qrCodes.add("http://beacon.uhk.cz/qr/3");
-        qrCodes.add("http://beacon.uhk.cz/qr/4");
 
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeDetector = new BarcodeDetector.Builder(this)
@@ -161,12 +151,12 @@ public class Act3AR extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (alertDialog == null && !scanFinished) {
-                    if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
+                    if (barcodes.size() != 0 && C.QR_CODES.contains(barcodes.valueAt(0).displayValue)) {
                         System.out.println(barcodes.valueAt(0).displayValue);
                         System.out.println(barcodes.valueAt(0).format);
                         System.out.println(barcodes.size());
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
-                        flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
+                        flagId = String.valueOf(C.QR_CODES.indexOf(barcodes.valueAt(0).displayValue) + 1);
                         if (!scanner.running && scanner.alertDialog == null && knowFlagInfo) {
                             ziskVlajkyKdy();
                             knowFlagInfo = false;
@@ -256,19 +246,19 @@ public class Act3AR extends AppCompatActivity {
             }
         }
     }
-    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flag) {
+    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flagId) {
         Fingerprint p = new Fingerprint();
         p.setWifiScans(wifiScans);
         p.setBleScans(bleScans); // naplnime daty z Bluetooth
         p.setCellScans(cellScans);
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
-        scans.insertScan(p.toString(), flag);
+        scans.insertScan(p.toString(), flagId);
     }
     public void poslaniScanu() {
 
         Map<String, String> params = new HashMap();
         params.put("token", token);
-        params.put("flag", flagId);
+        params.put("flag", scan.getString(flagDB));
         params.put("fingerprint", scan.getString(fingerprint));
         params.put("scanWhen", scan.getString(cas));
 
@@ -346,7 +336,6 @@ public class Act3AR extends AppCompatActivity {
                                                 alertDialog = null;
                                                 // ukončí aktivitu a vrátí výsledek
                                                 Intent intent = new Intent();
-                                                intent.putExtra("flagId",  flagId);
                                                 setResult(Activity.RESULT_OK, intent);
                                                 finish();
                                             }
@@ -416,17 +405,17 @@ public class Act3AR extends AppCompatActivity {
                             String fractionId = flagJson.getString("ID_fraction");
 
                             //zmena formatu casu
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            SimpleDateFormat sdfVysledny = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
+                            // nastavi prijaty cas na UTC
+                            sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
                             try {
-                                Date date = sdf.parse(flagWhen);
-                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
-                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                Date date = sdfPrijaty.parse(flagWhen);
                                 long dateFlagChange = date.getTime();
                                 // ziskani aktualniho casu
                                 Long dateNow = new Date().getTime();
-                                SimpleDateFormat sdf2 = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
                                 knowFlagInfo = true;
-                                    // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
+                                    // pokud hrac danou vlajku zabral (nezavisle na frakci), nemuze ji zabrat znovu
                                     if (flagMe.equals("true")) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
                                                 .setTitle("Vlajku nemůžeš změnit!")
@@ -438,6 +427,7 @@ public class Act3AR extends AppCompatActivity {
                                                     }
                                                 })
                                                 .show();
+                                        // pokud vlajku vlastni hracova frakce, tak ji nelze znova zabrat
                                     } else if (fractionMe.equals("true")) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
                                                 .setTitle("Vlajku nemůžeš změnit!")
@@ -449,10 +439,11 @@ public class Act3AR extends AppCompatActivity {
                                                     }
                                                 })
                                                 .show();
-                                    } else if (dateNow < dateFlagChange + 600000) {
+                                        // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
+                                    } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
                                                 .setTitle("Vlajku ještě nelze změnit!")
-                                                .setMessage("Změna možná: " + sdf2.format(dateFlagChange + 600000).toString())
+                                                .setMessage("Změna možná: " + sdfVysledny.format(dateFlagChange + C.FLAG_IMMUNE_TIME))
                                                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
@@ -472,7 +463,7 @@ public class Act3AR extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
                                                         Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
-                                                        writePoint(wifiScans, bleScans, cellScans, flag);
+                                                        writePoint(wifiScans, bleScans, cellScans, Integer.parseInt(flagId));
 
                                                         scanFinished = true;
                                                         // posle vsechny scany, i ty, ktere se drive neposlaly

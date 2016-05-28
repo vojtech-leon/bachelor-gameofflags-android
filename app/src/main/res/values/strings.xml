@@ -37,7 +37,7 @@
     </string>
 
     <!-- Transition type strings -->
-    <string name="geofence_transition_entered">Vítej zpět!</string>
+    <string name="geofence_transition_entered">Vítej zpět </string>
     <string name="unknown_geofence_transition">Unknown Transition - nahlaste adminovi</string>
 
     <string name="geofence_transition_notification_text">Pomož své frakci získat dominanci ve všech patrech!</string>

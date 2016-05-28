@@ -331,9 +331,9 @@ public class Scanner {
         AlphaAnimation animation;
 
         if (frakce1) {
-            animation = new AlphaAnimation(1.0f, 0.0f);
-        } else {
             animation = new AlphaAnimation(0.0f, 1.0f);
+        } else {
+            animation = new AlphaAnimation(1.0f, 0.0f);
         }
         animation.setDuration(C.SCAN_COLLECTOR_TIME);
         animation.setFillAfter(true);

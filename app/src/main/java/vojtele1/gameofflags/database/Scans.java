@@ -89,7 +89,7 @@ public class Scans {
         Date date = new Date();
         ContentValues values = new ContentValues();
         values.put(COLUMN_Fingerprint, fingerprint);
-        values.put(COLUMN_Date, date.getTime());  // je to v ms
+        values.put(COLUMN_Date, date.getTime());  // je to v ms a UTC timestamp
         values.put(COLUMN_Odeslano, false);
         values.put(COLUMN_Flag, flag);
 

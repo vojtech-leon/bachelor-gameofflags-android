@@ -245,15 +245,15 @@ public class Act2WebView extends AppCompatActivity {
                             String flagWhen = time.getString("date");
                             String idFraction = flagJson.getString("ID_fraction");
                             //zmena formatu casu
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            // nastavi prijaty cas na UTC
+                            sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
                             try {
-                                Date date = sdf.parse(flagWhen);
-                                // zmeni cas podle timezony na aktualni, 18000000 je 5 hodin (posun openshiftu od UTC)
-                                date.setTime(date.getTime() + TimeZone.getDefault().getRawOffset() + 18000000);
+                                Date date = sdfPrijaty.parse(flagWhen);
                                 long dateFlagChange = date.getTime();
                                 // ziskani aktualniho casu
                                 Long dateNow = new Date().getTime();
-                                if (dateNow < dateFlagChange + 600000) {
+                                if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
                                     if (idFraction == "1") {
                                         showPoint(idFlag, x, y, "#FF8080");
                                     } else {
