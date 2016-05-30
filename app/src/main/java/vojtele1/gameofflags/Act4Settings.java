@@ -55,10 +55,9 @@ public class Act4Settings extends AppCompatActivity {
 
     Geofencing geofencing;
 
+    AlarmReceiver alarmReceiver;
 
-    AlarmManager alarmManager;
-    Intent alarmIntent;
-    PendingIntent alarmPendingIntent, alarmPendingIntent2, alarmPendingIntent3, alarmPendingIntent4;
+
 
     int counterError;
     boolean knowAnswer, knowFName;
@@ -96,14 +95,8 @@ public class Act4Settings extends AppCompatActivity {
         mGetPlayerFraction();
 
         geofencing = new Geofencing(this);
+        alarmReceiver = new AlarmReceiver();
 
-        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        alarmIntent = new Intent(this, AlarmReceiver.class);
-        alarmPendingIntent = PendingIntent.getBroadcast(this, 1, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmPendingIntent2 = PendingIntent.getBroadcast(this, 2, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmPendingIntent3 = PendingIntent.getBroadcast(this, 3, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmPendingIntent4 = PendingIntent.getBroadcast(this, 4, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         // Retrieve an instance of the SharedPreferences object.
         mSharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
@@ -136,24 +129,8 @@ public class Act4Settings extends AppCompatActivity {
                 if (!geofencing.mGeofencesAdded) {
                     geofencing.addGeofencesButtonHandler(view);
                 }
+                alarmReceiver.setAlarms(this);
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, 9);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.
-                        INTERVAL_DAY, alarmPendingIntent);
-                calendar.set(Calendar.HOUR_OF_DAY, 12);
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.
-                        INTERVAL_DAY, alarmPendingIntent2);
-                calendar.set(Calendar.HOUR_OF_DAY, 15);
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.
-                        INTERVAL_DAY, alarmPendingIntent3);
-                calendar.set(Calendar.HOUR_OF_DAY, 18);
-                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.
-                        INTERVAL_DAY, alarmPendingIntent4);
-                // pro testovani kazdou minutu
-                //alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, 0, 1000*60, alarmPendingIntent2);
 
             } else {
 
@@ -162,10 +139,7 @@ public class Act4Settings extends AppCompatActivity {
                 if (geofencing.mGeofencesAdded) {
                     geofencing.removeGeofencesButtonHandler(view);
                 }
-                alarmManager.cancel(alarmPendingIntent);
-                alarmManager.cancel(alarmPendingIntent2);
-                alarmManager.cancel(alarmPendingIntent3);
-                alarmManager.cancel(alarmPendingIntent4);
+                alarmReceiver.removeAlarms(this);
             }
 
             // Update state and save in shared preferences.
@@ -193,7 +167,7 @@ public class Act4Settings extends AppCompatActivity {
             counterError = 0;
             showProgressDialogLoading();
             mDBPlayerFraction();
-            System.out.println("zapinam progress get");
+            System.out.println("zapinam progress v getPlayerFraction");
         }
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -295,7 +269,7 @@ public class Act4Settings extends AppCompatActivity {
             counterError = 0;
             showProgressDialogLoading();
             mDBChangeFraction(newPlayerFraction);
-            System.out.println("zapinam progress change");
+            System.out.println("zapinam progress v mChangeFraction");
         }
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
