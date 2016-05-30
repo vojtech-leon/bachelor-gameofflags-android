@@ -15,7 +15,7 @@ public class Fingerprint {
 
     int x;
     int y;
-    String description = "";
+    String description;
     List<WifiScan> wifiScans = new ArrayList<>();
     List<BleScan> bleScans = new ArrayList<>();
     List<CellScan> cellScans = new ArrayList<>();
@@ -333,7 +333,7 @@ public class Fingerprint {
 
     @Override
     public String toString() {
-        return "Position{" +
+       /*return "Position{" +
                 "id='" + id + '\'' +
                 ", level=" + level +
                 ", x=" + x +
@@ -372,7 +372,47 @@ public class Fingerprint {
                 ", lat=" + lat +
                 ", lon=" + lon +
                 ", createdDate=" + createdDate +
-                '}';
+                '}';*/
+        return "{" +
+                "\"id\":" + "\"" + id + "\"" +
+                ",\"level\":" + level +
+                ",\"x\":" + x +
+                ",\"y\":" + y +
+                ",\"description\":" + "\"" + description + "\"" +
+                ",\"wifiScans\":" + wifiScans +
+                ",\"cellScans\":" + cellScans +
+                ",\"supportsBLE\":" + supportsBLE +
+                ",\"bleScans\":" + bleScans +
+                ",\"accX\":" + accX +
+                ",\"accY\":" + accY +
+                ",\"accZ\":" + accZ +
+                ",\"gyroX\":" + gyroX +
+                ",\"gyroY\":" + gyroY +
+                ",\"gyroZ\":" + gyroZ +
+                ",\"magX\":" + magX +
+                ",\"magY\":" + magY +
+                ",\"magZ\":" + magZ +
+                ",\"board\":" + "\"" + board + "\"" +
+                ",\"bootloader\":" + "\"" + bootloader + "\"" +
+                ",\"brand\":" + "\"" + brand + "\"" +
+                ",\"device\":" + "\"" + device + "\"" +
+                ",\"display\":" + "\"" + display + "\"" +
+                ",\"fingerprint\":" + "\"" + fingerprint + "\"" +
+                ",\"hardware\":" + "\"" + hardware + "\"" +
+                ",\"host\":" + "\"" + host + "\"" +
+                ",\"osId\":" + "\"" + osId + "\"" +
+                ",\"manufacturer\":" + "\"" + manufacturer + "\"" +
+                ",\"model\":" + "\"" + model + "\"" +
+                ",\"product\":" + "\"" + product + "\"" +
+                ",\"serial\":" + "\"" + serial + "\"" +
+                ",\"tags\":" + "\"" + tags + "\"" +
+                ",\"type\":" + "\"" + type + "\"" +
+                ",\"user\":" + "\"" + user + "\"" +
+                ",\"deviceID\":" + "\"" + deviceID + "\"" +
+                ",\"lat\":" + lat +
+                ",\"lon\":" + lon +
+                ",\"createdDate\":" + createdDate +
+                "}";
     }
 
     public void setWifiScans(List<WifiScan> wifiScans) {

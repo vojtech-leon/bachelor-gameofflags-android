@@ -32,14 +32,23 @@ public class CellScan {
 
     @Override
     public String toString() {
-        return "CellScan{" +
+        /*return "CellScan{" +
                 "cid='" + cid + '\'' +
                 ", lac='" + lac + '\'' +
                 ", psc='" + psc + '\'' +
                 ", rssi=" + rssi +
                 ", type=" + type +
                 ", time=" + time +
-                '}';
+                '}';*/
+
+        return "{" +
+                "\"cid\":" + "\"" + cid + "\"" +
+                ",\"lac\":" + "\"" + lac + "\"" +
+                ",\"psc\":" + "\"" + psc + "\"" +
+                ",\"rssi\":" + rssi +
+                ",\"type\":" + type +
+                ",\"time\":" + time +
+                "}";
     }
 
     public int getCid() {

@@ -22,14 +22,22 @@ public class BleScan {
 
     @Override
     public String toString() {
-        return "BleScan{" +
+       /* return "BleScan{" +
                 "rssi=" + rssi +
                 ", uuid='" + uuid + '\'' +
                 ", major=" + major +
                 ", minor=" + minor +
                 ", address='" + address + '\'' +
                 ", time=" + time +
-                '}';
+                '}';*/
+        return "{" +
+                "\"rssi\":" + rssi +
+                ",\"uuid\":" + "\"" + uuid + "\"" +
+                ",\"major\":" + major +
+                ",\"minor\":" + minor +
+                ",\"address\":" + "\"" + address + "\"" +
+                ",\"time\":" + time +
+                "}";
     }
 
     public int getRssi() {

@@ -80,7 +80,7 @@ public class WifiScan {
 
     @Override
     public String toString() {
-        return "WifiScan{" +
+       /* return "WifiScan{" +
                 "SSID='" + SSID + '\'' +
                 ", MAC='" + MAC + '\'' +
                 ", technology='802.11" + technology + "'" +
@@ -88,7 +88,17 @@ public class WifiScan {
                 ", channel=" + channel +
                 ", strength=" + strength +
                 ", time=" + time +
-                '}';
+                '}';*/
+
+        return "{" +
+                "\"SSID\":" + "\"" + SSID + "\"" +
+                ",\"MAC=\":" + "\"" + MAC + "\"" +
+                ",\"technology\":" +"\"802.11" + technology + "\"" +
+                ",\"frequency\":" + frequency +
+                ",\"channel\":" + channel +
+                ",\"strength\":" + strength +
+                ",\"time\":" + time +
+                "}";
     }
 
     /**
