@@ -1,17 +1,20 @@
 package vojtele1.gameofflags;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -73,6 +76,7 @@ public class Act2WebView extends AppCompatActivity {
         // Enable Javascript
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webView.addJavascriptInterface(new WebviewOnClick(this, this), "Android");
         // zmena velikosti obsahu, aby se vesel cely na sirku
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
@@ -285,6 +289,9 @@ public class Act2WebView extends AppCompatActivity {
     private void showFlags(String floor) {
         switch (floor) {
             case "J1NP":
+
+                showFlag(1,1450,850);
+                showFlag(4,1450,1250);
                 break;
             case "J2NP":
                 break;

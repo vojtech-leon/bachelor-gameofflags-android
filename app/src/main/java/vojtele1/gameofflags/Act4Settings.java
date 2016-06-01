@@ -1,8 +1,6 @@
 package vojtele1.gameofflags;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,7 +104,6 @@ public class Act4Settings extends AppCompatActivity {
         if (mNotificationAdded) {
             buttonAddRemoveNotification.setText(R.string.button_notification_remove);
         }
-
     }
     public void logoutButton(View view) {
         Intent intent = new Intent(this, Act1Login.class);
