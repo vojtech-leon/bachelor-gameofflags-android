@@ -1,20 +1,14 @@
 package vojtele1.gameofflags;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,13 +22,13 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.WebviewOnClick;
 
 
 public class Act2WebView extends AppCompatActivity {
@@ -76,7 +70,7 @@ public class Act2WebView extends AppCompatActivity {
         // Enable Javascript
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new WebviewOnClick(this, this), "Android");
+        webView.addJavascriptInterface(new WebviewOnClick(this), "Android");
         // zmena velikosti obsahu, aby se vesel cely na sirku
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
@@ -230,13 +224,13 @@ public class Act2WebView extends AppCompatActivity {
         }
     }
 
-    private void showPoint(int id, int x, int y, String color) {
-        webView.loadUrl("javascript:setPoint(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"" + color + "\")");
+     private void createPoint(int id, int x, int y, String color) {
+        webView.loadUrl("javascript:createCircle(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"" + color + "\")");
     }
 
-    private void showFlag(final int idFlag, final int x, final int y) {
+    private void showFlags(String floor) {
         Map<String, String> params = new HashMap();
-        params.put("ID_flag", String.valueOf(idFlag));
+        params.put("floor", floor);
         CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfo, params,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -244,34 +238,39 @@ public class Act2WebView extends AppCompatActivity {
                         System.out.println(response.toString());
                         try {
                             JSONArray flagsJson = response.getJSONArray("flag");
-                            JSONObject flagJson = flagsJson.getJSONObject(0);
-                            JSONObject time = flagJson.getJSONObject("flagWhen");
-                            String flagWhen = time.getString("date");
-                            String idFraction = flagJson.getString("ID_fraction");
-                            //zmena formatu casu
-                            SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            // nastavi prijaty cas na UTC
-                            sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            try {
-                                Date date = sdfPrijaty.parse(flagWhen);
-                                long dateFlagChange = date.getTime();
-                                // ziskani aktualniho casu
-                                Long dateNow = new Date().getTime();
-                                if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
-                                    if (idFraction == "1") {
-                                        showPoint(idFlag, x, y, "#FF8080");
+                            for (int i = 0; i < flagsJson.length(); i++) {
+                                JSONObject flagJson = flagsJson.getJSONObject(i);
+                                JSONObject time = flagJson.getJSONObject("flagWhen");
+                                String flagWhen = time.getString("date");
+                                int idFraction = flagJson.getInt("ID_fraction");
+                                int idFlag = flagJson.getInt("ID_flag");
+                                int x = flagJson.getInt("x");
+                                int y = flagJson.getInt("y");
+                                //zmena formatu casu
+                                SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                // nastavi prijaty cas na UTC
+                                sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                try {
+                                    Date date = sdfPrijaty.parse(flagWhen);
+                                    long dateFlagChange = date.getTime();
+                                    // ziskani aktualniho casu
+                                    Long dateNow = new Date().getTime();
+                                    if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
+                                        if (idFraction == 1) {
+                                            createPoint(idFlag, x, y, "#FF8080");
+                                        } else {
+                                            createPoint(idFlag, x, y, "#8080FF");
+                                        }
                                     } else {
-                                        showPoint(idFlag, x, y, "#8080FF");
+                                        if (idFraction == 1) {
+                                            createPoint(idFlag, x, y, "#FF0000");
+                                        } else {
+                                            createPoint(idFlag, x, y, "#0000FF");
+                                        }
                                     }
-                                } else {
-                                    if (idFraction == "1") {
-                                        showPoint(idFlag, x, y, "#FF0000");
-                                    } else {
-                                        showPoint(idFlag, x, y, "#0000FF");
-                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -284,29 +283,5 @@ public class Act2WebView extends AppCompatActivity {
             }
         });
         requestQueue.add(jsObjRequest);
-    }
-
-    private void showFlags(String floor) {
-        switch (floor) {
-            case "J1NP":
-
-                showFlag(1,1450,850);
-                showFlag(4,1450,1250);
-                break;
-            case "J2NP":
-                break;
-            case "J3NP":
-                // vlajka u kabinetu Kriz
-                showFlag(1,1850,850);
-                // vlajka u kabinetu Maly
-                showFlag(2,1800,2420);
-                // vlajka mezi Kriz/Maly
-                showFlag(3,1700,1370);
-                // vlajka naproti kabinetu Horalek
-                showFlag(4,480,1175);
-                break;
-            case "J4NP":
-                break;
-        }
     }
 }

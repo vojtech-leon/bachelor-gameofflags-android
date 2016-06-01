@@ -34,6 +34,7 @@ import java.util.TimeZone;
 import vojtele1.gameofflags.notification.AlarmReceiver;
 import vojtele1.gameofflags.notification.geofence.Geofencing;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.M;
 
 
 /**
@@ -54,12 +55,9 @@ public class Act4Settings extends AppCompatActivity {
 
     AlarmReceiver alarmReceiver;
 
-
-
     int counterError;
-    boolean knowAnswer, knowFName;
-    boolean knowResponse, knowFNameResponse;
-    ProgressDialog progressDialog;
+    boolean knowAnswer;
+    boolean knowResponse;
 
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
@@ -75,7 +73,6 @@ public class Act4Settings extends AppCompatActivity {
 
     String changeFraction = adresa + "changefraction";
     String getPlayerFraction = adresa + "getplayerfraction";
-    String getFractionName = adresa + "getfractionname";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,27 +114,20 @@ public class Act4Settings extends AppCompatActivity {
     }
 
     public void addRemoveNotificationButton(View view) {
-        if (C.isLocationEnabled(this)) {
+        if (M.isLocationEnabled(this)) {
             if (!mNotificationAdded) {
-
                 buttonAddRemoveNotification.setText(R.string.button_notification_remove);
-
                 if (!geofencing.mGeofencesAdded) {
                     geofencing.addGeofencesButtonHandler(view);
                 }
                 alarmReceiver.setAlarms(this);
-
-
             } else {
-
                 buttonAddRemoveNotification.setText(R.string.button_notification_add);
-
                 if (geofencing.mGeofencesAdded) {
                     geofencing.removeGeofencesButtonHandler(view);
                 }
                 alarmReceiver.removeAlarms(this);
             }
-
             // Update state and save in shared preferences.
             mNotificationAdded = !mNotificationAdded;
             SharedPreferences.Editor editor = mSharedPreferences.edit();
@@ -159,9 +149,9 @@ public class Act4Settings extends AppCompatActivity {
         }
     }
     private void mGetPlayerFraction() {
-        if (progressDialog == null || !progressDialog.isShowing()) {
+        if (M.progressDialog == null || !M.progressDialog.isShowing()) {
             counterError = 0;
-            showProgressDialogLoading();
+            M.showProgressDialogLoading(this);
             mDBPlayerFraction();
             System.out.println("zapinam progress v getPlayerFraction");
         }
@@ -175,10 +165,12 @@ public class Act4Settings extends AppCompatActivity {
                         System.out.println("Konec, spravna odpoved bohuzel nedosla (same errory).");
                         new AlertDialog.Builder(Act4Settings.this)
                                 .setMessage("Problém s připojením k databázi, zkuste to prosím později.")
+                                .setCancelable(false)
                                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
-                                        progressDialog.dismiss();
+                                        M.progressDialog.dismiss();
+                                        finish();
                                     }
                                 })
                                 .show();
@@ -186,7 +178,7 @@ public class Act4Settings extends AppCompatActivity {
                         mDBPlayerFraction();
                         mGetPlayerFraction();
                     } else {
-                        progressDialog.dismiss();
+                        M.progressDialog.dismiss();
                         System.out.println("Loading dokoncen.");
                     }
                 } else {
@@ -261,9 +253,9 @@ public class Act4Settings extends AppCompatActivity {
         requestQueue.add(jsObjRequest);
     }
     private void mChangeFraction(final String newPlayerFraction) {
-        if (progressDialog == null || !progressDialog.isShowing()) {
+        if (M.progressDialog == null || !M.progressDialog.isShowing()) {
             counterError = 0;
-            showProgressDialogLoading();
+            M.showProgressDialogLoading(this);
             mDBChangeFraction(newPlayerFraction);
             System.out.println("zapinam progress v mChangeFraction");
         }
@@ -277,10 +269,11 @@ public class Act4Settings extends AppCompatActivity {
                         System.out.println("Konec, spravna odpoved bohuzel nedosla (same errory).");
                         new AlertDialog.Builder(Act4Settings.this)
                                 .setMessage("Problém s připojením k databázi, zkuste to prosím později.")
+                                .setCancelable(false)
                                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
-                                        progressDialog.dismiss();
+                                        M.progressDialog.dismiss();
                                     }
                                 })
                                 .show();
@@ -288,7 +281,7 @@ public class Act4Settings extends AppCompatActivity {
                         mDBChangeFraction(newPlayerFraction);
                         mChangeFraction(newPlayerFraction);
                     } else {
-                        progressDialog.dismiss();
+                        M.progressDialog.dismiss();
                         System.out.println("Loading dokoncen.");
                     }
                 } else {
@@ -391,58 +384,6 @@ public class Act4Settings extends AppCompatActivity {
                     .show();
         }
 
-    }
-
-    public void zmenaVypisuNazvuFrakce() {
-        knowFNameResponse = false;
-        Map<String, String> params3 = new HashMap();
-        params3.put("ID_fraction", playerFraction);
-
-        CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST,  getFractionName, params3,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        knowFNameResponse = true;
-                        try {
-                            JSONArray fractions = response.getJSONArray("fraction");
-                            JSONObject fraction = fractions.getJSONObject(0);
-
-                            // nastavi nazev frakce
-                            fraction_name.setText(fraction.getString("name"));
-                            knowFName = true;
-                            //Toast.makeText(Act4Settings.this, playerFraction, Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowFNameResponse = true;
-                counterError++;
-            }
-        });
-
-        requestQueue.add(jsObjRequest3);
-    }
-
-    private ProgressDialog showProgressDialogLoading() {
-
-        progressDialog = new ProgressDialog(this);
-
-        progressDialog.show();
-       // progressDialog.setCancelable(false);
-
-        progressDialog.setCanceledOnTouchOutside(false);
-
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        progressDialog.setContentView(R.layout.progress_dialog_loading);
-
-        return progressDialog;
     }
 
 }

@@ -6,19 +6,20 @@
 </head>
 <body>
 <script>
-    function setPoint(id, x, y, color) {
-        document.getElementById(id).setAttribute("cx", x);
-        document.getElementById(id).setAttribute("cy", y);
-        document.getElementById(id).setAttribute("fill", color);
-    }
+function createCircle(id, x, y, color)
+{
+    var myCircle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    myCircle.setAttributeNS(null,"id",id);
+    myCircle.setAttributeNS(null,"cx",x);
+    myCircle.setAttributeNS(null,"cy",y);
+    myCircle.setAttributeNS(null,"r",50);
+    myCircle.setAttributeNS(null,"fill",color);
+    myCircle.setAttributeNS(null,"onclick","Android.showPopup(id)");
+    document.getElementById("svg").appendChild(myCircle);
+}
 </script>
 <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" id="svg" viewBox="0 0 2700 3200">
 	<image xlink:href="./j2np.png" x="0" y="0" height="100%" width="100%" />
-
-	<circle cx="-100" cy="-100" r="40" fill="white" id="1"  />
-	<circle cx="-100" cy="-100" r="40" fill="white" id="2"  />
-	<circle cx="-100" cy="-100" r="40" fill="white" id="3"  />
-	<circle cx="-100" cy="-100" r="40" fill="white" id="4"  />
 </svg>
 </body>
 </html>
