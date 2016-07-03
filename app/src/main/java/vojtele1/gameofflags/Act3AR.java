@@ -26,6 +26,7 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -254,7 +255,9 @@ public class Act3AR extends AppCompatActivity {
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
         p.setCreatedDate(new Date());
         p.setId(String.valueOf(flagId));
-        scans.insertScan(p.toString(), flagId);
+        Gson gson = new Gson();
+        //scans.insertScan(p.toString(), flagId);
+        scans.insertScan(gson.toJson(p), flagId);
     }
     public void poslaniScanu() {
 
