@@ -247,7 +247,7 @@ public class Act3AR extends AppCompatActivity {
             }
         }
     }
-    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flagId) {
+    public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flagId, String floor, int x, int y) {
         Fingerprint p = new Fingerprint();
         p.setWifiScans(wifiScans);
         p.setBleScans(bleScans); // naplnime daty z Bluetooth
@@ -255,6 +255,9 @@ public class Act3AR extends AppCompatActivity {
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
         p.setCreatedDate(new Date());
         p.setId(String.valueOf(flagId));
+        p.setLevel(floor);
+        p.setX(x);
+        p.setY(y);
         Gson gson = new Gson();
         //scans.insertScan(p.toString(), flagId);
         scans.insertScan(gson.toJson(p), flagId);
@@ -408,6 +411,9 @@ public class Act3AR extends AppCompatActivity {
                             String flagMe = flagJson.getString("flagMe");
                             String fractionMe = flagJson.getString("fractionMe");
                             String fractionId = flagJson.getString("ID_fraction");
+                            final String floor = flagJson.getString("floor");
+                            final int x = flagJson.getInt("x");
+                            final int y = flagJson.getInt("y");
 
                             //zmena formatu casu
                             SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -468,7 +474,7 @@ public class Act3AR extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
                                                         Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
-                                                        writePoint(wifiScans, bleScans, cellScans, Integer.parseInt(flagId));
+                                                        writePoint(wifiScans, bleScans, cellScans, Integer.parseInt(flagId), floor, x, y);
 
                                                         scanFinished = true;
                                                         // posle vsechny scany, i ty, ktere se drive neposlaly
