@@ -92,7 +92,7 @@ public class WifiScan {
 
         return "{" +
                 "\"SSID\":" + "\"" + SSID + "\"" +
-                ",\"MAC=\":" + "\"" + MAC + "\"" +
+                ",\"MAC\":" + "\"" + MAC + "\"" +
                 ",\"technology\":" +"\"802.11" + technology + "\"" +
                 ",\"frequency\":" + frequency +
                 ",\"channel\":" + channel +

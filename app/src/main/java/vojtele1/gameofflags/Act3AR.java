@@ -252,6 +252,8 @@ public class Act3AR extends AppCompatActivity {
         p.setBleScans(bleScans); // naplnime daty z Bluetooth
         p.setCellScans(cellScans);
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
+        p.setCreatedDate(new Date());
+        p.setId(String.valueOf(flagId));
         scans.insertScan(p.toString(), flagId);
     }
     public void poslaniScanu() {
