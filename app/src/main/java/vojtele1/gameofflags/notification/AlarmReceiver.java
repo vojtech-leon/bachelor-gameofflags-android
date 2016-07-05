@@ -1,7 +1,6 @@
 package vojtele1.gameofflags.notification;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,27 +8,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import vojtele1.gameofflags.Act1Login;
-import vojtele1.gameofflags.CustomRequest;
-import vojtele1.gameofflags.R;
 import vojtele1.gameofflags.utils.C;
 
 /**

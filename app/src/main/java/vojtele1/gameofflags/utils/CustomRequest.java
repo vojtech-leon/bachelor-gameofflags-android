@@ -1,4 +1,4 @@
-package vojtele1.gameofflags;
+package vojtele1.gameofflags.utils;
 
 /**
  * Created by Leon on 02.11.2015.

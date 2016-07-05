@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import vojtele1.gameofflags.CustomRequest;
 import vojtele1.gameofflags.R;
 
 /**

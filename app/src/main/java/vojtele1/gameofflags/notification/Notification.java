@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import vojtele1.gameofflags.Act1Login;
-import vojtele1.gameofflags.CustomRequest;
+import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.R;
 import vojtele1.gameofflags.utils.C;
 

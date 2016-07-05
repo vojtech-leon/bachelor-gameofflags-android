@@ -32,6 +32,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import vojtele1.gameofflags.utils.CustomRequest;
+import vojtele1.gameofflags.utils.HttpUtils;
+
 /**
  * Created by Leon on 25.10.2015.
  */

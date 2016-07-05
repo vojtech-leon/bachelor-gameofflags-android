@@ -1,5 +1,6 @@
 package vojtele1.gameofflags;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,11 +29,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CustomRequest;
+import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.WebviewOnClick;
 
 
-public class Act2WebView extends AppCompatActivity {
+public class Act2WebView extends BaseActivity {
     TextView fraction1_score, fraction2_score, player_score, player_level;
     ImageButton buttonQR, buttonSettings;
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
@@ -45,6 +50,7 @@ public class Act2WebView extends AppCompatActivity {
     String webViewScoreFraction = adresa + "webviewscorefraction";
     String getFlagInfo = adresa + "getflaginfo";
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,14 +100,16 @@ public class Act2WebView extends AppCompatActivity {
     }
 
     private void vytahniData() {
-
-        Map<String, String> params = new HashMap();
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  webViewPlayer, params,
+        return new CustomRequest(Request.Method.POST,  webViewPlayer, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray players = response.getJSONArray("player");
@@ -110,6 +118,7 @@ public class Act2WebView extends AppCompatActivity {
                                 player_score.setText(player.getString("score"));
                                 player_level.setText(player.getString("level"));
 
+                            knowAnswer = true;
 
 
                         } catch (JSONException e) {
@@ -121,18 +130,23 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
             }
         });
-
-        requestQueue.add(jsObjRequest);
-
-        Map<String, String> params2 = new HashMap();
+            }
+        };
+        r.start();
+        RetryingSender r2 = new RetryingSender(this) {
+            public CustomRequest send() {
+        Map<String, String> params2 = new HashMap<>();
         params2.put("ID_fraction", "1");
-        CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
+        return new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray fractions = response.getJSONArray("fraction");
@@ -141,6 +155,7 @@ public class Act2WebView extends AppCompatActivity {
                                 fraction1_score.setText(fraction.getString("score"));
 
 
+                            knowAnswer = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -150,18 +165,24 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
             }
         });
 
-        requestQueue.add(jsObjRequest2);
-
-        Map<String, String> params3 = new HashMap();
+    }
+};
+r2.start();
+        RetryingSender r3 = new RetryingSender(this) {
+public CustomRequest send() {
+        Map<String, String> params3 = new HashMap<>();
         params3.put("ID_fraction", "2");
-        CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
+       return new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray fractions = response.getJSONArray("fraction");
@@ -169,6 +190,7 @@ public class Act2WebView extends AppCompatActivity {
                                 fraction2_score.setText(fraction.getString("score"));
 
 
+                            knowAnswer = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -178,9 +200,13 @@ public class Act2WebView extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
             }
         });
-        requestQueue.add(jsObjRequest3);
+        }
+        };
+        r3.start();
         showFlags(floor);
 
     }
@@ -228,60 +254,64 @@ public class Act2WebView extends AppCompatActivity {
         webView.loadUrl("javascript:createCircle(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"" + color + "\")");
     }
 
-    private void showFlags(String floor) {
-        Map<String, String> params = new HashMap();
-        params.put("floor", floor);
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfo, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        try {
-                            JSONArray flagsJson = response.getJSONArray("flag");
-                            for (int i = 0; i < flagsJson.length(); i++) {
-                                JSONObject flagJson = flagsJson.getJSONObject(i);
-                                JSONObject time = flagJson.getJSONObject("flagWhen");
-                                String flagWhen = time.getString("date");
-                                int idFraction = flagJson.getInt("ID_fraction");
-                                int idFlag = flagJson.getInt("ID_flag");
-                                int x = flagJson.getInt("x");
-                                int y = flagJson.getInt("y");
-                                //zmena formatu casu
-                                SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                // nastavi prijaty cas na UTC
-                                sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
+    private void showFlags(final String floor) {
+         RetryingSender r4 = new RetryingSender(this) {
+            public CustomRequest send() {
+                Map<String, String> params = new HashMap<>();
+                params.put("floor", floor);
+                return new CustomRequest(Request.Method.POST, getFlagInfo, params,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                System.out.println(response.toString());
+                                knowResponse = true;
                                 try {
-                                    Date date = sdfPrijaty.parse(flagWhen);
-                                    long dateFlagChange = date.getTime();
-                                    // ziskani aktualniho casu
-                                    Long dateNow = new Date().getTime();
-                                    if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
-                                        if (idFraction == 1) {
-                                            createPoint(idFlag, x, y, "#FF8080");
-                                        } else {
-                                            createPoint(idFlag, x, y, "#8080FF");
-                                        }
-                                    } else {
-                                        if (idFraction == 1) {
-                                            createPoint(idFlag, x, y, "#FF0000");
-                                        } else {
-                                            createPoint(idFlag, x, y, "#0000FF");
+                                    JSONArray flagsJson = response.getJSONArray("flag");
+                                    for (int i = 0; i < flagsJson.length(); i++) {
+                                        JSONObject flagJson = flagsJson.getJSONObject(i);
+                                        JSONObject time = flagJson.getJSONObject("flagWhen");
+                                        String flagWhen = time.getString("date");
+                                        int idFraction = flagJson.getInt("ID_fraction");
+                                        int idFlag = flagJson.getInt("ID_flag");
+                                        int x = flagJson.getInt("x");
+                                        int y = flagJson.getInt("y");
+                                        try {
+                                            Date date = stringToDate(flagWhen);
+                                            long dateFlagChange = date.getTime();
+                                            // ziskani aktualniho casu
+                                            Long dateNow = new Date().getTime();
+                                            if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
+                                                if (idFraction == 1) {
+                                                    createPoint(idFlag, x, y, "#FF8080");
+                                                } else {
+                                                    createPoint(idFlag, x, y, "#8080FF");
+                                                }
+                                            } else {
+                                                if (idFraction == 1) {
+                                                    createPoint(idFlag, x, y, "#FF0000");
+                                                } else {
+                                                    createPoint(idFlag, x, y, "#0000FF");
+                                                }
+                                            }
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
                                         }
                                     }
-                                } catch (ParseException e) {
+                                    knowAnswer = true;
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.append(error.getMessage());
+                        knowResponse = true;
+                        counterError++;
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
+                });
             }
-        });
-        requestQueue.add(jsObjRequest);
+    };
+    r4.start();
     }
 }

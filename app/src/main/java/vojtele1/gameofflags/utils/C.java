@@ -49,7 +49,7 @@ public class C {
     /**
      * Mapa s pozici Fakulty pro geofencing
      */
-    public static final HashMap<String, LatLng> GEOFENCING_LANDMARKS = new HashMap<String, LatLng>();
+    public static final HashMap<String, LatLng> GEOFENCING_LANDMARKS = new HashMap<>();
     static {
         // poloha FIM
         GEOFENCING_LANDMARKS.put("Doma", new LatLng(50.505316, 16.007224));
@@ -105,13 +105,4 @@ public class C {
         MAC_EDUROAM.add("00:24:14:3a:ac:7f");
         MAC_EDUROAM.add("00:21:a0:f9:54:cf");
     }
-
-    public static final ArrayList<String> QR_CODES = new ArrayList<>();
-    static {
-        QR_CODES.add("http://beacon.uhk.cz/qr/1");
-        QR_CODES.add("http://beacon.uhk.cz/qr/2");
-        QR_CODES.add("http://beacon.uhk.cz/qr/3");
-        QR_CODES.add("http://beacon.uhk.cz/qr/4");
-    }
-
 }

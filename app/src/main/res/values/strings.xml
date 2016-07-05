@@ -41,4 +41,6 @@
     <string name="unknown_geofence_transition">Unknown Transition - nahlaste adminovi</string>
 
     <string name="geofence_transition_notification_text">Pomož své frakci získat dominanci ve všech patrech!</string>
+
+    <string name="never">Nikdy.</string>
 </resources>

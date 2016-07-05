@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,10 @@ import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.Fingerprint;
 import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.database.Scans;
+import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CustomRequest;
+import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.scanners.DeviceInformation;
 import vojtele1.gameofflags.utils.scanners.ScanResultListener;
 import vojtele1.gameofflags.utils.scanners.Scanner;
@@ -53,7 +57,7 @@ import vojtele1.gameofflags.utils.scanners.Scanner;
 /**
  * predelane http://code.tutsplus.com/tutorials/reading-qr-codes-using-the-mobile-vision-api--cms-24680
  */
-public class Act3AR extends AppCompatActivity {
+public class Act3AR extends BaseActivity {
 
     SurfaceView cameraView;
     BarcodeDetector barcodeDetector;
@@ -62,11 +66,10 @@ public class Act3AR extends AppCompatActivity {
     boolean knowFlagInfo = true, scanFinished;
     boolean alreadyVisibleQR;
 
-    RequestQueue requestQueue;
     String token, flagId;
     Scanner scanner;
     Scans scans;
-    int fingerprint, idScan, odeslano, cas, position = -1, flagDB;
+    int fingerprint, idScan, odeslano, cas, flagDB;
     Cursor scan;
     AlertDialog alertDialog;
 
@@ -74,12 +77,18 @@ public class Act3AR extends AppCompatActivity {
     WifiManager wm;
     BluetoothAdapter bluetoothAdapter;
 
+    ArrayList<String> qrCodes;
+
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
     String sendScan = adresa + "sendscan";
     String changePlayerScore = adresa + "changeplayerscore";
     String changeFlagOwner = adresa + "changeflagowner";
     String getFlagInfoUser = adresa + "getflaginfouser";
+    String getQrCodes = adresa + "getqrcodes";
+
+
+    RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +96,6 @@ public class Act3AR extends AppCompatActivity {
         setContentView(R.layout.activity_ar);
         // vytahne token z activity loginu
         token = getIntent().getStringExtra("token");
-
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         scanner = new Scanner(this);
         scans = new Scans(this);
@@ -100,6 +107,11 @@ public class Act3AR extends AppCompatActivity {
         cas = scan.getColumnIndex("date");
         flagDB = scan.getColumnIndex("flag");
 
+        // ziska qr cody z db a ulozi do arraylistu
+        getQrCodes();
+
+
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -127,10 +139,8 @@ public class Act3AR extends AppCompatActivity {
             public void surfaceCreated(SurfaceHolder holder) {
                 try {
                     cameraSource.start(cameraView.getHolder());
-                } catch (IOException ie) {
+                } catch (IOException | SecurityException ie) {
                     Log.e("CAMERA SOURCE", ie.getMessage());
-                } catch (SecurityException se) {
-                    Log.e("CAMERA SOURCE", se.getMessage());
                 }
             }
 
@@ -152,12 +162,12 @@ public class Act3AR extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (alertDialog == null && !scanFinished) {
-                    if (barcodes.size() != 0 && C.QR_CODES.contains(barcodes.valueAt(0).displayValue)) {
+                    if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
                         System.out.println(barcodes.valueAt(0).displayValue);
                         System.out.println(barcodes.valueAt(0).format);
                         System.out.println(barcodes.size());
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
-                        flagId = String.valueOf(C.QR_CODES.indexOf(barcodes.valueAt(0).displayValue) + 1);
+                        flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
                         if (!scanner.running && scanner.alertDialog == null && knowFlagInfo) {
                             ziskVlajkyKdy();
                             knowFlagInfo = false;
@@ -229,22 +239,16 @@ public class Act3AR extends AppCompatActivity {
                 return bluetoothAdapter.enable();
             } else if (!wasBTEnabled) {
                 return bluetoothAdapter.enable();
-            } else if (!wasWifiEnabled) {
-                return wm.setWifiEnabled(true);
-            } else {
-                return true;
-            }
+            } else
+                return wasWifiEnabled || wm.setWifiEnabled(true);
         } else {
             if (!wasBTEnabled && !wasWifiEnabled) {
                 wm.setWifiEnabled(false);
                 return bluetoothAdapter.disable();
             } else if (!wasBTEnabled) {
                 return bluetoothAdapter.disable();
-            } else if (!wasWifiEnabled) {
-                return wm.setWifiEnabled(false);
-            } else {
-                return true;
-            }
+            } else
+                return wasWifiEnabled || wm.setWifiEnabled(false);
         }
     }
     public void writePoint(List<WifiScan> wifiScans, List<BleScan> bleScans, List<CellScan> cellScans, int flagId, String floor, int x, int y) {
@@ -259,23 +263,56 @@ public class Act3AR extends AppCompatActivity {
         p.setX(x);
         p.setY(y);
         Gson gson = new Gson();
-        //scans.insertScan(p.toString(), flagId);
         scans.insertScan(gson.toJson(p), flagId);
     }
-    public void poslaniScanu() {
+    public void poslaniScanu() {/*
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);
+                params.put("flag", scan.getString(flagDB));
+                params.put("fingerprint", scan.getString(fingerprint));
+                params.put("scanWhen", scan.getString(cas));
 
-        Map<String, String> params = new HashMap();
+        return new CustomRequest(Request.Method.POST,  sendScan, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+                        knowResponse = true;
+                        try {
+                            JSONArray scansJson = response.getJSONArray("scan");
+                            JSONObject scanJson = scansJson.getJSONObject(0);
+                            if (scanJson.getString("scanWhen") != null) {
+                                scans.updateScan(scanJson.getString("scanWhen"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        knowAnswer = true;
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
+            }
+        });
+            }
+        };
+        r.start();*/
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("flag", scan.getString(flagDB));
         params.put("fingerprint", scan.getString(fingerprint));
         params.put("scanWhen", scan.getString(cas));
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  sendScan, params,
+        CustomRequest customRequest = new CustomRequest(Request.Method.POST,  sendScan, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
-
                         try {
                             JSONArray scansJson = response.getJSONArray("scan");
                             JSONObject scanJson = scansJson.getJSONObject(0);
@@ -290,10 +327,9 @@ public class Act3AR extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-
             }
         });
-        requestQueue.add(jsObjRequest);
+        requestQueue.add(customRequest);
     }
     public void poslaniScanuVse() {
         scan = scans.getScans();
@@ -302,10 +338,22 @@ public class Act3AR extends AppCompatActivity {
         if (scan.getCount() < 1) {
             System.out.println("Není tu co poslat.");
         } else {
-            while (scan.moveToNext()) {
+            for(int i = 0;i < scan.getCount();i++) {
+                scan.moveToNext();
                 if (scan.getString(odeslano).equals("1")) {
                     scans.deleteScan(scan.getLong(idScan));
-                    position = position - 1;
+
+                    text = "Mažu id: " + scan.getString(0) + "\n";
+                    text_cely = text_cely.concat(text);
+                } else {
+                    poslaniScanu();
+                    text = "Posílám id: " + scan.getString(0) + "\n";
+                    text_cely = text_cely.concat(text);
+                }
+            }
+           /* while (scan.moveToNext()) {
+                if (scan.getString(odeslano).equals("1")) {
+                    scans.deleteScan(scan.getLong(idScan));
 
                     //System.out.println("Scan je už poslán: " + scan.getString(0));
                     text = "Mažu id: " + scan.getString(0) + "\n";
@@ -316,20 +364,22 @@ public class Act3AR extends AppCompatActivity {
                     text = "Posílám id: " + scan.getString(0) + "\n";
                     text_cely = text_cely.concat(text);
                 }
-            }
+            }*/
             System.out.println(text_cely);
         }
     }
     private void zmenaScore() {
-        Map<String, String> params = new HashMap();
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changePlayerScore, params,
+        return new CustomRequest(Request.Method.POST,  changePlayerScore, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println("zmena score: " + response.toString());
-
+                        knowResponse = true;
                         try {
                             JSONArray playersJson = response.getJSONArray("player");
                             JSONObject playerJson = playersJson.getJSONObject(0);
@@ -350,6 +400,7 @@ public class Act3AR extends AppCompatActivity {
                                         })
                                         .show();
                             }
+                            knowAnswer = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -358,21 +409,28 @@ public class Act3AR extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
             }
         });
-        requestQueue.add(jsObjRequest);
+    }
+};
+r.start();
     }
 
     private void zmenaVlastnikaVlajky() {
-        Map<String, String> params = new HashMap();
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("ID_flag", flagId);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changeFlagOwner, params,
+        return new CustomRequest(Request.Method.POST,  changeFlagOwner, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println("zmena vlastnika vlajky: " + response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray flagsJson = response.getJSONArray("flag");
@@ -380,6 +438,7 @@ public class Act3AR extends AppCompatActivity {
                             if (flagJson.getString("ID_flag") != null) {
                                 zmenaScore();
                             }
+                            knowAnswer = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -388,20 +447,27 @@ public class Act3AR extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
+                knowResponse = true;
+                counterError++;
             }
         });
-        requestQueue.add(jsObjRequest);
+    }
+};
+r.start();
     }
     private void ziskVlajkyKdy() {
-        Map<String, String> params = new HashMap();
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("ID_flag", flagId);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
+        return new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println("ziskani vlajky kdy a ja naposled?: " + response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray flagsJson = response.getJSONArray("flag");
@@ -414,14 +480,8 @@ public class Act3AR extends AppCompatActivity {
                             final String floor = flagJson.getString("floor");
                             final int x = flagJson.getInt("x");
                             final int y = flagJson.getInt("y");
-
-                            //zmena formatu casu
-                            SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            SimpleDateFormat sdfVysledny = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
-                            // nastavi prijaty cas na UTC
-                            sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
                             try {
-                                Date date = sdfPrijaty.parse(flagWhen);
+                                Date date = stringToDate(flagWhen);
                                 long dateFlagChange = date.getTime();
                                 // ziskani aktualniho casu
                                 Long dateNow = new Date().getTime();
@@ -454,7 +514,7 @@ public class Act3AR extends AppCompatActivity {
                                     } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
                                                 .setTitle("Vlajku ještě nelze změnit!")
-                                                .setMessage("Změna možná: " + sdfVysledny.format(dateFlagChange + C.FLAG_IMMUNE_TIME))
+                                                .setMessage("Změna možná: " + dateToString(dateFlagChange + C.FLAG_IMMUNE_TIME))
                                                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
@@ -485,7 +545,7 @@ public class Act3AR extends AppCompatActivity {
                                             }
                                         }, fractionId.equals("1"), root); // zde se predava hracova frakce a view pro vykresleni spravne animace
                                     }
-
+                                knowAnswer = true;
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -499,9 +559,48 @@ public class Act3AR extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
                 knowFlagInfo = true;
+                knowResponse = true;
+                counterError++;
             }
         });
-        requestQueue.add(jsObjRequest);
+            }
+        };
+        r.start();
     }
 
+    private void getQrCodes() {
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+                Map<String, String> params = new HashMap<>();
+                return new CustomRequest(Request.Method.POST,  getQrCodes, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
+                        knowResponse = true;
+                        try {
+                            qrCodes = new ArrayList<>();
+                            JSONArray flagsJson = response.getJSONArray("flag");
+                            for (int i = 0; i < flagsJson.length(); i++) {
+                                JSONObject flagJson = flagsJson.getJSONObject(i);
+                                String qrCode = flagJson.getString("qrCode");
+                                qrCodes.add(qrCode);
+                            }
+                            knowAnswer = true;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.append(error.getMessage());
+                    knowResponse = true;
+                    counterError++;
+                }
+            });
+            }
+        };
+        r.start();
+    }
 }

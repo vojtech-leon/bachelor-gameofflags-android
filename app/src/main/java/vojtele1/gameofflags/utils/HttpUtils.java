@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package vojtele1.gameofflags;
+package vojtele1.gameofflags.utils;
 
 import android.util.Log;
 
