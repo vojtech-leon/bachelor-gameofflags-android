@@ -8,6 +8,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
+import android.text.method.DigitsKeyListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,13 +36,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.HttpUtils;
+import vojtele1.gameofflags.utils.RetryingSender;
 
 /**
  * Created by Leon on 25.10.2015.
  */
-public class Act1Login extends Activity implements View.OnClickListener {
+public class Act1Login extends BaseActivity implements View.OnClickListener {
 
     private String token;
 
@@ -208,41 +214,59 @@ public class Act1Login extends Activity implements View.OnClickListener {
 
 
     private void loginHrac() {
-        Map<String, String> params = new HashMap();
-        params.put("token", token);
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  loginPlayer, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
+               return new CustomRequest(Request.Method.POST, loginPlayer, params,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                System.out.println(response.toString());
+                                knowResponse = true;
 
-                        try {
-                            JSONArray players = response.getJSONArray("player");
-                            for (int i = 0; i < players.length(); i++) {
-                                JSONObject player = players.getJSONObject(i);
-                                nickname = player.getString("nickname");
-                                if (nickname.equals("user"))
-                                zmenaJmena();
+                                try {
+                                    JSONArray players = response.getJSONArray("player");
+                                    JSONObject player = players.getJSONObject(0);
+                                    nickname = player.getString("nickname");
+                                    if (nickname.equals("user"))
+                                        zmenaJmena();
+                                    knowAnswer = true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.append(error.getMessage());
+                        knowResponse = true;
+                        counterError++;
 
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-
+                });
             }
-        });
-
-        requestQueue.add(jsObjRequest);
+        };
+        r.startSender();
     }
     private void zmenaJmena() {
         final EditText editText = new EditText(Act1Login.this);
+        // filtr pro zadavani pouze cisel a pismen
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (!Character.isLetterOrDigit(source.charAt(i))) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        editText.setFilters(new InputFilter[] { filter });
 
         new AlertDialog.Builder(Act1Login.this)
                 .setTitle("Zadejte svůj nick:")
@@ -250,43 +274,42 @@ public class Act1Login extends Activity implements View.OnClickListener {
                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         newNickname = editText.getText().toString();
-                        zmenaJmenaRequest();
+                        if (newNickname.length() >= 4) {
+                            zmenaJmenaRequest(newNickname);
+                        } else {
+                            zmenaJmena();
+                            Toast.makeText(Act1Login.this, "Nickname musí být alespoň 4 znaky.", Toast.LENGTH_LONG).show();
+                        }
                         dialog.dismiss();
                     }
                 })
                 .show();
 
     }
-    private void zmenaJmenaRequest() {
-        Map<String, String> params = new HashMap();
+    private void zmenaJmenaRequest(final String nickname) {
+        RetryingSender r = new RetryingSender(this) {
+            public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
+        Map<String, String> params = new HashMap<>();
         params.put("token", token);
-        params.put("nickname", newNickname);
+        params.put("nickname", nickname);
 
-        CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,  changePlayerName, params,
+        return new CustomRequest(Request.Method.POST,  changePlayerName, params,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         System.out.println(response.toString());
+                        knowResponse = true;
 
                         try {
                             JSONArray players = response.getJSONArray("player");
-                            for (int i = 0; i < players.length(); i++) {
-                                JSONObject player = players.getJSONObject(i);
-                                nickname = player.getString("nickname");
-
-                                if (!nickname.equals("user")) {
-                                    new AlertDialog.Builder(Act1Login.this)
-                                            .setTitle("")
-                                            .setMessage("Vítej ve hře, " + nickname + "!")
-                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    dialog.dismiss();
-                                                }
-                                            })
-                                            .show();
-                                }
+                            JSONObject player = players.getJSONObject(0);
+                            String nickname = player.getString("nickname");
+                            if (nickname != null) {
+                               showInfoDialog("Vítej ve hře, " + nickname + "!",false);
                             }
-
+                            knowAnswer = true;
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -296,10 +319,12 @@ public class Act1Login extends Activity implements View.OnClickListener {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.append(error.getMessage());
-
+                knowResponse = true;
+                counterError++;
             }
         });
-
-        requestQueue.add(jsObjRequest);
+    }
+};
+r.startSender();
     }
 }

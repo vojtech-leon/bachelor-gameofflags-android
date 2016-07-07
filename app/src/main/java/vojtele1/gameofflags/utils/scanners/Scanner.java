@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.altbeacon.beacon.Beacon;
@@ -144,7 +145,7 @@ public class Scanner {
             wm.startScan();
         }
         if (ble) {
-            //nabindovani altbeaconu pro ble skenovani = start skenovani
+            //nabindovani altbeaconu pro ble skenovani = startSender skenovani
             beaconConsumer.bind();
         }
         if (cell) {
@@ -307,9 +308,10 @@ public class Scanner {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View layout = inflater.inflate(R.layout.flags,
-                root);
+        root);
 
         ImageView imageView = (ImageView) layout.findViewById(R.id.imageView4);
+        TextView textView = (TextView) layout.findViewById(R.id.textViewTime);
 
         progressDialog = new ProgressDialog(context);
 
@@ -340,21 +342,21 @@ public class Scanner {
         imageView.startAnimation(animation);
 
 
-        updateProgressDialogFlag();
+        updateProgressDialogFlag(textView);
         return progressDialog;
     }
 
     /**
      * Updatuje zobrazovane hodnoty v progressDialogu pokud ten neni null.
      */
-    private void updateProgressDialogFlag() {
+    private void updateProgressDialogFlag(final TextView textView) {
         if (progressDialog != null) {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     stepDetector.enableStepDetector(true);
                     // -1500 aby se tam na chvíli zobrazilo hotovo, jinak to jen problikne
-                    cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME - 1500, 1) {
+                    cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME, 1) {
 
                         public void onTick(long millisUntilFinished) {
                             if (stepDetector.pohyb()) {
@@ -370,12 +372,12 @@ public class Scanner {
                                         })
                                         .show();
                             } else {
-                                progressDialog.setMessage("Zbývá: " + millisUntilFinished / 1000f);
+                                textView.setText(String.valueOf(millisUntilFinished / 1000L));
                             }
                         }
 
                         public void onFinish() {
-                            progressDialog.setMessage("Hotovo!");
+                            textView.setText("Hotovo!");
                         }
                     };
                     cdt.start();

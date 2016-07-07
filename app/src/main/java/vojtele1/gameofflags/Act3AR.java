@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -33,13 +32,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
@@ -159,13 +156,19 @@ public class Act3AR extends BaseActivity {
             }
 
             @Override
-            public void receiveDetections(Detector.Detections<Barcode> detections) {
+            public void receiveDetections(final Detector.Detections<Barcode> detections) {
+          /*      new Thread() {
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+*/
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (alertDialog == null && !scanFinished) {
                     if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
-                        System.out.println(barcodes.valueAt(0).displayValue);
-                        System.out.println(barcodes.valueAt(0).format);
-                        System.out.println(barcodes.size());
+                    //    System.out.println(barcodes.valueAt(0).displayValue);
+                    //    System.out.println(barcodes.valueAt(0).format);
+                    //    System.out.println(barcodes.size());
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
                         flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
                         if (!scanner.running && scanner.alertDialog == null && knowFlagInfo) {
@@ -177,7 +180,7 @@ public class Act3AR extends BaseActivity {
 
                     } else {
                         if (alreadyVisibleQR) {
-                            if (notVisibleSecond == 3) {
+                            if (notVisibleSecond == 100) { // TODO jak nastavit cas
                                 scanner.stopScan();
                                 alreadyVisibleQR = false;
                                 runOnUiThread(new Runnable() {
@@ -204,11 +207,15 @@ public class Act3AR extends BaseActivity {
                     }
                 }
                 // detekuje kazdou vterinu -> snizeni zateze
-                try {
+             /*   try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
+                          /*  }
+                        });
+                    }
+                }.start();*/
             }
         });
     }
@@ -225,6 +232,7 @@ public class Act3AR extends BaseActivity {
         super.onPause();
         changeBTWifiState(false);
         System.out.println("onPause");
+        finish();
     }
 
     /**
@@ -301,7 +309,7 @@ public class Act3AR extends BaseActivity {
         });
             }
         };
-        r.start();*/
+        r.startSender();*/
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("flag", scan.getString(flagDB));
@@ -371,6 +379,8 @@ public class Act3AR extends BaseActivity {
     private void zmenaScore() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
 
@@ -415,12 +425,14 @@ public class Act3AR extends BaseActivity {
         });
     }
 };
-r.start();
+r.startSender();
     }
 
     private void zmenaVlastnikaVlajky() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("ID_flag", flagId);
@@ -453,11 +465,13 @@ r.start();
         });
     }
 };
-r.start();
+r.startSender();
     }
     private void ziskVlajkyKdy() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("ID_flag", flagId);
@@ -514,7 +528,7 @@ r.start();
                                     } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
                                                 .setTitle("Vlajku ještě nelze změnit!")
-                                                .setMessage("Změna možná: " + dateToString(dateFlagChange + C.FLAG_IMMUNE_TIME))
+                                                .setMessage("Změna možná: " + objectToString(dateFlagChange + C.FLAG_IMMUNE_TIME))
                                                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
@@ -565,12 +579,14 @@ r.start();
         });
             }
         };
-        r.start();
+        r.startSender();
     }
 
     private void getQrCodes() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
                 Map<String, String> params = new HashMap<>();
                 return new CustomRequest(Request.Method.POST,  getQrCodes, params,
                 new Response.Listener<JSONObject>() {
@@ -601,6 +617,6 @@ r.start();
             });
             }
         };
-        r.start();
+        r.startSender();
     }
 }

@@ -139,6 +139,8 @@ public class Act4Settings extends BaseActivity {
     private void getPlayerFraction() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
                 // zjisti frakci a cas posledni zmeny
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
@@ -197,11 +199,13 @@ public class Act4Settings extends BaseActivity {
                 });
             }
         };
-        r.start2(true);
+        r.startSender(true);
     }
     private void changePlayerFraction(final String newPlayerFraction) {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
                 // zjisti frakci a cas posledni zmeny
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
@@ -245,7 +249,7 @@ public class Act4Settings extends BaseActivity {
                 });
             }
         };
-        r.start();
+        r.startSender();
     }
 
     public void changeFraction(View view) {
@@ -253,7 +257,7 @@ public class Act4Settings extends BaseActivity {
         Long dateNow = new Date().getTime();
         // pokud se frakce menila pred mene jak tydnem, tak ji nelze zmenit
         if (dateNow < dateFractionChange+7*86400000) {
-            showInfoDialog("Frakci nelze změnit!","Změna možná: "+ dateToString(dateFractionChange+7*86400000));
+            showInfoDialog("Frakci nelze změnit!","Změna možná: "+ objectToString(dateFractionChange+7*86400000));
         }
         else {
             // informuje hrace o zmene frakce

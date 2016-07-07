@@ -1,6 +1,7 @@
 package vojtele1.gameofflags.utils;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -52,6 +53,9 @@ public class WebviewOnClick {
     boolean knowAnswer;
     boolean knowResponse;
 
+    ProgressDialog progressDialog;
+
+
     public WebviewOnClick(Context context) {
         this.context = context;
 
@@ -75,8 +79,8 @@ public class WebviewOnClick {
         popUp.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                if (M.progressDialog.isShowing()) {
-                    M.progressDialog.dismiss();
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
                 }
             }
         });
@@ -87,8 +91,8 @@ public class WebviewOnClick {
     }
 
     private void zjisti(final String id) {
-        if (M.progressDialog == null || !M.progressDialog.isShowing()) {
-            M.showProgressDialogLoading(context);
+        if (progressDialog == null || !progressDialog.isShowing()) {
+            showProgressDialogLoading(context);
             showFlag(id);
             System.out.println("zapinam progress v showFlag(WebviewOnClick)");
             counterError = 0;
@@ -122,7 +126,7 @@ public class WebviewOnClick {
                         showFlag(id);
                         zjisti(id);
                     } else {
-                        M.progressDialog.dismiss();
+                        progressDialog.dismiss();
                         System.out.println("Loading dokoncen.");
                     }
                 } else {
@@ -193,9 +197,25 @@ public class WebviewOnClick {
                 fractionName.setText(responseFrName);
                 flagWhen.setText(cas);
 
-                M.progressDialog.dismiss();
+                progressDialog.dismiss();
             }
         };
         mainHandler.post(myRunnable);
+    }
+    public ProgressDialog showProgressDialogLoading(Context context) {
+
+        progressDialog = new ProgressDialog(context);
+
+        progressDialog.show();
+
+        progressDialog.setCancelable(false);
+
+        progressDialog.setCanceledOnTouchOutside(false);
+
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        progressDialog.setContentView(R.layout.progress_dialog_loading);
+
+        return progressDialog;
     }
 }

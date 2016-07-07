@@ -14,15 +14,7 @@ import vojtele1.gameofflags.R;
  * Created by Leon on 01.06.2016.
  */
 public class M {
-    /**
-     * Pro zjisteni, jestli progress dialog v showProgressDialogLoading() bezi
-     * a umoznuje jeho ukonceni.
-     */
-    public static ProgressDialog progressDialog;
-
-
-
-    /**
+        /**
      * Zjisti, zdali je Poloha zapnuta
      * @param context
      * @return true/false
@@ -42,22 +34,5 @@ public class M {
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             return !TextUtils.isEmpty(locationProviders);
         }
-    }
-
-    public static ProgressDialog showProgressDialogLoading(Context context) {
-
-        progressDialog = new ProgressDialog(context);
-
-        progressDialog.show();
-
-        progressDialog.setCancelable(false);
-
-        progressDialog.setCanceledOnTouchOutside(false);
-
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        progressDialog.setContentView(R.layout.progress_dialog_loading);
-
-        return progressDialog;
     }
 }

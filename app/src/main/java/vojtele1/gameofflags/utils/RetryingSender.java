@@ -4,7 +4,6 @@ package vojtele1.gameofflags.utils;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -16,6 +15,7 @@ import vojtele1.gameofflags.R;
 
 /**
  * Created by NB on 4.7.2016.
+ *
  */
 public class RetryingSender {
     Activity activity;
@@ -25,7 +25,7 @@ public class RetryingSender {
     RequestQueue requestQueue;
     AlertDialog alertDialog;
     /**
-     * Pro zjisteni, jestli progress dialog v showProgressDialogLoading() bezi
+     * Pro zjisteni, jestli progress dialog v showLoadingProgress() bezi
      * a umoznuje jeho ukonceni.
      */
     protected ProgressDialog progressDialog;
@@ -65,7 +65,7 @@ public class RetryingSender {
                 })
                 .show();
     }
-    public void start2(final boolean finish) {
+    public void startSender(final boolean finish) {
         new Thread() {
             public void run() {
                 activity.runOnUiThread(new Runnable() {
@@ -88,13 +88,13 @@ public class RetryingSender {
                                         hideLoadingProgress();
                                     } else if (!knowAnswer) {
                                         requestQueue.add(send());
-                                        start2(finish);
+                                        startSender(finish);
                                     } else {
                                         hideLoadingProgress();
                                         System.out.println("Loading dokoncen.");
                                     }
                                 } else {
-                                    start2(finish);
+                                    startSender(finish);
                                 }
                             }
                         }, 100);
@@ -105,12 +105,10 @@ public class RetryingSender {
         }.start();
 
     }
-    public void start() {
-        start2(false);
+    public void startSender() {
+        startSender(false);
     }
     protected CustomRequest send() {
-        knowResponse = false;
-        knowAnswer = false;
         return null;
     }
 }

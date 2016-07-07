@@ -2,7 +2,6 @@ package vojtele1.gameofflags;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -11,7 +10,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -23,11 +21,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
@@ -41,7 +37,6 @@ public class Act2WebView extends BaseActivity {
     ImageButton buttonQR, buttonSettings;
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
     android.webkit.WebView webView;
-    RequestQueue requestQueue;
     String token;
     String floor;
 
@@ -57,8 +52,6 @@ public class Act2WebView extends BaseActivity {
         setContentView(R.layout.activity_webview);
         // vytahne token z activity loginu
         token = getIntent().getStringExtra("token");
-
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         fraction1_score = (TextView) findViewById(R.id.fraction1_score);
         fraction2_score = (TextView) findViewById(R.id.fraction2_score);
@@ -102,6 +95,8 @@ public class Act2WebView extends BaseActivity {
     private void vytahniData() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
         return new CustomRequest(Request.Method.POST,  webViewPlayer, params,
@@ -136,9 +131,11 @@ public class Act2WebView extends BaseActivity {
         });
             }
         };
-        r.start();
+        r.startSender();
         RetryingSender r2 = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
         Map<String, String> params2 = new HashMap<>();
         params2.put("ID_fraction", "1");
         return new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
@@ -172,9 +169,11 @@ public class Act2WebView extends BaseActivity {
 
     }
 };
-r2.start();
+r2.startSender();
         RetryingSender r3 = new RetryingSender(this) {
 public CustomRequest send() {
+    knowResponse = false;
+    knowAnswer = false;
         Map<String, String> params3 = new HashMap<>();
         params3.put("ID_fraction", "2");
        return new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
@@ -206,7 +205,7 @@ public CustomRequest send() {
         });
         }
         };
-        r3.start();
+        r3.startSender();
         showFlags(floor);
 
     }
@@ -257,6 +256,8 @@ public CustomRequest send() {
     private void showFlags(final String floor) {
          RetryingSender r4 = new RetryingSender(this) {
             public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
                 Map<String, String> params = new HashMap<>();
                 params.put("floor", floor);
                 return new CustomRequest(Request.Method.POST, getFlagInfo, params,
@@ -312,6 +313,6 @@ public CustomRequest send() {
                 });
             }
     };
-    r4.start();
+    r4.startSender();
     }
 }
