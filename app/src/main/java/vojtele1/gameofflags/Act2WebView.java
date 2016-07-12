@@ -315,4 +315,9 @@ public CustomRequest send() {
     };
     r4.startSender();
     }
+    @Override
+    public void onBackPressed() {
+        // zakomentovani zabrani reakci na stisk hw back
+        //super.onBackPressed();
+    }
 }

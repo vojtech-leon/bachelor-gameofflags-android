@@ -60,7 +60,7 @@ public class Act3AR extends BaseActivity {
     BarcodeDetector barcodeDetector;
     CameraSource cameraSource;
     int notVisibleSecond;
-    boolean knowFlagInfo = true, scanFinished;
+    boolean knowFlagInfo = true;
     boolean alreadyVisibleQR;
 
     String token, flagId;
@@ -164,7 +164,7 @@ public class Act3AR extends BaseActivity {
                             public void run() {
 */
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (alertDialog == null && !scanFinished) {
+                if (alertDialog == null && !scanner.scanFinished) {
                     if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
                     //    System.out.println(barcodes.valueAt(0).displayValue);
                     //    System.out.println(barcodes.valueAt(0).format);
@@ -180,7 +180,7 @@ public class Act3AR extends BaseActivity {
 
                     } else {
                         if (alreadyVisibleQR) {
-                            if (notVisibleSecond == 100) { // TODO jak nastavit cas
+                            if (notVisibleSecond == 50) { // TODO jak nastavit cas
                                 scanner.stopScan();
                                 alreadyVisibleQR = false;
                                 runOnUiThread(new Runnable() {
@@ -499,7 +499,6 @@ r.startSender();
                                 long dateFlagChange = date.getTime();
                                 // ziskani aktualniho casu
                                 Long dateNow = new Date().getTime();
-                                knowFlagInfo = true;
                                     // pokud hrac danou vlajku zabral (nezavisle na frakci), nemuze ji zabrat znovu
                                     if (flagMe.equals("true")) {
                                         alertDialog = new AlertDialog.Builder(Act3AR.this)
@@ -509,6 +508,7 @@ r.startSender();
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                         alertDialog = null;
+                                                        knowFlagInfo = true;
                                                     }
                                                 })
                                                 .show();
@@ -521,6 +521,7 @@ r.startSender();
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                         alertDialog = null;
+                                                        knowFlagInfo = true;
                                                     }
                                                 })
                                                 .show();
@@ -533,11 +534,13 @@ r.startSender();
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         dialog.dismiss();
                                                         alertDialog = null;
+                                                        knowFlagInfo = true;
                                                     }
                                                 })
                                                 .show();
                                     } else {
                                         alreadyVisibleQR = true;
+                                        knowFlagInfo = true;
 
                                         ViewGroup root = (ViewGroup) findViewById(R.id.flags);
 
@@ -549,8 +552,6 @@ r.startSender();
                                                     public void run() {
                                                         Log.d("Act2WebView", "Received onScanfinish, wifi = " + wifiScans.size() + ", ble = " + bleScans.size() + ", gsm = " + cellScans.size());
                                                         writePoint(wifiScans, bleScans, cellScans, Integer.parseInt(flagId), floor, x, y);
-
-                                                        scanFinished = true;
                                                         // posle vsechny scany, i ty, ktere se drive neposlaly
                                                         poslaniScanuVse();
                                                         zmenaVlastnikaVlajky();

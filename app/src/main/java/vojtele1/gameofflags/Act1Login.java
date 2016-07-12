@@ -271,6 +271,7 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
         new AlertDialog.Builder(Act1Login.this)
                 .setTitle("Zadejte svůj nick:")
                 .setView(editText)
+                .setCancelable(false)
                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         newNickname = editText.getText().toString();
@@ -291,40 +292,44 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
             public CustomRequest send() {
                 knowResponse = false;
                 knowAnswer = false;
-        Map<String, String> params = new HashMap<>();
-        params.put("token", token);
-        params.put("nickname", nickname);
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);
+                params.put("nickname", nickname);
 
-        return new CustomRequest(Request.Method.POST,  changePlayerName, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        knowResponse = true;
-
-                        try {
-                            JSONArray players = response.getJSONArray("player");
-                            JSONObject player = players.getJSONObject(0);
-                            String nickname = player.getString("nickname");
-                            if (nickname != null) {
-                               showInfoDialog("Vítej ve hře, " + nickname + "!",false);
+                return new CustomRequest(Request.Method.POST,  changePlayerName, params,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            System.out.println(response.toString());
+                            knowResponse = true;
+                            try {
+                                JSONArray players = response.getJSONArray("player");
+                                JSONObject player = players.getJSONObject(0);
+                                String nickname = player.getString("nickname");
+                                if (nickname != null) {
+                                   showInfoDialog("Vítej ve hře, " + nickname + "!",false);
+                                }
+                                knowAnswer = true;
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            knowAnswer = true;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowResponse = true;
-                counterError++;
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            System.out.append(error.getMessage());
+                            knowResponse = true;
+                            counterError++;
+                        }
+                    });
             }
-        });
+        };
+        r.startSender();
     }
-};
-r.startSender();
+
+    @Override
+    public void onBackPressed() {
+        // zakomentovani zabrani reakci na stisk hw back
+        //super.onBackPressed();
     }
 }

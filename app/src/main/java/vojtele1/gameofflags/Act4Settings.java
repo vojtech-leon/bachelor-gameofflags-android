@@ -287,4 +287,9 @@ public class Act4Settings extends BaseActivity {
         }
 
     }
+    @Override
+    public void onBackPressed() {
+        // zakomentovani zabrani reakci na stisk hw back
+        //super.onBackPressed();
+    }
 }

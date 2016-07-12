@@ -76,6 +76,11 @@ public class Scanner {
 
     StepDetector stepDetector;
 
+    /**
+     * zdali je scan dokoncen, slouzi pro snimaci aktivitu
+     */
+    public boolean scanFinished;
+
     public Scanner(Context context) {
         this.context = context;
         init();
@@ -133,6 +138,7 @@ public class Scanner {
         running = true;
         cont = true; //nastav aby se synchronni skenovani cyklicky spoustela znovu
 
+        scanFinished = false;
         progressDialog = showProgressDialogFlag(frakce1, root);
 
         wifiScans.clear();
@@ -173,6 +179,7 @@ public class Scanner {
                         if (running && scanResultListener != null) {
                             scanResultListener.onScanFinished(wifiScans, bleScans, cellScans);
                         }
+                        scanFinished = true;
                         stopScan();
                     }
                 }, time);
@@ -355,7 +362,6 @@ public class Scanner {
                 @Override
                 public void run() {
                     stepDetector.enableStepDetector(true);
-                    // -1500 aby se tam na chvíli zobrazilo hotovo, jinak to jen problikne
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME, 1) {
 
                         public void onTick(long millisUntilFinished) {
@@ -372,7 +378,8 @@ public class Scanner {
                                         })
                                         .show();
                             } else {
-                                textView.setText(String.valueOf(millisUntilFinished / 1000L));
+                                // 1000L zajisti ze to bude v s a celociselne
+                                textView.setText(String.valueOf(millisUntilFinished/1000L));
                             }
                         }
 

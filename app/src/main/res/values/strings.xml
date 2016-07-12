@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GameofFlags</string>
-
-    <string name="act_qrreader">Zabírání vlajky</string>
-    <string name="act_login">Přihlašování</string>
-    <string name="act_settings">Nastavení</string>
-    <string name="act_map">Mapa</string>
+    <string name="app_name">Game of Flags</string>
+    <string name="settings">Nastavení</string>
 
     <string name="profile_picture_desc">Profile picture</string>
-    <string name="welcome">Vítejte v Game of Flags!</string>
-    <string name="sign_in_label">Sign in</string>
-    <string name="manage_account_label">Manage account</string>
-    <string name="sign_out_label">Sign out</string>
+    <string name="welcome">Vítej v Game of Flags!</string>
+    <string name="sign_in_label">Přihlásit</string>
+    <string name="sign_out_label">Odhlásit</string>
     <string name="fb_app_id">919073338174996</string>
 
 

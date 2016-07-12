@@ -191,12 +191,12 @@ public class Notification {
 
         NotificationCompat.Builder mBuilder = new
                 NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.app_logo)
                         // In a real app, you may want to use a library like Volley
                         // to decode the Bitmap.
                 // ta ikona, co je stale videt
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.drawable.ic_launcher))
+                        R.drawable.app_logo))
                 .setContentTitle(msg)
                 .setContentText(msgText)
                 .setTicker(msgAlert);
