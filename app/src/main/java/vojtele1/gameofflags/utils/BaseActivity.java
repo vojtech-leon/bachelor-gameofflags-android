@@ -28,6 +28,13 @@ public class BaseActivity extends AppCompatActivity {
                 })
                 .show();
     }
+    protected void showInfoDialog(String text, DialogInterface.OnClickListener onClickListener) {
+        alertDialog =  new AlertDialog.Builder(this)
+                .setMessage(text)
+                .setCancelable(false)
+                .setNeutralButton("OK", onClickListener)
+                .show();
+    }
     protected void showInfoDialog(String text, final boolean finishActivity) {
         alertDialog =  new AlertDialog.Builder(this)
                 .setMessage(text)

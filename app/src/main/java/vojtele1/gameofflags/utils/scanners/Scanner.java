@@ -379,7 +379,7 @@ public class Scanner {
                                         .show();
                             } else {
                                 // 1000L zajisti ze to bude v s a celociselne
-                                textView.setText(String.valueOf(millisUntilFinished/1000L));
+                                textView.setText("Do zabrání zbývá: " + millisUntilFinished/1000L + ", nehýbej se.");
                             }
                         }
 

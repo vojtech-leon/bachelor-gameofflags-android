@@ -53,7 +53,7 @@ public class RetryingSender {
         progressDialog.dismiss();
     }
 
-    protected void showInfoDialog(String text, final boolean finishActivity) {
+    private void showInfoDialog(String text, final boolean finishActivity) {
         alertDialog =  new AlertDialog.Builder(activity)
                 .setMessage(text)
                 .setCancelable(false)
@@ -84,7 +84,7 @@ public class RetryingSender {
                                 if (knowResponse) {
                                     System.out.println("Pocet chyb: " + counterError);
                                     if (counterError >= 200) {
-                                        showInfoDialog("Problém s připojením k databázi, zkuste to prosím později.", finish);
+                                        showInfoDialog("Problém s připojením, zkuste to prosím později.", finish);
                                         hideLoadingProgress();
                                     } else if (!knowAnswer) {
                                         requestQueue.add(send());

@@ -81,7 +81,7 @@ public class Act4Settings extends BaseActivity {
 
         // Retrieve an instance of the SharedPreferences object.
         mSharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
-                Context.MODE_PRIVATE);
+                MODE_PRIVATE);
 
         // Get the value of mNotificationAdded from SharedPreferences. Set to false as a default.
         mNotificationAdded = mSharedPreferences.getBoolean(C.NOTIFICATION_ADDED_KEY, false);
@@ -289,7 +289,10 @@ public class Act4Settings extends BaseActivity {
     }
     @Override
     public void onBackPressed() {
-        // zakomentovani zabrani reakci na stisk hw back
+        // zakomentovani zabrani klasicke reakci na stisk hw back
         //super.onBackPressed();
+        Intent intent = new Intent(this, Act2WebView.class);
+        intent.putExtra("token", token);
+        startActivity(intent);
     }
 }

@@ -1,7 +1,10 @@
+
 package vojtele1.gameofflags;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -33,7 +36,7 @@ import vojtele1.gameofflags.utils.WebviewOnClick;
 
 
 public class Act2WebView extends BaseActivity {
-    TextView fraction1_score, fraction2_score, player_score, player_level;
+    TextView fraction1_score, fraction2_score, player_score, fraction1_name, fraction2_name;
     ImageButton buttonQR, buttonSettings;
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
     android.webkit.WebView webView;
@@ -45,6 +48,16 @@ public class Act2WebView extends BaseActivity {
     String webViewScoreFraction = adresa + "webviewscorefraction";
     String getFlagInfo = adresa + "getflaginfo";
 
+    /**
+     * Umozni nacitat a ukladat hodnoty do pameti
+     */
+    private SharedPreferences sharedPreferences;
+
+    /**
+     * Jake patro bylo naposledy zobrazeno
+     */
+    private String shownFloor;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +68,9 @@ public class Act2WebView extends BaseActivity {
 
         fraction1_score = (TextView) findViewById(R.id.fraction1_score);
         fraction2_score = (TextView) findViewById(R.id.fraction2_score);
+        fraction1_name = (TextView) findViewById(R.id.fraction1_name);
+        fraction2_name = (TextView) findViewById(R.id.fraction2_name);
         player_score = (TextView) findViewById(R.id.player_score);
-        player_level = (TextView) findViewById(R.id.player_level);
         buttonQR = (ImageButton) findViewById(R.id.buttonQR);
         buttonSettings = (ImageButton) findViewById(R.id.buttonSettings);
         webView = (android.webkit.WebView) findViewById(R.id.webViewMap);
@@ -77,11 +91,18 @@ public class Act2WebView extends BaseActivity {
         webSettings.setBuiltInZoomControls(true);
         webSettings.setSupportZoom(true);
 
-        webView.loadUrl("file:///android_asset/j1np.html");
-        floor = "J1NP";
+        // Retrieve an instance of the SharedPreferences object.
+        sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+                MODE_PRIVATE);
+
+        // Get the value of mNotificationAdded from SharedPreferences. Set to false as a default.
+        shownFloor = sharedPreferences.getString(C.SHOWN_FLOOR, "J1NP");
+
+        webView.loadUrl("file:///android_asset/" + shownFloor + ".html");
+        floor = shownFloor;
 
         // Force links and redirects to open in the WebView instead of in a browser
-        webView.setWebViewClient(new WebViewClient());
+       // webView.setWebViewClient(new WebViewClient());
 
         vytahniData();
     }
@@ -111,9 +132,15 @@ public class Act2WebView extends BaseActivity {
 
                                 JSONObject player = players.getJSONObject(0);
                                 player_score.setText(player.getString("score"));
-                                player_level.setText(player.getString("level"));
-
+                            if (player.getInt("fraction") == 1) {
+                                fraction1_name.setText("•");
+                            } else {
+                                fraction2_name.setText("•");
+                            }
                             knowAnswer = true;
+                            // musi to byt po urcite dobe, jinak se webview nestihlo nacist a body
+                            // nezobrazilo - pockani na odpoved prvniho dotazu je dostacujici
+                            showFlags(floor);
 
 
                         } catch (JSONException e) {
@@ -206,28 +233,39 @@ public CustomRequest send() {
         }
         };
         r3.startSender();
-        showFlags(floor);
 
     }
 
     public void layer1Button(View view) {
-        webView.loadUrl("file:///android_asset/j1np.html");
         floor = "J1NP";
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(C.SHOWN_FLOOR, floor);
+        editor.apply();
+        webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
     }
     public void layer2Button(View view) {
-        webView.loadUrl("file:///android_asset/j2np.html");
         floor = "J2NP";
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(C.SHOWN_FLOOR, floor);
+        editor.apply();
+        webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
     }
     public void layer3Button(View view) {
-        webView.loadUrl("file:///android_asset/j3np.html");
         floor = "J3NP";
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(C.SHOWN_FLOOR, floor);
+        editor.apply();
+        webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
     }
     public void layer4Button(View view) {
-        webView.loadUrl("file:///android_asset/j4np.html");
         floor = "J4NP";
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(C.SHOWN_FLOOR, floor);
+        editor.apply();
+        webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
     }
 

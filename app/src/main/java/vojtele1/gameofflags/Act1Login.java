@@ -1,29 +1,18 @@
 package vojtele1.gameofflags;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputFilter;
-import android.text.InputType;
 import android.text.Spanned;
-import android.text.method.DigitsKeyListener;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.google.identitytoolkit.GitkitClient;
 import com.google.identitytoolkit.GitkitUser;
 import com.google.identitytoolkit.IdToken;
@@ -32,19 +21,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.CustomRequest;
-import vojtele1.gameofflags.utils.HttpUtils;
 import vojtele1.gameofflags.utils.RetryingSender;
 
 /**
  * Created by Leon on 25.10.2015.
  */
-public class Act1Login extends BaseActivity implements View.OnClickListener {
+public class Act1Login extends BaseActivity {
 
     private String token;
 
@@ -53,7 +40,6 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
 
     private String nickname;
     private String newNickname;
-    RequestQueue requestQueue;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
@@ -64,7 +50,8 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
+        setContentView(R.layout.activity_login_welcome);
+
 
         // Step 1: Create a GitkitClient.
         // The configurations are set in the AndroidManifest.xml. You can also set or overwrite them
@@ -77,25 +64,15 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
             // in account information are passed to the callback.
             @Override
             public void onSignIn(IdToken idToken, GitkitUser user) {
-                showProfilePage(idToken, user);
+                //showProfilePage(idToken, user);
 
                 // Now use the idToken to create a session for your user.
                 // To do so, you should exchange the idToken for either a Session Token or Cookie
                 // from your server.
                 // Finally, save the Session Token or Cookie to maintain your user's session.
-                String uspech = "nic";
-
-                uspech = "Email: " + user.getEmail() + "\n"
-                        + "LocalId: " + user.getLocalId() + "\n"
-                        + "ProviderId: " + idToken.getProviderId() + "\n"
-                        + "Auth: " + idToken.getKeyId() + "\n"
-                        + "expired-kdy: " + idToken.getExpireAt() + "\n"
-                        + "issueAt: " + idToken.getIssueAt();
 
                 token = idToken.getTokenString();
                 System.out.println(token);
-
-             //   Toast.makeText(Act1Login.this, uspech, Toast.LENGTH_LONG).show();
 
                 loginHrac();
 
@@ -106,11 +83,10 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
             // This method is called when the sign-in process fails.
             @Override
             public void onSignInFailed() {
-                Toast.makeText(Act1Login.this, "Sign in failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(Act1Login.this, "Přihlášení se nezdařilo.", Toast.LENGTH_LONG).show();
             }
         }).build();
 
-        showSignInPage();
     }
 
 
@@ -146,72 +122,16 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
 
 
 
-    private void showSignInPage() {
-        setContentView(R.layout.activity_login_welcome);
-        Button button = (Button) findViewById(R.id.sign_in);
-        button.setOnClickListener(this);
-    }
 
-
-    private void showProfilePage(IdToken idToken, GitkitUser user) {
-        setContentView(R.layout.activity_login_profile);
-        showAccount(user);
-        findViewById(R.id.sign_out).setOnClickListener(this);
-    }
 
 
     // Step 5: Respond to user actions.
     // If the user clicks sign in, call GitkitClient.startSignIn() to trigger the sign in flow.
 
-    @Override
-    public void onClick(View v) {
+    public void logIn(View view) {
 
-        if (v.getId() == R.id.sign_in) {
             client.startSignIn();
-        } else if (v.getId() == R.id.sign_out) {
-            showSignInPage();
-        }
     }
-
-
-
-    private void showAccount(GitkitUser user) {
-        ((TextView) findViewById(R.id.account_email)).setText(user.getEmail());
-
-        if (user.getDisplayName() != null) {
-            ((TextView) findViewById(R.id.account_name)).setText(user.getDisplayName());
-        }
-
-        if (user.getPhotoUrl() != null) {
-            final ImageView pictureView = (ImageView) findViewById(R.id.account_picture);
-            new AsyncTask<String, Void, Bitmap>() {
-
-                @Override
-                protected Bitmap doInBackground(String... arg) {
-                    try {
-                        byte[] result = HttpUtils.get(arg[0]);
-                        return BitmapFactory.decodeByteArray(result, 0, result.length);
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }
-
-                @Override
-                protected void onPostExecute(Bitmap bitmap) {
-                    if (bitmap != null) {
-                        pictureView.setImageBitmap(bitmap);
-                    }
-                }
-            }.execute(user.getPhotoUrl());
-        }
-    }
-    public void pokracujWebView(View view) {
-        Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("token", token);
-        startActivity(intent);
-
-    }
-
 
     private void loginHrac() {
         RetryingSender r = new RetryingSender(this) {
@@ -232,8 +152,20 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
                                     JSONArray players = response.getJSONArray("player");
                                     JSONObject player = players.getJSONObject(0);
                                     nickname = player.getString("nickname");
-                                    if (nickname.equals("user"))
-                                        zmenaJmena();
+                                    String fraction_name;
+                                    int fraction = player.optInt("player_fraction");
+                                    if (fraction == 1) {
+                                        fraction_name = "Red";
+                                    } else {
+                                        fraction_name = "Blue";
+                                    }
+
+
+                                    if (nickname.equals("user")) {
+                                        zmenaJmena(fraction_name);
+                                    } else {
+                                        continueToWebview();
+                                    }
                                     knowAnswer = true;
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -252,7 +184,14 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
         };
         r.startSender();
     }
-    private void zmenaJmena() {
+
+    private void continueToWebview() {
+        Intent intent = new Intent(this, Act2WebView.class);
+        intent.putExtra("token", token);
+        startActivity(intent);
+    }
+
+    private void zmenaJmena(final String fraction_name) {
         final EditText editText = new EditText(Act1Login.this);
         // filtr pro zadavani pouze cisel a pismen
         InputFilter filter = new InputFilter() {
@@ -275,10 +214,13 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         newNickname = editText.getText().toString();
-                        if (newNickname.length() >= 4) {
-                            zmenaJmenaRequest(newNickname);
+                        if (("user").equals(newNickname)) {
+                            zmenaJmena(fraction_name);
+                            Toast.makeText(Act1Login.this, "Nickname nesmí být slovo user.", Toast.LENGTH_LONG).show();
+                        } else if (newNickname.length() >= 4) {
+                            zmenaJmenaRequest(newNickname, fraction_name);
                         } else {
-                            zmenaJmena();
+                            zmenaJmena(fraction_name);
                             Toast.makeText(Act1Login.this, "Nickname musí být alespoň 4 znaky.", Toast.LENGTH_LONG).show();
                         }
                         dialog.dismiss();
@@ -287,7 +229,7 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
                 .show();
 
     }
-    private void zmenaJmenaRequest(final String nickname) {
+    private void zmenaJmenaRequest(final String nickname, final String fraction_name) {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
                 knowResponse = false;
@@ -307,7 +249,14 @@ public class Act1Login extends BaseActivity implements View.OnClickListener {
                                 JSONObject player = players.getJSONObject(0);
                                 String nickname = player.getString("nickname");
                                 if (nickname != null) {
-                                   showInfoDialog("Vítej ve hře, " + nickname + "!",false);
+                                   showInfoDialog("Vítej ve hře " + nickname + ", tvoje frakce je: "
+                                           + fraction_name + "!", new DialogInterface.OnClickListener() {
+                                       @Override
+                                       public void onClick(DialogInterface dialogInterface, int i) {
+                                           dialogInterface.dismiss();
+                                           continueToWebview();
+                                       }
+                                   });
                                 }
                                 knowAnswer = true;
                             } catch (JSONException e) {

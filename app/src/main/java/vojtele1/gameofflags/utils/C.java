@@ -44,6 +44,8 @@ public class C {
 
     public static final String PLAYER_FRACTION = PACKAGE_NAME + ".PLAYER_FRACTION";
 
+    public static final String SHOWN_FLOOR = PACKAGE_NAME + ".SHOWN_FLOOR";
+
     public static final float GEOFENCE_RADIUS_IN_METERS = 1600; // 1 mile, 1.6 km
 
     /**

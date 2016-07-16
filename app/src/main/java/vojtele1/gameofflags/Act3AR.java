@@ -164,7 +164,7 @@ public class Act3AR extends BaseActivity {
                             public void run() {
 */
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (alertDialog == null && !scanner.scanFinished) {
+                if (alertDialog == null && !scanner.scanFinished && qrCodes != null) {
                     if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
                     //    System.out.println(barcodes.valueAt(0).displayValue);
                     //    System.out.println(barcodes.valueAt(0).format);
