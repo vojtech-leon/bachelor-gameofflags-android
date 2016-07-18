@@ -3,6 +3,7 @@ package vojtele1.gameofflags;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import vojtele1.gameofflags.utils.BaseActivity;
+import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
 
@@ -46,12 +48,28 @@ public class Act1Login extends BaseActivity {
     String loginPlayer = adresa + "loginplayer";
     String changePlayerName = adresa + "changeplayername";
 
+    /**
+     * Umozni nacitat a ukladat hodnoty do pameti
+     */
+    private SharedPreferences sharedPreferences;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login_welcome);
 
+        // Retrieve an instance of the SharedPreferences object.
+        sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+                MODE_PRIVATE);
+
+        // Get the value of token from SharedPreferences. Set to "" as a default.
+        token = sharedPreferences.getString(C.TOKEN, "");
+
+        if (!token.equals("")) {
+            loginHrac();
+        }
 
         // Step 1: Create a GitkitClient.
         // The configurations are set in the AndroidManifest.xml. You can also set or overwrite them
@@ -73,6 +91,10 @@ public class Act1Login extends BaseActivity {
 
                 token = idToken.getTokenString();
                 System.out.println(token);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(C.TOKEN, token);
+                editor.apply();
 
                 loginHrac();
 
@@ -187,7 +209,6 @@ public class Act1Login extends BaseActivity {
 
     private void continueToWebview() {
         Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("token", token);
         startActivity(intent);
     }
 

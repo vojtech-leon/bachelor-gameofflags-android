@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -32,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,15 +86,18 @@ public class Act3AR extends BaseActivity {
     String getFlagInfoUser = adresa + "getflaginfouser";
     String getQrCodes = adresa + "getqrcodes";
 
-
     RequestQueue requestQueue;
+
+    /**
+     * Umozni nacitat a ukladat hodnoty do pameti
+     */
+    private SharedPreferences sharedPreferences;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
-        // vytahne token z activity loginu
-        token = getIntent().getStringExtra("token");
 
         scanner = new Scanner(this);
         scans = new Scans(this);
@@ -107,6 +112,14 @@ public class Act3AR extends BaseActivity {
         // ziska qr cody z db a ulozi do arraylistu
         getQrCodes();
 
+        // Retrieve an instance of the SharedPreferences object.
+        sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+                MODE_PRIVATE);
+        // Get the value of token from SharedPreferences. Set to "" as a default.
+        token = sharedPreferences.getString(C.TOKEN, "");
+
+        if (token.equals(""))
+            startActivity(new Intent(this, Act1Login.class));
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
@@ -180,7 +193,7 @@ public class Act3AR extends BaseActivity {
 
                     } else {
                         if (alreadyVisibleQR) {
-                            if (notVisibleSecond == 50) { // TODO jak nastavit cas
+                            if (notVisibleSecond == 50) {
                                 scanner.stopScan();
                                 alreadyVisibleQR = false;
                                 runOnUiThread(new Runnable() {
@@ -265,8 +278,7 @@ public class Act3AR extends BaseActivity {
         p.setBleScans(bleScans); // naplnime daty z Bluetooth
         p.setCellScans(cellScans);
         new DeviceInformation(this).fillPosition(p); // naplnime infomacemi o zarizeni
-        p.setCreatedDate(new Date());
-        p.setId(String.valueOf(flagId));
+        p.setCreatedDate(dateToStringServer(new Date()));
         p.setLevel(floor);
         p.setX(x);
         p.setY(y);
@@ -619,5 +631,11 @@ r.startSender();
             }
         };
         r.startSender();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, Act2WebView.class);
+        startActivity(intent);
     }
 }

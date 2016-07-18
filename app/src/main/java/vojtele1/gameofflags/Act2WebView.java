@@ -63,8 +63,6 @@ public class Act2WebView extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
-        // vytahne token z activity loginu
-        token = getIntent().getStringExtra("token");
 
         fraction1_score = (TextView) findViewById(R.id.fraction1_score);
         fraction2_score = (TextView) findViewById(R.id.fraction2_score);
@@ -98,6 +96,12 @@ public class Act2WebView extends BaseActivity {
         // Get the value of mNotificationAdded from SharedPreferences. Set to false as a default.
         shownFloor = sharedPreferences.getString(C.SHOWN_FLOOR, "J1NP");
 
+        // Get the value of token from SharedPreferences. Set to "" as a default.
+        token = sharedPreferences.getString(C.TOKEN, "");
+
+        if (token.equals(""))
+            startActivity(new Intent(this, Act1Login.class));
+
         webView.loadUrl("file:///android_asset/" + shownFloor + ".html");
         floor = shownFloor;
 
@@ -109,7 +113,6 @@ public class Act2WebView extends BaseActivity {
 
     public void settingsButton(View view) {
         Intent intent = new Intent(this, Act4Settings.class);
-        intent.putExtra("token", token);
         startActivity(intent);
     }
 
@@ -271,20 +274,7 @@ public CustomRequest send() {
 
     public void qrButton(View view) {
         Intent intent = new Intent(this, Act3AR.class);
-        intent.putExtra("token", token);
-        startActivityForResult(intent, 0);
-    }
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == 0) {
-            if (resultCode == RESULT_OK) {
-
-                vytahniData();
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // To Handle cancel
-                System.out.println("Act 2 - Zabrání vlajky se nepodařilo.");
-            }
-        }
+        startActivity(intent);
     }
 
      private void createPoint(int id, int x, int y, String color) {

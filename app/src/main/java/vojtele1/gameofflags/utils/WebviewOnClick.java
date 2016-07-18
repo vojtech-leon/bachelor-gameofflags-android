@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.view.Gravity;
@@ -40,11 +40,11 @@ public class WebviewOnClick {
     Context context;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-    String getFlagInfoFull = adresa + "getflaginfofull";
+    String getFlagInfoUser = adresa + "getflaginfouser";
 
-    TextView fractionName, playerName, flagName, flagWhen;
+    TextView tvFractionName, tvPlayerName, tvFlagName, tvFlagWhen, tvWhatToDo;
     RequestQueue requestQueue;
-    String cas,responseFrName, responsePName, responseFlName;
+    String cas,responseFrName, responsePName, responseFlName, whatToDo;
 
     PopupWindow popUp;
     View popUpView;
@@ -55,6 +55,12 @@ public class WebviewOnClick {
 
     ProgressDialog progressDialog;
 
+    /**
+     * Umozni nacitat a ukladat hodnoty do pameti
+     */
+    private SharedPreferences sharedPreferences;
+
+    private String token;
 
     public WebviewOnClick(Context context) {
         this.context = context;
@@ -62,14 +68,22 @@ public class WebviewOnClick {
         requestQueue = Volley.newRequestQueue(context);
         popUp = new PopupWindow(context);
 
+        // Retrieve an instance of the SharedPreferences object.
+        sharedPreferences = context.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+                Context.MODE_PRIVATE);
+
+        // Get the value of token from SharedPreferences. Set to "" as a default.
+        token = sharedPreferences.getString(C.TOKEN, "");
+
     }
     @JavascriptInterface
     public void showPopup(String id) {
         popUpView = LayoutInflater.from(context).inflate(R.layout.flag_info, null);
-        fractionName = (TextView) popUpView.findViewById(R.id.flag_info_textView_fraction);
-        playerName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_owner);
-        flagName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_name);
-        flagWhen = (TextView) popUpView.findViewById(R.id.flag_info_textView_flagWhen);
+        tvFractionName = (TextView) popUpView.findViewById(R.id.flag_info_textView_fraction);
+        tvPlayerName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_owner);
+        tvFlagName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_name);
+        tvFlagWhen = (TextView) popUpView.findViewById(R.id.flag_info_textView_flagWhen);
+        tvWhatToDo = (TextView) popUpView.findViewById(R.id.flag_info_whatToDo);
 
         popUp.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         popUp.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -85,7 +99,10 @@ public class WebviewOnClick {
             }
         });
         popUp.setFocusable(true);
-        popUp.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFAB00")));
+        //popUp.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFAB00
+
+        popUp.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.background_popup_orange_with_dark_orange_border));
+
         popUp.showAtLocation(popUpView, Gravity.CENTER, 0, 0);
         zjisti(id);
     }
@@ -141,8 +158,9 @@ public class WebviewOnClick {
         knowAnswer = false;
 
             Map<String, String> params = new HashMap();
+            params.put("token", token);
             params.put("ID_flag", idFlag);
-            CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfoFull, params,
+            CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -156,15 +174,36 @@ public class WebviewOnClick {
                                 responseFlName = flagJson.getString("flagName");
                                 responsePName = flagJson.getString("playerName");
                                 responseFrName = flagJson.getString("fractionName");
+                                String flagMe = flagJson.getString("flagMe");
+                                String fractionMe = flagJson.getString("fractionMe");
                                 //zmena formatu casu
                                 SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                 SimpleDateFormat sdfVysledny = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
                                 // nastavi prijaty cas na UTC
                                 sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
+
                                 try {
                                     Date date = sdfPrijaty.parse(flagDate);
                                     // preformatuje prijaty cas do bezneho ciselneho tvaru
                                     cas = sdfVysledny.format(date.getTime());
+
+
+                                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                                    long dateFlagChange = date.getTime();
+                                    // ziskani aktualniho casu
+                                    Long dateNow = new Date().getTime();
+                                    if (flagMe.equals("true") && !fractionMe.equals("true")) {
+                                        whatToDo = "zabrána tebou za druhou frakci.";
+                                    } else if (flagMe.equals("true")) {
+                                        whatToDo = "zabrána tebou.";
+                                    } else if (fractionMe.equals("true")) {
+                                        whatToDo = "patří tvé frakci.";
+                                    } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
+                                        whatToDo = "čerstvě zabrána, počkej do " + sdf.format(date.getTime()) + ".";
+                                    } else {
+                                        whatToDo = "zaber ji!";
+                                    }
+
 
                                     setText();
                                     knowAnswer = true;
@@ -192,10 +231,11 @@ public class WebviewOnClick {
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
-                flagName.setText(responseFlName);
-                playerName.setText(responsePName);
-                fractionName.setText(responseFrName);
-                flagWhen.setText(cas);
+                tvFlagName.setText(responseFlName);
+                tvPlayerName.setText(responsePName);
+                tvFractionName.setText(responseFrName);
+                tvFlagWhen.setText(cas);
+                tvWhatToDo.setText(whatToDo);
 
                 progressDialog.dismiss();
             }

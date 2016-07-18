@@ -5,7 +5,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:id="@+id/activity_settings">
+    android:id="@+id/activity_settings"
+    android:background="@drawable/background_main">
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,7 +24,11 @@
         android:id="@+id/buttonChangeFraction"
         android:onClick="changeFraction"
         android:layout_below="@+id/add_remove_notification_button"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/background_button_blue_with_dark_blue_border"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_margin="5dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -32,7 +37,11 @@
         android:id="@+id/buttonLogout"
         android:onClick="logoutButton"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/buttonChangeFraction" />
+        android:layout_below="@+id/buttonChangeFraction"
+        android:background="@drawable/background_button_blue_with_dark_blue_border"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_margin="5dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -78,7 +87,8 @@
         android:id="@+id/buttonBack"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:onClick="backButton"/>
+        android:onClick="backButton"
+        android:background="@drawable/background_button_blue_with_dark_blue_border" />
 
     <Button
         android:layout_width="wrap_content"
@@ -87,6 +97,10 @@
         android:id="@+id/add_remove_notification_button"
         android:onClick="addRemoveNotificationButton"
         android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/background_button_blue_with_dark_blue_border"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_margin="5dp" />
 
 </RelativeLayout>

@@ -88,7 +88,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * upraveny date podle SimpleDateFormat("dd. MM. yyyy HH:mm:ss")
+     * upraveny date podle SimpleDateFormat("dd. MM. yyyy HH:mm:ss") pro bezne pouziti
      * @param date
      * @return string
      */
@@ -99,7 +99,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * upraveny date podle SimpleDateFormat("dd. MM. yyyy HH:mm:ss")
+     * upraveny object podle SimpleDateFormat("dd. MM. yyyy HH:mm:ss")
      * @param object
      * @return String
      */
@@ -107,5 +107,18 @@ public class BaseActivity extends AppCompatActivity {
     protected String objectToString(Object object) {
         SimpleDateFormat sdfVysledny = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
         return sdfVysledny.format(object);
+    }
+
+    /**
+     * upraveny date podle SimpleDateFormat("yyyy-MM-dd HH:mm:ss") pro serverove ucely
+     * @param date
+     * @return String
+     */
+    @SuppressLint("SimpleDateFormat")
+    protected String dateToStringServer(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // nastavi cas na UTC
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.format(date);
     }
 }

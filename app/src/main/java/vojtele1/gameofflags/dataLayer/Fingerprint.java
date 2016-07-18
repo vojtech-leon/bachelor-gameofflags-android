@@ -9,8 +9,6 @@ import java.util.List;
  * Dominik Matoulek 2015
  */
 public class Fingerprint {
-    // couchDB identificator
-    String id;
     String level;
 
     int x;
@@ -28,14 +26,9 @@ public class Fingerprint {
 
     private Float lat, lon;
 
-    Date createdDate;
+    String createdDate;
 
     public Fingerprint() {
-    }
-
-    public Fingerprint(int x, int y) {
-        this.x = x;
-        this.y = y;
     }
 
     public void addScan(WifiScan s) {
@@ -79,14 +72,6 @@ public class Fingerprint {
         this.description = description;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getLevel() {
         return level;
     }
@@ -95,11 +80,11 @@ public class Fingerprint {
         this.level = level;
     }
 
-    public Date getCreatedDate() {
+    public String getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -333,48 +318,7 @@ public class Fingerprint {
 
     @Override
     public String toString() {
-       /*return "Position{" +
-                "id='" + id + '\'' +
-                ", level=" + level +
-                ", x=" + x +
-                ", y=" + y +
-                ", description='" + description + '\'' +
-                ", wifiScans=" + wifiScans +
-                ", cellScans=" + cellScans +
-                ", supportsBLE=" + supportsBLE +
-                ", bleScans=" + bleScans +
-                ", accX=" + accX +
-                ", accY=" + accY +
-                ", accZ=" + accZ +
-                ", gyroX=" + gyroX +
-                ", gyroY=" + gyroY +
-                ", gyroZ=" + gyroZ +
-                ", magX=" + magX +
-                ", magY=" + magY +
-                ", magZ=" + magZ +
-                ", board='" + board + '\'' +
-                ", bootloader='" + bootloader + '\'' +
-                ", brand='" + brand + '\'' +
-                ", device='" + device + '\'' +
-                ", display='" + display + '\'' +
-                ", fingerprint='" + fingerprint + '\'' +
-                ", hardware='" + hardware + '\'' +
-                ", host='" + host + '\'' +
-                ", osId='" + osId + '\'' +
-                ", manufacturer='" + manufacturer + '\'' +
-                ", model='" + model + '\'' +
-                ", product='" + product + '\'' +
-                ", serial='" + serial + '\'' +
-                ", tags='" + tags + '\'' +
-                ", type='" + type + '\'' +
-                ", user='" + user + '\'' +
-                ", deviceID='" + deviceID + '\'' +
-                ", lat=" + lat +
-                ", lon=" + lon +
-                ", createdDate=" + createdDate +
-                '}';*/
         return "{" +
-                "\"id\":" + "\"" + id + "\"" +
                 ",\"level\":" + level +
                 ",\"x\":" + x +
                 ",\"y\":" + y +

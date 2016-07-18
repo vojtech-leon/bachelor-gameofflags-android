@@ -46,6 +46,8 @@ public class C {
 
     public static final String SHOWN_FLOOR = PACKAGE_NAME + ".SHOWN_FLOOR";
 
+    public static final String TOKEN = PACKAGE_NAME + ".TOKEN";
+
     public static final float GEOFENCE_RADIUS_IN_METERS = 1600; // 1 mile, 1.6 km
 
     /**

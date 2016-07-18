@@ -1,7 +1,6 @@
 package vojtele1.gameofflags;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,7 +37,10 @@ import vojtele1.gameofflags.utils.RetryingSender;
  */
 public class Act4Settings extends BaseActivity {
 
-    String token;
+    /**
+     *  token pro autentifikaci
+     */
+    private String token;
     String playerFraction;
     String playerFractionWhen;
     TextView fraction_name, fraction_when;
@@ -52,12 +54,12 @@ public class Act4Settings extends BaseActivity {
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
      */
-    private SharedPreferences mSharedPreferences;
+    private SharedPreferences sharedPreferences;
 
     /**
      * Jestli jsou notifikace pridany
      */
-    private boolean mNotificationAdded;
+    private boolean notificationAdded;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
 
@@ -67,8 +69,6 @@ public class Act4Settings extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        // vytahne token z activity loginu
-        token = getIntent().getStringExtra("token");
 
         fraction_name = (TextView) findViewById(R.id.fraction_name);
         fraction_when = (TextView) findViewById(R.id.fraction_when);
@@ -80,30 +80,38 @@ public class Act4Settings extends BaseActivity {
         alarmReceiver = new AlarmReceiver();
 
         // Retrieve an instance of the SharedPreferences object.
-        mSharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+        sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 MODE_PRIVATE);
 
-        // Get the value of mNotificationAdded from SharedPreferences. Set to false as a default.
-        mNotificationAdded = mSharedPreferences.getBoolean(C.NOTIFICATION_ADDED_KEY, false);
+        // Get the value of notificationAdded from SharedPreferences. Set to false as a default.
+        notificationAdded = sharedPreferences.getBoolean(C.NOTIFICATION_ADDED_KEY, false);
 
-        if (mNotificationAdded) {
+        // Get the value of token from SharedPreferences. Set to "" as a default.
+        token = sharedPreferences.getString(C.TOKEN, "");
+
+        if (token.equals(""))
+            startActivity(new Intent(this, Act1Login.class));
+
+        if (notificationAdded) {
             buttonAddRemoveNotification.setText(R.string.button_notification_remove);
         }
     }
     public void logoutButton(View view) {
         Intent intent = new Intent(this, Act1Login.class);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(C.TOKEN, "");
+        editor.apply();
         startActivity(intent);
     }
 
     public void backButton(View view) {
         Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("token", token);
         startActivity(intent);
     }
 
     public void addRemoveNotificationButton(View view) {
         if (M.isLocationEnabled(this)) {
-            if (!mNotificationAdded) {
+            if (!notificationAdded) {
                 buttonAddRemoveNotification.setText(R.string.button_notification_remove);
                 if (!geofencing.mGeofencesAdded) {
                     geofencing.addGeofencesButtonHandler(view);
@@ -117,14 +125,14 @@ public class Act4Settings extends BaseActivity {
                 alarmReceiver.removeAlarms(this);
             }
             // Update state and save in shared preferences.
-            mNotificationAdded = !mNotificationAdded;
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putBoolean(C.NOTIFICATION_ADDED_KEY, mNotificationAdded);
+            notificationAdded = !notificationAdded;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(C.NOTIFICATION_ADDED_KEY, notificationAdded);
             editor.apply();
 
             Toast.makeText(
                     this,
-                    getString(mNotificationAdded ? R.string.notification_added :
+                    getString(notificationAdded ? R.string.notification_added :
                             R.string.notification_removed),
                     Toast.LENGTH_SHORT
             ).show();
@@ -162,7 +170,7 @@ public class Act4Settings extends BaseActivity {
                                     // nastavi nazev frakce
                                     fraction_name.setText(player.getString("fractionName"));
                                     // Ulozi aktualni hracovu frakci kvuli notifikacim
-                                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
                                     editor.putString(C.PLAYER_FRACTION, playerFraction);
                                     editor.apply();
 
@@ -292,7 +300,6 @@ public class Act4Settings extends BaseActivity {
         // zakomentovani zabrani klasicke reakci na stisk hw back
         //super.onBackPressed();
         Intent intent = new Intent(this, Act2WebView.class);
-        intent.putExtra("token", token);
         startActivity(intent);
     }
 }
