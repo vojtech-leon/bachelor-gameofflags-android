@@ -1,20 +1,21 @@
 package vojtele1.gameofflags;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.hardware.Camera;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.Request;
@@ -22,7 +23,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
@@ -33,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,6 +46,8 @@ import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.database.Scans;
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CameraSource;
+import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.scanners.DeviceInformation;
@@ -70,7 +71,6 @@ public class Act3AR extends BaseActivity {
     Scans scans;
     int fingerprint, idScan, odeslano, cas, flagDB;
     Cursor scan;
-    AlertDialog alertDialog;
 
     boolean wasBTEnabled, wasWifiEnabled;
     WifiManager wm;
@@ -94,10 +94,14 @@ public class Act3AR extends BaseActivity {
     private SharedPreferences sharedPreferences;
 
 
+    boolean flash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ar);
+
+        flash = getIntent().getBooleanExtra("flash", false);
 
         scanner = new Scanner(this);
         scans = new Scans(this);
@@ -138,9 +142,11 @@ public class Act3AR extends BaseActivity {
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedPreviewSize(1600, 1024);
 
-        // make sure that auto focus is an available option
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            builder = builder.setAutoFocusEnabled(true);
+        builder.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+
+        System.out.println("flash je: "+flash);
+        if (flash) {
+            builder.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         }
         cameraSource = builder.build();
 
@@ -170,21 +176,15 @@ public class Act3AR extends BaseActivity {
 
             @Override
             public void receiveDetections(final Detector.Detections<Barcode> detections) {
-          /*      new Thread() {
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-*/
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (alertDialog == null && !scanner.scanFinished && qrCodes != null) {
+                if ((CustomDialog.dialog == null || !CustomDialog.dialog.isShowing()) && !scanner.scanFinished && qrCodes != null) {
+
                     if (barcodes.size() != 0 && qrCodes.contains(barcodes.valueAt(0).displayValue)) {
-                    //    System.out.println(barcodes.valueAt(0).displayValue);
-                    //    System.out.println(barcodes.valueAt(0).format);
-                    //    System.out.println(barcodes.size());
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
                         flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
-                        if (!scanner.running && scanner.alertDialog == null && knowFlagInfo) {
+                        if (!scanner.running && knowFlagInfo) {
+
+                            Log.d("test", "jsem tu");
                             ziskVlajkyKdy();
                             knowFlagInfo = false;
                         }
@@ -192,46 +192,29 @@ public class Act3AR extends BaseActivity {
                         notVisibleSecond = 0;
 
                     } else {
-                        if (alreadyVisibleQR) {
+                        if (alreadyVisibleQR && scanner.running) {
                             if (notVisibleSecond == 50) {
                                 scanner.stopScan();
                                 alreadyVisibleQR = false;
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        alertDialog = new AlertDialog.Builder(Act3AR.this)
-                                                .setTitle("")
-                                                .setMessage("Nesmíš ztratit vlajku z dohledu!")
-                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                        alertDialog = null;
-                                                    }
-                                                })
-                                                .show();
+                                        CustomDialog.showDialog(Act3AR.this,"Nesmíš ztratit vlajku z dohledu!");
                                     }
                                 });
                             }
                             else {
                                 notVisibleSecond++;
                             }
-                            System.out.println("Nevidim Qr (max 3s): " + notVisibleSecond);
+                            if (notVisibleSecond == 40)
+                            System.out.println("Nevidim Qr (max 50 ticku): " + notVisibleSecond);
                         }
                     }
                 }
-                // detekuje kazdou vterinu -> snizeni zateze
-             /*   try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
-                          /*  }
-                        });
-                    }
-                }.start();*/
             }
         });
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -285,43 +268,7 @@ public class Act3AR extends BaseActivity {
         Gson gson = new Gson();
         scans.insertScan(gson.toJson(p), flagId);
     }
-    public void poslaniScanu() {/*
-        RetryingSender r = new RetryingSender(this) {
-            public CustomRequest send() {
-                Map<String, String> params = new HashMap<>();
-                params.put("token", token);
-                params.put("flag", scan.getString(flagDB));
-                params.put("fingerprint", scan.getString(fingerprint));
-                params.put("scanWhen", scan.getString(cas));
-
-        return new CustomRequest(Request.Method.POST,  sendScan, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        knowResponse = true;
-                        try {
-                            JSONArray scansJson = response.getJSONArray("scan");
-                            JSONObject scanJson = scansJson.getJSONObject(0);
-                            if (scanJson.getString("scanWhen") != null) {
-                                scans.updateScan(scanJson.getString("scanWhen"));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        knowAnswer = true;
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowResponse = true;
-                counterError++;
-            }
-        });
-            }
-        };
-        r.startSender();*/
+    public void poslaniScanu() {
         Map<String, String> params = new HashMap<>();
         params.put("token", token);
         params.put("flag", scan.getString(flagDB));
@@ -406,21 +353,13 @@ public class Act3AR extends BaseActivity {
                             JSONArray playersJson = response.getJSONArray("player");
                             JSONObject playerJson = playersJson.getJSONObject(0);
                             if (playerJson.getString("score") != null) {
-
-                                alertDialog = new AlertDialog.Builder(Act3AR.this)
-                                        .setTitle("")
-                                        .setMessage("Vlajka byla zabrána!")
-                                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                                alertDialog = null;
-                                                // ukončí aktivitu a vrátí výsledek
-                                                Intent intent = new Intent();
-                                                setResult(Activity.RESULT_OK, intent);
-                                                finish();
-                                            }
-                                        })
-                                        .show();
+                                CustomDialog.showDialog(Act3AR.this,"Vlajka byla zabrána!", new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        // ukončí aktivitu
+                                        finish();
+                                    }
+                                });
                             }
                             knowAnswer = true;
                         } catch (JSONException e) {
@@ -513,47 +452,29 @@ r.startSender();
                                 Long dateNow = new Date().getTime();
                                     // pokud hrac danou vlajku zabral (nezavisle na frakci), nemuze ji zabrat znovu
                                     if (flagMe.equals("true")) {
-                                        alertDialog = new AlertDialog.Builder(Act3AR.this)
-                                                .setTitle("Vlajku nemůžeš změnit!")
-                                                .setMessage("Tuto vlajku jsi již zabral.")
-                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                        alertDialog = null;
-                                                        knowFlagInfo = true;
-                                                    }
-                                                })
-                                                .show();
-                                        // pokud vlajku vlastni hracova frakce, tak ji nelze znova zabrat
+                                        CustomDialog.showDialog(Act3AR.this,"Tuto vlajku jsi již zabral.", new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialog) {
+                                                knowFlagInfo = true;
+                                            }
+                                        });
+                                    // pokud vlajku vlastni hracova frakce, tak ji nelze znova zabrat
                                     } else if (fractionMe.equals("true")) {
-                                        alertDialog = new AlertDialog.Builder(Act3AR.this)
-                                                .setTitle("Vlajku nemůžeš změnit!")
-                                                .setMessage("Tuto vlajku již tvoje frakce vlastní.")
-                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                        alertDialog = null;
-                                                        knowFlagInfo = true;
-                                                    }
-                                                })
-                                                .show();
-                                        // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
+                                        CustomDialog.showDialog(Act3AR.this,"Tuto vlajku již tvoje frakce vlastní.", new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialog) {
+                                                knowFlagInfo = true;
+                                            }
+                                        });
+                                    // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
                                     } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
-                                        alertDialog = new AlertDialog.Builder(Act3AR.this)
-                                                .setTitle("Vlajku ještě nelze změnit!")
-                                                .setMessage("Změna možná: " + objectToString(dateFlagChange + C.FLAG_IMMUNE_TIME))
-                                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                        alertDialog = null;
-                                                        knowFlagInfo = true;
-                                                    }
-                                                })
-                                                .show();
+                                        CustomDialog.showDialog(Act3AR.this,"Změna možná: " + objectToString(dateFlagChange + C.FLAG_IMMUNE_TIME), new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialog) {
+                                                knowFlagInfo = true;
+                                            }
+                                        });
                                     } else {
-                                        alreadyVisibleQR = true;
-                                        knowFlagInfo = true;
-
                                         ViewGroup root = (ViewGroup) findViewById(R.id.flags);
 
                                         scanner.startScan(C.SCAN_COLLECTOR_TIME, new ScanResultListener() {
@@ -571,6 +492,9 @@ r.startSender();
                                                 });
                                             }
                                         }, fractionId.equals("1"), root); // zde se predava hracova frakce a view pro vykresleni spravne animace
+
+                                        alreadyVisibleQR = true;
+                                        knowFlagInfo = true;
                                     }
                                 knowAnswer = true;
                             } catch (Exception e) {
@@ -637,5 +561,22 @@ r.startSender();
     public void onBackPressed() {
         Intent intent = new Intent(this, Act2WebView.class);
         startActivity(intent);
+    }
+
+    public void useFlash(View view) {
+
+        finish();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                flash = !flash;
+                Intent intent= new Intent(Act3AR.this, Act3AR.class);
+                intent.putExtra("flash", flash);
+                startActivity(intent);
+            }
+        }, 100);
+
     }
 }

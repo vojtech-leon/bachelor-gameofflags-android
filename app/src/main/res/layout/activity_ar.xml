@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:keepScreenOn="true" tools:context=".MainActivity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" android:keepScreenOn="true">
 
     <SurfaceView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/camera_view"
         />
+
+    <ImageButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/flash"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="useFlash"
+        android:background="@drawable/ic_flash" />
 
 </RelativeLayout>

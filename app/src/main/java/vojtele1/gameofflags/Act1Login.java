@@ -27,6 +27,7 @@ import java.util.Map;
 
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
 
@@ -227,7 +228,6 @@ public class Act1Login extends BaseActivity {
             }
         };
         editText.setFilters(new InputFilter[] { filter });
-
         new AlertDialog.Builder(Act1Login.this)
                 .setTitle("Zadejte svůj nick:")
                 .setView(editText)
@@ -270,14 +270,13 @@ public class Act1Login extends BaseActivity {
                                 JSONObject player = players.getJSONObject(0);
                                 String nickname = player.getString("nickname");
                                 if (nickname != null) {
-                                   showInfoDialog("Vítej ve hře " + nickname + ", tvoje frakce je: "
-                                           + fraction_name + "!", new DialogInterface.OnClickListener() {
-                                       @Override
-                                       public void onClick(DialogInterface dialogInterface, int i) {
-                                           dialogInterface.dismiss();
-                                           continueToWebview();
-                                       }
-                                   });
+                                    CustomDialog.showDialog(Act1Login.this, "Vítej ve hře " + nickname + ", tvoje frakce je: "
+                                            + fraction_name + "!", new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialogInterface) {
+                                            continueToWebview();
+                                        }
+                                    });
                                 }
                                 knowAnswer = true;
                             } catch (JSONException e) {

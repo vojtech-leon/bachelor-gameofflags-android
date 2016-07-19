@@ -104,10 +104,11 @@ public class Act2WebView extends BaseActivity {
 
         webView.loadUrl("file:///android_asset/" + shownFloor + ".html");
         floor = shownFloor;
+    }
 
-        // Force links and redirects to open in the WebView instead of in a browser
-       // webView.setWebViewClient(new WebViewClient());
-
+    @Override
+    protected void onResume() {
+        super.onResume();
         vytahniData();
     }
 

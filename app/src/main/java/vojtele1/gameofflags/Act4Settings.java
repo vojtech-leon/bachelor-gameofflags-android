@@ -4,7 +4,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,8 +29,8 @@ import vojtele1.gameofflags.notification.AlarmReceiver;
 import vojtele1.gameofflags.notification.geofence.Geofencing;
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
-import vojtele1.gameofflags.utils.M;
 import vojtele1.gameofflags.utils.RetryingSender;
 
 
@@ -110,7 +113,7 @@ public class Act4Settings extends BaseActivity {
     }
 
     public void addRemoveNotificationButton(View view) {
-        if (M.isLocationEnabled(this)) {
+        if (isLocationEnabled()) {
             if (!notificationAdded) {
                 buttonAddRemoveNotification.setText(R.string.button_notification_remove);
                 if (!geofencing.mGeofencesAdded) {
@@ -235,16 +238,13 @@ public class Act4Settings extends BaseActivity {
                                 if (answer.equals("ano")) {
                                     knowAnswer = true;
                                     //zobrazi zpravu o uspesne zmene frakce
-                                    new AlertDialog.Builder(Act4Settings.this)
-                                            .setMessage("Frakce byla změněna.")
-                                            .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    dialog.dismiss();
-                                                    // obnovi data v textview
-                                                    getPlayerFraction();
-                                                }
-                                            })
-                                            .show();
+                                    CustomDialog.showDialog(Act4Settings.this, "Frakce byla změněna.", new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialogInterface) {
+                                            // obnovi data v textview
+                                            getPlayerFraction();
+                                        }
+                                    });
                                 }
                             }
                         }, new Response.ErrorListener() {
@@ -265,35 +265,51 @@ public class Act4Settings extends BaseActivity {
         Long dateNow = new Date().getTime();
         // pokud se frakce menila pred mene jak tydnem, tak ji nelze zmenit
         if (dateNow < dateFractionChange+7*86400000) {
-            showInfoDialog("Frakci nelze změnit!","Změna možná: "+ objectToString(dateFractionChange+7*86400000));
+            CustomDialog.showDialog(Act4Settings.this, "Frakci nelze změnit!,\nZměna možná: " + objectToString(dateFractionChange+7*86400000));
         }
         else {
             // informuje hrace o zmene frakce
-            new AlertDialog.Builder(Act4Settings.this)
-                    .setTitle("Změna frakce")
-                    .setMessage("Opravdu chcete změnit frakci?")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
+            CustomDialog.showDialogYesNo(Act4Settings.this, "Opravdu chcete změnit frakci?", new View.OnClickListener() {
+                public void onClick(View view) {
+                    // pokud je id frakce 1, zmeni ho na 2 a naopak
+                    if (playerFraction.equals("1")) {
+                        playerFraction = "2";
+                    } else {
+                        playerFraction = "1";
+                    }
 
-                            // pokud je id frakce 1, zmeni ho na 2 a naopak
-                            if (playerFraction.equals("1")) {
-                                playerFraction = "2";
-                            } else {
-                                playerFraction = "1";
-                            }
+                    changePlayerFraction(playerFraction);
+                    CustomDialog.dismissDialog();
+                }
+            }, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CustomDialog.dismissDialog();
+                }
+            });
 
-                            changePlayerFraction(playerFraction);
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // pokud nechce zmenit frakci, tak nic nedelat
-                            dialog.dismiss();
-                        }
-                    })
-                    .show();
         }
 
+    }
+    /**
+     * Zjisti, zdali je Poloha zapnuta
+     * @return true/false
+     */
+    public boolean isLocationEnabled() {
+        int locationMode = 0;
+        String locationProviders;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        }else{
+            locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
     }
     @Override
     public void onBackPressed() {

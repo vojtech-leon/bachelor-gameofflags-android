@@ -15,63 +15,6 @@ import java.util.TimeZone;
  * Created by NB on 4.7.2016.
  */
 public class BaseActivity extends AppCompatActivity {
-    AlertDialog alertDialog;
-
-    protected void showInfoDialog(String text) {
-        alertDialog =  new AlertDialog.Builder(this)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-    }
-    protected void showInfoDialog(String text, DialogInterface.OnClickListener onClickListener) {
-        alertDialog =  new AlertDialog.Builder(this)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", onClickListener)
-                .show();
-    }
-    protected void showInfoDialog(String text, final boolean finishActivity) {
-        alertDialog =  new AlertDialog.Builder(this)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        if (finishActivity) finish();
-                    }
-                })
-                .show();
-    }
-    protected void showInfoDialog(String title, String text) {
-        alertDialog =  new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-    }
-    protected void showInfoDialog(String title, String text, final boolean finishActivity) {
-        alertDialog =  new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        if (finishActivity) finish();
-                    }
-                })
-                .show();
-    }
 
     /**
      * upraveny string podle SimpleDateFormat("yyyy-MM-dd HH:mm:ss") a v UTC

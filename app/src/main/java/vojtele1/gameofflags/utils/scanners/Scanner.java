@@ -40,6 +40,7 @@ import vojtele1.gameofflags.dataLayer.BleScan;
 import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.utils.C;
+import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.StepDetector;
 
 
@@ -72,7 +73,6 @@ public class Scanner {
     ProgressDialog progressDialog;
     Timer timer;
     CountDownTimer cdt;
-    public AlertDialog alertDialog;
 
     StepDetector stepDetector;
 
@@ -197,19 +197,14 @@ public class Scanner {
         if (ble) { //pokud nas zajima zapnuti BT
             final BluetoothAdapter btAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
             if (btAdapter != null && !btAdapter.isEnabled()) {
-                alertDialog = new AlertDialog.Builder(context)
-                .setTitle("Bluetooth")
-                .setMessage("BT je vypnut. Pro zabírání musí být zapnut. Zapínám")
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                CustomDialog.showDialog(context, "BT je vypnut. Pro zabírání musí být zapnut. Zapínám", new DialogInterface.OnDismissListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onDismiss(DialogInterface dialogInterface) {
                         if (!btAdapter.enable()) {
                             Toast.makeText(context, "Chyba při zapínání BT", Toast.LENGTH_SHORT).show();
                         }
-                        alertDialog = null;
                     }
-                })
-                .show();
+                });
                 return false; //zajima nas zapnuti BT ale ten je off -> navrat false protoze se musi pockat na jeho asynchronni zapnuti
             }
         }
@@ -367,16 +362,7 @@ public class Scanner {
                         public void onTick(long millisUntilFinished) {
                             if (stepDetector.pohyb()) {
                                 stopScan();
-                                alertDialog = new AlertDialog.Builder(context)
-                                        .setTitle("Nepodváděj!")
-                                        .setMessage("Příliš jsi se pohl!")
-                                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                dialog.dismiss();
-                                                alertDialog = null;
-                                            }
-                                        })
-                                        .show();
+                                CustomDialog.showDialog(context, "Příliš jsi se pohl!");
                             } else {
                                 // 1000L zajisti ze to bude v s a celociselne
                                 textView.setText("Do zabrání zbývá: " + millisUntilFinished/1000L + ", nehýbej se.");

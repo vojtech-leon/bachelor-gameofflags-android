@@ -54,16 +54,7 @@ public class RetryingSender {
     }
 
     private void showInfoDialog(String text, final boolean finishActivity) {
-        alertDialog =  new AlertDialog.Builder(activity)
-                .setMessage(text)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        if (finishActivity) activity.finish();
-                    }
-                })
-                .show();
+        CustomDialog.showDialog(activity, text, finishActivity);
     }
     public void startSender(final boolean finish) {
         new Thread() {
@@ -83,8 +74,8 @@ public class RetryingSender {
                             public void run() {
                                 if (knowResponse) {
                                     System.out.println("Pocet chyb: " + counterError);
-                                    if (counterError >= 200) {
-                                        showInfoDialog("Problém s připojením, zkuste to prosím později.", finish);
+                                    if (counterError >= 20) {
+                                        showInfoDialog("Problém s připojením, zkuste to prosím znovu.", finish);
                                         hideLoadingProgress();
                                     } else if (!knowAnswer) {
                                         requestQueue.add(send());
