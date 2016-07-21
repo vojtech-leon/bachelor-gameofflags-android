@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import vojtele1.gameofflags.R;
@@ -31,6 +32,9 @@ public class CustomDialog {
         });
     }
     public static void showDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener) {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_ok);
 
@@ -52,6 +56,9 @@ public class CustomDialog {
     }
 
     public static void showDialogYesNo(Context context, String textDialog, View.OnClickListener yesListener, View.OnClickListener noListener) {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_yes_no);
 
@@ -74,6 +81,34 @@ public class CustomDialog {
             }
         });
     }
+
+    public static void showDialogEditText(Context context, String title, View.OnClickListener okListener) {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dialog_with_edit_text);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        TextView text = (TextView) dialog.findViewById(R.id.txt_dia_in_edit_text);
+        text.setText(title);
+
+        dialog.show();
+
+        dialog.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
+
+        Button button = (Button) dialog.findViewById(R.id.btn_ok);
+        button.setOnClickListener(okListener);
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                //dialog.dismiss();
+            }
+        });
+    }
+
     public static void dismissDialog() {
         dialog.dismiss();
     }

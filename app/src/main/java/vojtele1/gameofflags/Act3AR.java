@@ -8,9 +8,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.hardware.Camera;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
@@ -95,13 +93,11 @@ public class Act3AR extends BaseActivity {
 
 
     boolean flash;
+    CameraSource.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ar);
-
-        flash = getIntent().getBooleanExtra("flash", false);
 
         scanner = new Scanner(this);
         scans = new Scans(this);
@@ -130,6 +126,11 @@ public class Act3AR extends BaseActivity {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
+        initCamera();
+    }
+
+    private void initCamera() {
+        setContentView(R.layout.activity_ar);
         cameraView = (SurfaceView) findViewById(R.id.camera_view);
         barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.QR_CODE)
@@ -138,13 +139,11 @@ public class Act3AR extends BaseActivity {
         // Creates and starts the camera.  Note that this uses a higher resolution in comparison
         // to other detection examples to enable the barcode detector to detect small barcodes
         // at long distances.
-        CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
+        builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedPreviewSize(1600, 1024);
 
         builder.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-
-        System.out.println("flash je: "+flash);
         if (flash) {
             builder.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         }
@@ -169,7 +168,10 @@ public class Act3AR extends BaseActivity {
                 cameraSource.stop();
             }
         });
-        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+        barcodeDetector.setProcessor(barcodeProcessor());
+    }
+    private Detector.Processor<Barcode> barcodeProcessor() {
+        return new Detector.Processor<Barcode>() {
             @Override
             public void release() {
             }
@@ -207,12 +209,12 @@ public class Act3AR extends BaseActivity {
                                 notVisibleSecond++;
                             }
                             if (notVisibleSecond == 40)
-                            System.out.println("Nevidim Qr (max 50 ticku): " + notVisibleSecond);
+                                System.out.println("Nevidim Qr (max 50 ticku): " + notVisibleSecond);
                         }
                     }
                 }
             }
-        });
+        };
     }
 
     @Override
@@ -554,7 +556,7 @@ r.startSender();
             });
             }
         };
-        r.startSender();
+        r.startSender(true);
     }
 
     @Override
@@ -564,19 +566,8 @@ r.startSender();
     }
 
     public void useFlash(View view) {
-
-        finish();
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                flash = !flash;
-                Intent intent= new Intent(Act3AR.this, Act3AR.class);
-                intent.putExtra("flash", flash);
-                startActivity(intent);
-            }
-        }, 100);
-
+        flash = !flash;
+        // zapne znovu cameru s/bez blesku
+        initCamera();
     }
 }

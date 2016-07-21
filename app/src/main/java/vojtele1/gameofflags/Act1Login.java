@@ -54,6 +54,8 @@ public class Act1Login extends BaseActivity {
      */
     private SharedPreferences sharedPreferences;
 
+    boolean nameAvailability;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,8 +181,10 @@ public class Act1Login extends BaseActivity {
                                     int fraction = player.optInt("player_fraction");
                                     if (fraction == 1) {
                                         fraction_name = "Red";
-                                    } else {
+                                    } else if (fraction == 2) {
                                         fraction_name = "Blue";
+                                    } else {
+                                        fraction_name = "";
                                     }
 
 
@@ -214,41 +218,22 @@ public class Act1Login extends BaseActivity {
     }
 
     private void zmenaJmena(final String fraction_name) {
-        final EditText editText = new EditText(Act1Login.this);
-        // filtr pro zadavani pouze cisel a pismen
-        InputFilter filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                for (int i = start; i < end; i++) {
-                    if (!Character.isLetterOrDigit(source.charAt(i))) {
-                        return "";
-                    }
+        CustomDialog.showDialogEditText(Act1Login.this, "Zadejte svoji přezdívku:", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditText editText = (EditText) CustomDialog.dialog.findViewById(R.id.etxt_in_dia);
+                newNickname = editText.getText().toString();
+                if (("user").equals(newNickname)) {
+                    zmenaJmena(fraction_name);
+                    Toast.makeText(Act1Login.this, "Přezdívka nesmí být slovo user.", Toast.LENGTH_LONG).show();
+                } else if (newNickname.length() >= 4) {
+                    zmenaJmenaRequest(newNickname, fraction_name);
+                } else {
+                    zmenaJmena(fraction_name);
+                    Toast.makeText(Act1Login.this, "Přezdívka musí být alespoň 4 znaky.", Toast.LENGTH_LONG).show();
                 }
-                return null;
             }
-        };
-        editText.setFilters(new InputFilter[] { filter });
-        new AlertDialog.Builder(Act1Login.this)
-                .setTitle("Zadejte svůj nick:")
-                .setView(editText)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        newNickname = editText.getText().toString();
-                        if (("user").equals(newNickname)) {
-                            zmenaJmena(fraction_name);
-                            Toast.makeText(Act1Login.this, "Nickname nesmí být slovo user.", Toast.LENGTH_LONG).show();
-                        } else if (newNickname.length() >= 4) {
-                            zmenaJmenaRequest(newNickname, fraction_name);
-                        } else {
-                            zmenaJmena(fraction_name);
-                            Toast.makeText(Act1Login.this, "Nickname musí být alespoň 4 znaky.", Toast.LENGTH_LONG).show();
-                        }
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-
+        });
     }
     private void zmenaJmenaRequest(final String nickname, final String fraction_name) {
         RetryingSender r = new RetryingSender(this) {
@@ -268,15 +253,24 @@ public class Act1Login extends BaseActivity {
                             try {
                                 JSONArray players = response.getJSONArray("player");
                                 JSONObject player = players.getJSONObject(0);
-                                String nickname = player.getString("nickname");
-                                if (nickname != null) {
-                                    CustomDialog.showDialog(Act1Login.this, "Vítej ve hře " + nickname + ", tvoje frakce je: "
-                                            + fraction_name + "!", new DialogInterface.OnDismissListener() {
+                                boolean nameAvailability = player.getBoolean("nameAvailability");
+                                if (nameAvailability) {
+                                    String message;
+                                    if (fraction_name.equals("")) {
+                                        message = "Byl jsi přejmenován, nová přezdívka je: " + nickname + "!";
+                                    } else {
+                                        message =  "Vítej ve hře " + nickname + ", tvoje frakce je: "
+                                                + fraction_name + "!";
+                                    }
+                                    CustomDialog.showDialog(Act1Login.this, message, new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialogInterface) {
                                             continueToWebview();
                                         }
                                     });
+                                } else {
+                                    Toast.makeText(Act1Login.this, "Zadaná přezdívka již existuje.", Toast.LENGTH_LONG).show();
+                                    zmenaJmena(fraction_name);
                                 }
                                 knowAnswer = true;
                             } catch (JSONException e) {
