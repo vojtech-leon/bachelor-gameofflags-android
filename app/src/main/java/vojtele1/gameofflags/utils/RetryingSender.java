@@ -53,10 +53,25 @@ public class RetryingSender {
         progressDialog.dismiss();
     }
 
-    private void showInfoDialog(String text, final boolean finishActivity) {
+    private void showInfoDialog(String text, final boolean finishActivity, final boolean popup) {
+        if (popup) {
+            CustomDialog.showDialog(activity, text, new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    Handler mainHandler = WebviewOnClick.popUpView.getHandler();
+                    Runnable myRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            WebviewOnClick.popUp.dismiss();
+                        }
+                    };
+                    mainHandler.post(myRunnable);
+                }
+            });
+        }
         CustomDialog.showDialog(activity, text, finishActivity);
     }
-    public void startSender(final boolean finish) {
+    public void startSender(final boolean finish, final boolean popup) {
         new Thread() {
             public void run() {
                 activity.runOnUiThread(new Runnable() {
@@ -75,7 +90,7 @@ public class RetryingSender {
                                 if (knowResponse) {
                                     System.out.println("Pocet chyb: " + counterError);
                                     if (counterError >= 20) {
-                                        showInfoDialog("Problém s připojením, zkuste to prosím znovu.", finish);
+                                        showInfoDialog("Problém s připojením, zkuste to prosím znovu.", finish, popup);
                                         hideLoadingProgress();
                                     } else if (!knowAnswer) {
                                         requestQueue.add(send());
@@ -98,6 +113,10 @@ public class RetryingSender {
     }
     public void startSender() {
         startSender(false);
+    }
+
+    public void startSender(final boolean finish) {
+        startSender(finish,false);
     }
     protected CustomRequest send() {
         return null;

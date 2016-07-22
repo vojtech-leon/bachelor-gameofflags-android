@@ -32,6 +32,7 @@ import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
+import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
 
 /**
@@ -72,6 +73,8 @@ public class Act4Settings extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 
         fraction_name = (TextView) findViewById(R.id.fraction_name);
         fraction_when = (TextView) findViewById(R.id.fraction_when);

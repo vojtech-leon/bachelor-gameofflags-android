@@ -3,10 +3,7 @@
     <string name="app_name">Game of Flags</string>
     <string name="settings">Nastavení</string>
 
-    <string name="profile_picture_desc">Profile picture</string>
-    <string name="welcome">Vítej v Game of Flags!</string>
     <string name="sign_in_label">Přihlásit</string>
-    <string name="sign_out_label">Odhlásit</string>
     <string name="fb_app_id">919073338174996</string>
 
 
@@ -38,4 +35,11 @@
     <string name="geofence_transition_notification_text">Pomož své frakci získat dominanci ve všech patrech!</string>
 
     <string name="never">Nikdy.</string>
+
+    <string name="activity_crash_title">An Unexpected Crash Occurred</string>
+    <string name="activity_crash_button">Send Crash Report By Email</string>
+    <string name="activity_crash_email_subject">[UHK Navigation] Crash Report</string>
+    <string name="activity_crash_email_text">Hello,\nI\'m sending crash report.\n\nThank you for solving this problem.</string>
+    <string name="activity_crash_email_attachment">[%1$s] This exception was generated on %2$s %3$s (Android %4$s, API %5$d) with %6$,d / %7$,d MB RAM:\n\n%8$s</string>
+
 </resources>

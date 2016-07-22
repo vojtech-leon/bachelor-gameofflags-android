@@ -109,4 +109,6 @@ public class C {
         MAC_EDUROAM.add("00:24:14:3a:ac:7f");
         MAC_EDUROAM.add("00:21:a0:f9:54:cf");
     }
+
+    public static final String[] EXCEPTION_EMAIL = { "vojtele1@uhk.cz" };
 }

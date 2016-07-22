@@ -30,6 +30,7 @@ import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
+import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
 /**
  * Created by Leon on 25.10.2015.
@@ -62,6 +63,8 @@ public class Act1Login extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login_welcome);
+
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 
         // Retrieve an instance of the SharedPreferences object.
         sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,

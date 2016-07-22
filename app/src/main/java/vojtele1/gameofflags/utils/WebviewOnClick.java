@@ -1,5 +1,6 @@
 package vojtele1.gameofflags.utils;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -37,7 +39,7 @@ import vojtele1.gameofflags.R;
  * Created by Leon on 31.05.2016.
  */
 public class WebviewOnClick {
-    Context context;
+    Activity activity;
 
     String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
     String getFlagInfoUser = adresa + "getflaginfouser";
@@ -46,14 +48,8 @@ public class WebviewOnClick {
     RequestQueue requestQueue;
     String cas,responseFrName, responsePName, responseFlName, whatToDo;
 
-    PopupWindow popUp;
-    View popUpView;
-
-    int counterError;
-    boolean knowAnswer;
-    boolean knowResponse;
-
-    ProgressDialog progressDialog;
+     public static PopupWindow popUp;
+    public static View popUpView;
 
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
@@ -62,14 +58,14 @@ public class WebviewOnClick {
 
     private String token;
 
-    public WebviewOnClick(Context context) {
-        this.context = context;
+    public WebviewOnClick(Activity activity) {
+        this.activity = activity;
 
-        requestQueue = Volley.newRequestQueue(context);
-        popUp = new PopupWindow(context);
+        requestQueue = Volley.newRequestQueue(activity);
+        popUp = new PopupWindow(activity);
 
         // Retrieve an instance of the SharedPreferences object.
-        sharedPreferences = context.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+        sharedPreferences = activity.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
 
         // Get the value of token from SharedPreferences. Set to "" as a default.
@@ -78,7 +74,7 @@ public class WebviewOnClick {
     }
     @JavascriptInterface
     public void showPopup(String id) {
-        popUpView = LayoutInflater.from(context).inflate(R.layout.flag_info, null);
+        popUpView = LayoutInflater.from(activity).inflate(R.layout.flag_info, null);
         tvFractionName = (TextView) popUpView.findViewById(R.id.flag_info_textView_fraction);
         tvPlayerName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_owner);
         tvFlagName = (TextView) popUpView.findViewById(R.id.flag_info_textView_flag_name);
@@ -90,77 +86,24 @@ public class WebviewOnClick {
         popUp.setContentView(popUpView);
         // Closes the popup window when touch outside.
         popUp.setOutsideTouchable(true);
-        popUp.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                if (progressDialog.isShowing()) {
-                    progressDialog.dismiss();
-                }
-            }
-        });
         popUp.setFocusable(true);
         //popUp.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFAB00
 
-        popUp.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.background_popup_orange_with_dark_orange_border));
+        popUp.setBackgroundDrawable(activity.getResources().getDrawable(R.drawable.background_popup_orange_with_dark_orange_border));
 
         popUp.showAtLocation(popUpView, Gravity.CENTER, 0, 0);
-        zjisti(id);
+        showFlag(id);
     }
-
-    private void zjisti(final String id) {
-        if (progressDialog == null || !progressDialog.isShowing()) {
-            showProgressDialogLoading(context);
-            showFlag(id);
-            System.out.println("zapinam progress v showFlag(WebviewOnClick)");
-            counterError = 0;
-        }
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (knowResponse) {
-                    System.out.println("Pocet chyb: " + counterError);
-                    if (counterError >= 200) {
-                        System.out.println("Konec, spravna odpoved bohuzel nedosla (same errory).");
-                        new AlertDialog.Builder(context)
-                                .setMessage("Problém s připojením k databázi, zkuste to prosím později.")
-                                .setCancelable(false)
-                                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                        Handler mainHandler = popUpView.getHandler();
-                                        Runnable myRunnable = new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                popUp.dismiss();
-                                            }
-                                        };
-                                        mainHandler.post(myRunnable);
-                                    }
-                                })
-                                .show();
-                    } else if (!knowAnswer) {
-                        showFlag(id);
-                        zjisti(id);
-                    } else {
-                        progressDialog.dismiss();
-                        System.out.println("Loading dokoncen.");
-                    }
-                } else {
-                    zjisti(id);
-                }
-            }
-        }, 100);
-    }
-
     private void showFlag(final String idFlag) {
-        knowResponse = false;
-        knowAnswer = false;
+        RetryingSender r = new RetryingSender(activity) {
+            public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);
+                params.put("ID_flag", idFlag);
 
-            Map<String, String> params = new HashMap();
-            params.put("token", token);
-            params.put("ID_flag", idFlag);
-            CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
+                return new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -223,7 +166,9 @@ public class WebviewOnClick {
                     counterError++;
                 }
             });
-            requestQueue.add(jsObjRequest);
+            }
+        };
+        r.startSender();
     }
 
     private void setText() {
@@ -236,26 +181,8 @@ public class WebviewOnClick {
                 tvFractionName.setText(responseFrName);
                 tvFlagWhen.setText(cas);
                 tvWhatToDo.setText(whatToDo);
-
-                progressDialog.dismiss();
             }
         };
         mainHandler.post(myRunnable);
-    }
-    public ProgressDialog showProgressDialogLoading(Context context) {
-
-        progressDialog = new ProgressDialog(context);
-
-        progressDialog.show();
-
-        progressDialog.setCancelable(false);
-
-        progressDialog.setCanceledOnTouchOutside(false);
-
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-
-        progressDialog.setContentView(R.layout.progress_dialog_loading);
-
-        return progressDialog;
     }
 }

@@ -2,22 +2,18 @@
 package vojtele1.gameofflags;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +29,7 @@ import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.WebviewOnClick;
+import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
 
 public class Act2WebView extends BaseActivity {
@@ -63,6 +60,8 @@ public class Act2WebView extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
+
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 
         fraction1_score = (TextView) findViewById(R.id.fraction1_score);
         fraction2_score = (TextView) findViewById(R.id.fraction2_score);

@@ -48,6 +48,7 @@ import vojtele1.gameofflags.utils.CameraSource;
 import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
 import vojtele1.gameofflags.utils.RetryingSender;
+import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 import vojtele1.gameofflags.utils.scanners.DeviceInformation;
 import vojtele1.gameofflags.utils.scanners.ScanResultListener;
 import vojtele1.gameofflags.utils.scanners.Scanner;
@@ -98,6 +99,8 @@ public class Act3AR extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 
         scanner = new Scanner(this);
         scans = new Scans(this);
