@@ -1,7 +1,6 @@
 package vojtele1.gameofflags.utils.scanners;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -15,7 +14,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
@@ -197,7 +195,7 @@ public class Scanner {
         if (ble) { //pokud nas zajima zapnuti BT
             final BluetoothAdapter btAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
             if (btAdapter != null && !btAdapter.isEnabled()) {
-                CustomDialog.showDialog(context, "BT je vypnut. Pro zabírání musí být zapnut. Zapínám", new DialogInterface.OnDismissListener() {
+                CustomDialog.showAlertDialog(context, "BT je vypnut. Pro zabírání musí být zapnut. Zapínám", new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialogInterface) {
                         if (!btAdapter.enable()) {
@@ -335,9 +333,9 @@ public class Scanner {
         AlphaAnimation animation;
 
         if (frakce1) {
-            animation = new AlphaAnimation(0.0f, 1.0f);
-        } else {
             animation = new AlphaAnimation(1.0f, 0.0f);
+        } else {
+            animation = new AlphaAnimation(0.0f, 1.0f);
         }
         animation.setDuration(C.SCAN_COLLECTOR_TIME);
         animation.setFillAfter(true);
@@ -362,7 +360,7 @@ public class Scanner {
                         public void onTick(long millisUntilFinished) {
                             if (stepDetector.pohyb()) {
                                 stopScan();
-                                CustomDialog.showDialog(context, "Příliš jsi se pohl!");
+                                CustomDialog.showAlertDialog(context, "Příliš jsi se pohl!");
                             } else {
                                 // 1000L zajisti ze to bude v s a celociselne
                                 textView.setText("Do zabrání zbývá: " + millisUntilFinished/1000L + ", nehýbej se.");

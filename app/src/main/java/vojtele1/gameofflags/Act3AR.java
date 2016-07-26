@@ -204,7 +204,7 @@ public class Act3AR extends BaseActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        CustomDialog.showDialog(Act3AR.this,"Nesmíš ztratit vlajku z dohledu!");
+                                        CustomDialog.showAlertDialog(Act3AR.this,"Nesmíš ztratit vlajku z dohledu!");
                                     }
                                 });
                             }
@@ -358,7 +358,7 @@ public class Act3AR extends BaseActivity {
                             JSONArray playersJson = response.getJSONArray("player");
                             JSONObject playerJson = playersJson.getJSONObject(0);
                             if (playerJson.getString("score") != null) {
-                                CustomDialog.showDialog(Act3AR.this,"Vlajka byla zabrána!", new DialogInterface.OnDismissListener() {
+                                CustomDialog.showInfoDialog(Act3AR.this,"Vlajka byla zabrána!", new DialogInterface.OnDismissListener() {
                                     @Override
                                     public void onDismiss(DialogInterface dialog) {
                                         // ukončí aktivitu
@@ -457,7 +457,7 @@ r.startSender();
                                 Long dateNow = new Date().getTime();
                                     // pokud hrac danou vlajku zabral (nezavisle na frakci), nemuze ji zabrat znovu
                                     if (flagMe.equals("true")) {
-                                        CustomDialog.showDialog(Act3AR.this,"Tuto vlajku jsi již zabral.", new DialogInterface.OnDismissListener() {
+                                        CustomDialog.showAlertDialog(Act3AR.this,"Tuto vlajku jsi již zabral.", new DialogInterface.OnDismissListener() {
                                             @Override
                                             public void onDismiss(DialogInterface dialog) {
                                                 knowFlagInfo = true;
@@ -465,7 +465,7 @@ r.startSender();
                                         });
                                     // pokud vlajku vlastni hracova frakce, tak ji nelze znova zabrat
                                     } else if (fractionMe.equals("true")) {
-                                        CustomDialog.showDialog(Act3AR.this,"Tuto vlajku již tvoje frakce vlastní.", new DialogInterface.OnDismissListener() {
+                                        CustomDialog.showAlertDialog(Act3AR.this,"Tuto vlajku již tvoje frakce vlastní.", new DialogInterface.OnDismissListener() {
                                             @Override
                                             public void onDismiss(DialogInterface dialog) {
                                                 knowFlagInfo = true;
@@ -473,7 +473,7 @@ r.startSender();
                                         });
                                     // pokud se vlajka menila pred mene jak 10 minutami, tak ji nelze zmenit
                                     } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
-                                        CustomDialog.showDialog(Act3AR.this,"Změna možná: " + objectToString(dateFlagChange + C.FLAG_IMMUNE_TIME), new DialogInterface.OnDismissListener() {
+                                        CustomDialog.showAlertDialog(Act3AR.this,"Změna možná: " + objectToString(dateFlagChange + C.FLAG_IMMUNE_TIME), new DialogInterface.OnDismissListener() {
                                             @Override
                                             public void onDismiss(DialogInterface dialog) {
                                                 knowFlagInfo = true;

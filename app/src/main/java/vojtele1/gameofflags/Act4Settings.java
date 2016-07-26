@@ -1,6 +1,5 @@
 package vojtele1.gameofflags;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -241,7 +240,7 @@ public class Act4Settings extends BaseActivity {
                                 if (answer.equals("ano")) {
                                     knowAnswer = true;
                                     //zobrazi zpravu o uspesne zmene frakce
-                                    CustomDialog.showDialog(Act4Settings.this, "Frakce byla změněna.", new DialogInterface.OnDismissListener() {
+                                    CustomDialog.showInfoDialog(Act4Settings.this, "Frakce byla změněna.", new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialogInterface) {
                                             // obnovi data v textview
@@ -268,11 +267,11 @@ public class Act4Settings extends BaseActivity {
         Long dateNow = new Date().getTime();
         // pokud se frakce menila pred mene jak tydnem, tak ji nelze zmenit
         if (dateNow < dateFractionChange+7*86400000) {
-            CustomDialog.showDialog(Act4Settings.this, "Frakci nelze změnit!,\nZměna možná: " + objectToString(dateFractionChange+7*86400000));
+            CustomDialog.showAlertDialog(Act4Settings.this, "Frakci nelze změnit!,\nZměna možná: " + objectToString(dateFractionChange+7*86400000));
         }
         else {
             // informuje hrace o zmene frakce
-            CustomDialog.showDialogYesNo(Act4Settings.this, "Opravdu chcete změnit frakci?", new View.OnClickListener() {
+            CustomDialog.showAlertDialogYesNo(Act4Settings.this, "Opravdu chcete změnit frakci?", new View.OnClickListener() {
                 public void onClick(View view) {
                     // pokud je id frakce 1, zmeni ho na 2 a naopak
                     if (playerFraction.equals("1")) {

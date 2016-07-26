@@ -1,12 +1,9 @@
 package vojtele1.gameofflags;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -54,9 +51,6 @@ public class Act1Login extends BaseActivity {
      * Umozni nacitat a ukladat hodnoty do pameti
      */
     private SharedPreferences sharedPreferences;
-
-    boolean nameAvailability;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,7 +215,7 @@ public class Act1Login extends BaseActivity {
     }
 
     private void zmenaJmena(final String fraction_name) {
-        CustomDialog.showDialogEditText(Act1Login.this, "Zadejte svoji přezdívku:", new View.OnClickListener() {
+        CustomDialog.showInfoDialogEditText(Act1Login.this, "Zadejte svoji přezdívku:", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 EditText editText = (EditText) CustomDialog.dialog.findViewById(R.id.etxt_in_dia);
@@ -265,7 +259,7 @@ public class Act1Login extends BaseActivity {
                                         message =  "Vítej ve hře " + nickname + ", tvoje frakce je: "
                                                 + fraction_name + "!";
                                     }
-                                    CustomDialog.showDialog(Act1Login.this, message, new DialogInterface.OnDismissListener() {
+                                    CustomDialog.showInfoDialog(Act1Login.this, message, new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialogInterface) {
                                             continueToWebview();

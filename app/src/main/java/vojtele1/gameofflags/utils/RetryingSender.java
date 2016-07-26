@@ -55,7 +55,7 @@ public class RetryingSender {
 
     private void showInfoDialog(String text, final boolean finishActivity, final boolean popup) {
         if (popup) {
-            CustomDialog.showDialog(activity, text, new DialogInterface.OnDismissListener() {
+            CustomDialog.showAlertDialog(activity, text, new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialogInterface) {
                     Handler mainHandler = WebviewOnClick.popUpView.getHandler();
@@ -69,7 +69,7 @@ public class RetryingSender {
                 }
             });
         }
-        CustomDialog.showDialog(activity, text, finishActivity);
+        CustomDialog.showAlertDialog(activity, text, finishActivity);
     }
     public void startSender(final boolean finish, final boolean popup) {
         new Thread() {

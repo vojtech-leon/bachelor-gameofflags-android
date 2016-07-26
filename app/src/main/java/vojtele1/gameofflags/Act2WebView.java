@@ -4,6 +4,7 @@ package vojtele1.gameofflags;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -92,9 +93,7 @@ public class Act2WebView extends BaseActivity {
         sharedPreferences = getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 MODE_PRIVATE);
 
-        // Get the value of mNotificationAdded from SharedPreferences. Set to false as a default.
-        shownFloor = sharedPreferences.getString(C.SHOWN_FLOOR, "J1NP");
-
+        changeButtonBackground();
         // Get the value of token from SharedPreferences. Set to "" as a default.
         token = sharedPreferences.getString(C.TOKEN, "");
 
@@ -246,6 +245,7 @@ public CustomRequest send() {
         editor.apply();
         webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
+        changeButtonBackground();
     }
     public void layer2Button(View view) {
         floor = "J2NP";
@@ -254,6 +254,7 @@ public CustomRequest send() {
         editor.apply();
         webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
+        changeButtonBackground();
     }
     public void layer3Button(View view) {
         floor = "J3NP";
@@ -262,6 +263,7 @@ public CustomRequest send() {
         editor.apply();
         webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
+        changeButtonBackground();
     }
     public void layer4Button(View view) {
         floor = "J4NP";
@@ -270,6 +272,7 @@ public CustomRequest send() {
         editor.apply();
         webView.loadUrl("file:///android_asset/" + floor + ".html");
         vytahniData();
+        changeButtonBackground();
     }
 
     public void qrButton(View view) {
@@ -347,5 +350,38 @@ public CustomRequest send() {
     public void onBackPressed() {
         // zakomentovani zabrani reakci na stisk hw back
         //super.onBackPressed();
+    }
+
+    private void changeButtonBackground() {
+        shownFloor = sharedPreferences.getString(C.SHOWN_FLOOR, "J1NP");
+        switch (shownFloor) {
+            case "J1NP":
+                buttonLayer1.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border_selected));
+                buttonLayer2.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer3.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer4.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                break;
+            case "J2NP":
+                buttonLayer1.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer2.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border_selected));
+                buttonLayer3.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer4.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                break;
+            case "J3NP":
+                buttonLayer1.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer2.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer3.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border_selected));
+                buttonLayer4.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                break;
+            case "J4NP":
+                buttonLayer1.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer2.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer3.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border));
+                buttonLayer4.setBackground(getResources().getDrawable(R.drawable.background_button_blue_with_dark_blue_border_selected));
+                break;
+            default:
+                break;
+        }
+
     }
 }

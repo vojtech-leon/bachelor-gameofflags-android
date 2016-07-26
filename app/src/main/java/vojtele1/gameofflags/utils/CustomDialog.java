@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import vojtele1.gameofflags.R;
@@ -18,12 +17,12 @@ import vojtele1.gameofflags.R;
 public class CustomDialog {
     public static Dialog dialog;
 
-    public static void showDialog(Context context, String textDialog) {
-        showDialog(context,textDialog,null);
+    public static void showAlertDialog(Context context, String textDialog) {
+        showAlertDialog(context,textDialog,null);
     }
 
-    public static void showDialog(final Activity activity, String textDialog, final boolean finish) {
-        showDialog(activity, textDialog, new DialogInterface.OnDismissListener() {
+    public static void showAlertDialog(final Activity activity, String textDialog, final boolean finish) {
+        showAlertDialog(activity, textDialog, new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
                 if (finish)
@@ -31,12 +30,32 @@ public class CustomDialog {
             }
         });
     }
-    public static void showDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener) {
+
+    public static void showAlertDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener) {
+        showDialog(context, textDialog, onDismissListener, true);
+    }
+
+    public static void showInfoDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener) {
+        showDialog(context, textDialog, onDismissListener, false);
+    }
+
+    /**
+     * zobrazi dialog daneho typu
+     * @param context
+     * @param textDialog
+     * @param onDismissListener
+     * @param type - true znamena alert, false je info dialog
+     */
+    private static void showDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener, Boolean type) {
         if (dialog != null) {
             dialog.dismiss();
         }
         dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_ok);
+        if (type) {
+            dialog.setContentView(R.layout.dialog_alert_ok);
+        } else {
+            dialog.setContentView(R.layout.dialog_info_ok);
+        }
 
         TextView text = (TextView) dialog.findViewById(R.id.txt_dia_in_ok);
         text.setText(textDialog);
@@ -55,12 +74,12 @@ public class CustomDialog {
         dialog.setOnDismissListener(onDismissListener);
     }
 
-    public static void showDialogYesNo(Context context, String textDialog, View.OnClickListener yesListener, View.OnClickListener noListener) {
+    public static void showAlertDialogYesNo(Context context, String textDialog, View.OnClickListener yesListener, View.OnClickListener noListener) {
         if (dialog != null) {
             dialog.dismiss();
         }
         dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_yes_no);
+        dialog.setContentView(R.layout.dialog_alert_yes_no);
 
         TextView text = (TextView) dialog.findViewById(R.id.txt_dia_in_yes_no);
         text.setText(textDialog);
@@ -82,12 +101,12 @@ public class CustomDialog {
         });
     }
 
-    public static void showDialogEditText(Context context, String title, View.OnClickListener okListener) {
+    public static void showInfoDialogEditText(Context context, String title, View.OnClickListener okListener) {
         if (dialog != null) {
             dialog.dismiss();
         }
         dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dialog_with_edit_text);
+        dialog.setContentView(R.layout.dialog_info_with_edit_text);
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
 
