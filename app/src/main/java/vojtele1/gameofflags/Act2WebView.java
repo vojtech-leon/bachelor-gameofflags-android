@@ -4,7 +4,6 @@ package vojtele1.gameofflags;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -35,7 +34,8 @@ import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
 public class Act2WebView extends BaseActivity {
     TextView fraction1_score, fraction2_score, player_score, fraction1_name, fraction2_name;
-    ImageButton buttonQR, buttonSettings;
+    Button buttonQR;
+    ImageButton buttonSettings;
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
     android.webkit.WebView webView;
     String token;
@@ -69,8 +69,6 @@ public class Act2WebView extends BaseActivity {
         fraction1_name = (TextView) findViewById(R.id.fraction1_name);
         fraction2_name = (TextView) findViewById(R.id.fraction2_name);
         player_score = (TextView) findViewById(R.id.player_score);
-        buttonQR = (ImageButton) findViewById(R.id.buttonQR);
-        buttonSettings = (ImageButton) findViewById(R.id.buttonSettings);
         webView = (android.webkit.WebView) findViewById(R.id.webViewMap);
 
         buttonLayer1 = (Button) findViewById(R.id.buttonLayer1);

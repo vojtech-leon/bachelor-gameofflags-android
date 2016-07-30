@@ -188,8 +188,6 @@ public class Act3AR extends BaseActivity {
                         // +1 kvuli poli, ktere zacina od 0, ale id v db od 1
                         flagId = String.valueOf(qrCodes.indexOf(barcodes.valueAt(0).displayValue) + 1);
                         if (!scanner.running && knowFlagInfo) {
-
-                            Log.d("test", "jsem tu");
                             ziskVlajkyKdy();
                             knowFlagInfo = false;
                         }

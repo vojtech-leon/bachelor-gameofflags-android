@@ -72,7 +72,7 @@ public class Scanner {
     Timer timer;
     CountDownTimer cdt;
 
-    StepDetector stepDetector;
+    //StepDetector stepDetector;
 
     /**
      * zdali je scan dokoncen, slouzi pro snimaci aktivitu
@@ -103,7 +103,7 @@ public class Scanner {
                 }
             }
         };
-        stepDetector = new StepDetector(context);
+        //stepDetector = new StepDetector(context);
     }
 
     /**
@@ -235,7 +235,7 @@ public class Scanner {
             // pokud by nekdo zrusil scan a zacal znova, cdt by stale dobihal
             cdt.cancel();
         }
-        stepDetector.enableStepDetector(false);
+        //stepDetector.enableStepDetector(false);
         context.unregisterReceiver(wifiBroadcastReceiver);
         beaconConsumer.unBind();
         running = false;
@@ -354,17 +354,17 @@ public class Scanner {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    stepDetector.enableStepDetector(true);
+                    //stepDetector.enableStepDetector(true);
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME, 1) {
 
                         public void onTick(long millisUntilFinished) {
-                            if (stepDetector.pohyb()) {
+                           /* if (stepDetector.pohyb()) {
                                 stopScan();
                                 CustomDialog.showAlertDialog(context, "Příliš jsi se pohl!");
-                            } else {
+                            } else {*/
                                 // 1000L zajisti ze to bude v s a celociselne
                                 textView.setText("Do zabrání zbývá: " + millisUntilFinished/1000L + ", nehýbej se.");
-                            }
+                           // }
                         }
 
                         public void onFinish() {
