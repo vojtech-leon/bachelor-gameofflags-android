@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -184,5 +185,11 @@ public class WebviewOnClick {
             }
         };
         mainHandler.post(myRunnable);
+    }
+
+
+    @JavascriptInterface
+    public void getXYDistance(int x, int y, int distance) {
+        Log.i("Web-click", "X je: " + x + " Y je : " + y + " a vzdalenost k nejblizsimu je (max 250): " + distance);
     }
 }
