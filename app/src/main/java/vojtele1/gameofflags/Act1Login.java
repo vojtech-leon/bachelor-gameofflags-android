@@ -173,7 +173,6 @@ public class Act1Login extends BaseActivity {
                                 try {
                                     JSONArray players = response.getJSONArray("player");
                                     JSONObject player = players.getJSONObject(0);
-                                    nickname = player.getString("nickname");
                                     String fraction_name;
                                     int fraction = player.optInt("player_fraction");
                                     if (fraction == 1) {
@@ -183,9 +182,9 @@ public class Act1Login extends BaseActivity {
                                     } else {
                                         fraction_name = "";
                                     }
-
-
-                                    if (nickname.equals("user")) {
+                                    // pokud jmeno neni nastaveno v db, vrati se null,
+                                    // proto se porovnava s null (jmeno "null" muze byt)
+                                    if (player.get("nickname").equals(null)) {
                                         zmenaJmena(fraction_name);
                                     } else {
                                         continueToWebview();
@@ -220,10 +219,7 @@ public class Act1Login extends BaseActivity {
             public void onClick(View view) {
                 EditText editText = (EditText) CustomDialog.dialog.findViewById(R.id.etxt_in_dia);
                 newNickname = editText.getText().toString();
-                if (("user").equals(newNickname)) {
-                    zmenaJmena(fraction_name);
-                    Toast.makeText(Act1Login.this, "Přezdívka nesmí být slovo user.", Toast.LENGTH_LONG).show();
-                } else if (newNickname.length() >= 4) {
+                if (newNickname.length() >= 4) {
                     zmenaJmenaRequest(newNickname, fraction_name);
                 } else {
                     zmenaJmena(fraction_name);
