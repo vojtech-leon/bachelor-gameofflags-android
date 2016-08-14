@@ -39,7 +39,6 @@ import vojtele1.gameofflags.dataLayer.CellScan;
 import vojtele1.gameofflags.dataLayer.WifiScan;
 import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomDialog;
-import vojtele1.gameofflags.utils.StepDetector;
 
 
 /**
@@ -250,7 +249,6 @@ public class Scanner {
         List<WifiScan> wifiScans = new ArrayList<>();
         for (ScanResult scan : scanResults) {
             WifiScan wifiScan = new WifiScan(scan.SSID, scan.BSSID, scan.level, scan.frequency);
-            //        wifiScan.setTime((scan.timestamp / 1000) - (startTime)); //scan.timestamp ne nekterych telefonech/verzich/??? hazi nesmysly a na jinych zase funguje perfektne
             wifiScan.setTime(SystemClock.uptimeMillis() - startTime);
 
             wifiScans.add(wifiScan);
@@ -318,15 +316,6 @@ public class Scanner {
         progressDialog.show();
         progressDialog.setCancelable(false);
 
-        //progressDialog.setCanceledOnTouchOutside(false);
-        /*progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                stopScan();
-            }
-        });*/
-
-
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         progressDialog.setContentView(layout);
@@ -358,7 +347,7 @@ public class Scanner {
                     cdt = new CountDownTimer(C.SCAN_COLLECTOR_TIME, 1) {
 
                         public void onTick(long millisUntilFinished) {
-                           /* if (stepDetector.pohyb()) {
+                           /* if (stepDetector.move()) {
                                 stopScan();
                                 CustomDialog.showAlertDialog(context, "Příliš jsi se pohl!");
                             } else {*/

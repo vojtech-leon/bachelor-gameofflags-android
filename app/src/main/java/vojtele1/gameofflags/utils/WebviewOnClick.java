@@ -37,19 +37,17 @@ import java.util.TimeZone;
 import vojtele1.gameofflags.R;
 
 /**
+ * Trida zobrazujici popup pri kliku na bod v mape
  * Created by Leon on 31.05.2016.
  */
 public class WebviewOnClick {
     Activity activity;
 
-    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-    String getFlagInfoUser = adresa + "getflaginfouser";
 
     TextView tvFractionName, tvPlayerName, tvFlagName, tvFlagWhen, tvWhatToDo;
-    RequestQueue requestQueue;
     String cas,responseFrName, responsePName, responseFlName, whatToDo;
 
-     public static PopupWindow popUp;
+    public static PopupWindow popUp;
     public static View popUpView;
 
     /**
@@ -62,7 +60,6 @@ public class WebviewOnClick {
     public WebviewOnClick(Activity activity) {
         this.activity = activity;
 
-        requestQueue = Volley.newRequestQueue(activity);
         popUp = new PopupWindow(activity);
 
         // Retrieve an instance of the SharedPreferences object.
@@ -104,12 +101,12 @@ public class WebviewOnClick {
                 params.put("token", token);
                 params.put("ID_flag", idFlag);
 
-                return new CustomRequest(Request.Method.POST, getFlagInfoUser, params,
+                return new CustomRequest(Request.Method.POST, C.GET_FLAG_INFO_USER, params,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             knowResponse = true;
-                            System.out.println(response.toString());
+                            Log.d(C.LOG_WEBVIEWONCLICK, response.toString());
                             try {
                                 JSONArray flagsJson = response.getJSONArray("flag");
                                 JSONObject flagJson = flagsJson.getJSONObject(0);
@@ -120,16 +117,10 @@ public class WebviewOnClick {
                                 responseFrName = flagJson.getString("fractionName");
                                 String flagMe = flagJson.getString("flagMe");
                                 String fractionMe = flagJson.getString("fractionMe");
-                                //zmena formatu casu
-                                SimpleDateFormat sdfPrijaty = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                SimpleDateFormat sdfVysledny = new SimpleDateFormat("dd. MM. yyyy HH:mm:ss");
-                                // nastavi prijaty cas na UTC
-                                sdfPrijaty.setTimeZone(TimeZone.getTimeZone("UTC"));
-
                                 try {
-                                    Date date = sdfPrijaty.parse(flagDate);
+                                    Date date = FormatDate.stringToDate(flagDate);
                                     // preformatuje prijaty cas do bezneho ciselneho tvaru
-                                    cas = sdfVysledny.format(date.getTime());
+                                    cas = FormatDate.dateToString(date);
 
 
                                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
@@ -137,15 +128,15 @@ public class WebviewOnClick {
                                     // ziskani aktualniho casu
                                     Long dateNow = new Date().getTime();
                                     if (flagMe.equals("true") && !fractionMe.equals("true")) {
-                                        whatToDo = "zabrána tebou za druhou frakci.";
+                                        whatToDo = activity.getString(R.string.webview_on_click_flag_you_another_fraction);
                                     } else if (flagMe.equals("true")) {
-                                        whatToDo = "zabrána tebou.";
+                                        whatToDo = activity.getString(R.string.webview_on_click_flag_you);
                                     } else if (fractionMe.equals("true")) {
-                                        whatToDo = "patří tvé frakci.";
+                                        whatToDo = activity.getString(R.string.webview_on_click_flag_your_fraction);
                                     } else if (dateNow < dateFlagChange + C.FLAG_IMMUNE_TIME) {
-                                        whatToDo = "čerstvě zabrána, počkej do " + sdf.format(date.getTime()) + ".";
+                                        whatToDo = activity.getString(R.string.webview_on_click_flag_wait_to) + sdf.format(date.getTime()) + ".";
                                     } else {
-                                        whatToDo = "zaber ji!";
+                                        whatToDo = activity.getString(R.string.webview_on_click_flag_take);
                                     }
 
 
@@ -187,9 +178,14 @@ public class WebviewOnClick {
         mainHandler.post(myRunnable);
     }
 
-
+    /**
+     * metoda pro zjisteni pozice kliku v mape a vzdalenosti od nejblizsiho bodu
+     * @param x
+     * @param y
+     * @param distance
+     */
     @JavascriptInterface
     public void getXYDistance(int x, int y, int distance) {
-        Log.i("Web-click", "X je: " + x + " Y je : " + y + " a vzdalenost k nejblizsimu je (max 250): " + distance);
+        Log.d("Web-click", "X je: " + x + " Y je : " + y + " a vzdalenost k nejblizsimu je (max 250): " + distance);
     }
 }

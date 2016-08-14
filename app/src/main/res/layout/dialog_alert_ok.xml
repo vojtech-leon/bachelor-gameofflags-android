@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="#ed4040"
-        android:text="OK"
+        android:text="@string/ok"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:layout_marginBottom="10dp" />

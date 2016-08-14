@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 /**
  * Created by Leon on 30.03.2016.
@@ -14,7 +15,8 @@ public class StepDetector implements SensorEventListener {
     Context context;
     private SensorManager sensorManager;
     private Sensor stepDetector;
-    private double krok;
+    private double step;
+    private String TAG = "StepDetector";
 
     boolean activityRunning;
 
@@ -30,8 +32,8 @@ public class StepDetector implements SensorEventListener {
         final int type = event.sensor.getType();
         if (activityRunning) {
             if (type == Sensor.TYPE_STEP_DETECTOR) {
-                krok = krok + event.values[0];
-                System.out.println("Krok! " + krok);
+                step = step + event.values[0];
+                Log.d(TAG, "Krok! " + step);
             }
         }
     }
@@ -43,8 +45,8 @@ public class StepDetector implements SensorEventListener {
      * Vraci true/false, pokud je/neni zaznamenan pohyb
      * @return
      */
-    public boolean pohyb() {
-        if (krok > 1.0) {
+    public boolean move() {
+        if (step > 1.0) {
             activityRunning = false;
             return true;
         }
@@ -60,7 +62,7 @@ public class StepDetector implements SensorEventListener {
             }
         } else {
             sensorManager.unregisterListener(this, stepDetector);
-            krok = 0;
+            step = 0;
         }
     }
 }

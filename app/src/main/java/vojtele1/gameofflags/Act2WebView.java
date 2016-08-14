@@ -5,10 +5,10 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -27,24 +27,20 @@ import java.util.Map;
 import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomRequest;
+import vojtele1.gameofflags.utils.FormatDate;
 import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.WebviewOnClick;
 import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
-
+/**
+ * hlavni aktivita obsahujici mapu a informace o aktualnim stavu
+ */
 public class Act2WebView extends BaseActivity {
     TextView fraction1_score, fraction2_score, player_score, fraction1_name, fraction2_name;
-    Button buttonQR;
-    ImageButton buttonSettings;
     Button buttonLayer1, buttonLayer2, buttonLayer3, buttonLayer4;
     android.webkit.WebView webView;
     String token;
     String floor;
-
-    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-    String webViewPlayer = adresa + "webviewplayer";
-    String webViewScoreFraction = adresa + "webviewscorefraction";
-    String getFlagInfo = adresa + "getflaginfo";
 
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
@@ -105,7 +101,7 @@ public class Act2WebView extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        vytahniData();
+        getInfo();
     }
 
     public void settingsButton(View view) {
@@ -113,49 +109,49 @@ public class Act2WebView extends BaseActivity {
         startActivity(intent);
     }
 
-    private void vytahniData() {
+    private void getInfo() {
         RetryingSender r = new RetryingSender(this) {
             public CustomRequest send() {
                 knowResponse = false;
                 knowAnswer = false;
-        Map<String, String> params = new HashMap<>();
-        params.put("token", token);
-        return new CustomRequest(Request.Method.POST,  webViewPlayer, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
-                        knowResponse = true;
+                Map<String, String> params = new HashMap<>();
+                params.put("token", token);
+                return new CustomRequest(Request.Method.POST, C.WEBVIEW_PLAYER, params,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(C.LOG_ACT2WEBVIEW, response.toString());
+                                knowResponse = true;
 
-                        try {
-                            JSONArray players = response.getJSONArray("player");
+                                try {
+                                    JSONArray players = response.getJSONArray("player");
 
-                                JSONObject player = players.getJSONObject(0);
-                                player_score.setText(player.getString("score"));
-                            if (player.getInt("fraction") == 1) {
-                                fraction1_name.setText("•");
-                            } else {
-                                fraction2_name.setText("•");
+                                    JSONObject player = players.getJSONObject(0);
+                                    player_score.setText(player.getString("score"));
+                                    if (player.getInt("fraction") == 1) {
+                                        fraction1_name.setText("•");
+                                    } else {
+                                        fraction2_name.setText("•");
+                                    }
+                                    knowAnswer = true;
+                                    // musi to byt po urcite dobe, jinak se webview nestihlo nacist a body
+                                    // nezobrazilo - pockani na odpoved prvniho dotazu je dostacujici
+                                    showFlags(floor);
+
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
                             }
-                            knowAnswer = true;
-                            // musi to byt po urcite dobe, jinak se webview nestihlo nacist a body
-                            // nezobrazilo - pockani na odpoved prvniho dotazu je dostacujici
-                            showFlags(floor);
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(C.LOG_ACT2WEBVIEW, "" + error.getMessage());
+                        knowResponse = true;
+                        counterError++;
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowResponse = true;
-                counterError++;
-            }
-        });
+                });
             }
         };
         r.startSender();
@@ -163,74 +159,74 @@ public class Act2WebView extends BaseActivity {
             public CustomRequest send() {
                 knowResponse = false;
                 knowAnswer = false;
-        Map<String, String> params2 = new HashMap<>();
-        params2.put("ID_fraction", "1");
-        return new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
-                new Response.Listener<JSONObject>() {
+                Map<String, String> params2 = new HashMap<>();
+                params2.put("ID_fraction", "1");
+                return new CustomRequest(Request.Method.POST, C.WEBVIEW_SCORE_FRACTION, params2,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(C.LOG_ACT2WEBVIEW, response.toString());
+                                knowResponse = true;
+
+                                try {
+                                    JSONArray fractions = response.getJSONArray("fraction");
+
+                                    JSONObject fraction = fractions.getJSONObject(0);
+                                    fraction1_score.setText(fraction.getString("score"));
+
+
+                                    knowAnswer = true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }, new Response.ErrorListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(C.LOG_ACT2WEBVIEW, "" + error.getMessage());
                         knowResponse = true;
-
-                        try {
-                            JSONArray fractions = response.getJSONArray("fraction");
-
-                                JSONObject fraction = fractions.getJSONObject(0);
-                                fraction1_score.setText(fraction.getString("score"));
-
-
-                            knowAnswer = true;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                        counterError++;
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowResponse = true;
-                counterError++;
-            }
-        });
+                });
 
-    }
-};
-r2.startSender();
+            }
+        };
+        r2.startSender();
         RetryingSender r3 = new RetryingSender(this) {
-public CustomRequest send() {
-    knowResponse = false;
-    knowAnswer = false;
-        Map<String, String> params3 = new HashMap<>();
-        params3.put("ID_fraction", "2");
-       return new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
-                new Response.Listener<JSONObject>() {
+            public CustomRequest send() {
+                knowResponse = false;
+                knowAnswer = false;
+                Map<String, String> params3 = new HashMap<>();
+                params3.put("ID_fraction", "2");
+                return new CustomRequest(Request.Method.POST, C.WEBVIEW_SCORE_FRACTION, params3,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(C.LOG_ACT2WEBVIEW, response.toString());
+                                knowResponse = true;
+
+                                try {
+                                    JSONArray fractions = response.getJSONArray("fraction");
+                                    JSONObject fraction = fractions.getJSONObject(0);
+                                    fraction2_score.setText(fraction.getString("score"));
+
+
+                                    knowAnswer = true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }, new Response.ErrorListener() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(C.LOG_ACT2WEBVIEW, "" + error.getMessage());
                         knowResponse = true;
-
-                        try {
-                            JSONArray fractions = response.getJSONArray("fraction");
-                                JSONObject fraction = fractions.getJSONObject(0);
-                                fraction2_score.setText(fraction.getString("score"));
-
-
-                            knowAnswer = true;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                        counterError++;
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.append(error.getMessage());
-                knowResponse = true;
-                counterError++;
+                });
             }
-        });
-        }
         };
         r3.startSender();
 
@@ -238,38 +234,29 @@ public CustomRequest send() {
 
     public void layer1Button(View view) {
         floor = "J1NP";
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(C.SHOWN_FLOOR, floor);
-        editor.apply();
-        webView.loadUrl("file:///android_asset/" + floor + ".html");
-        vytahniData();
-        changeButtonBackground();
+        changeLayer(floor);
     }
+
     public void layer2Button(View view) {
         floor = "J2NP";
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(C.SHOWN_FLOOR, floor);
-        editor.apply();
-        webView.loadUrl("file:///android_asset/" + floor + ".html");
-        vytahniData();
-        changeButtonBackground();
+        changeLayer(floor);
     }
+
     public void layer3Button(View view) {
         floor = "J3NP";
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(C.SHOWN_FLOOR, floor);
-        editor.apply();
-        webView.loadUrl("file:///android_asset/" + floor + ".html");
-        vytahniData();
-        changeButtonBackground();
+        changeLayer(floor);
     }
+
     public void layer4Button(View view) {
         floor = "J4NP";
+        changeLayer(floor);
+    }
+    private void changeLayer(String floor) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(C.SHOWN_FLOOR, floor);
         editor.apply();
         webView.loadUrl("file:///android_asset/" + floor + ".html");
-        vytahniData();
+        getInfo();
         changeButtonBackground();
     }
 
@@ -278,22 +265,22 @@ public CustomRequest send() {
         startActivity(intent);
     }
 
-     private void createPoint(int id, int x, int y, String color) {
+    private void createPoint(int id, int x, int y, String color) {
         webView.loadUrl("javascript:createCircle(" + String.valueOf(id) + ", " + String.valueOf(x) + ", " + String.valueOf(y) + ", \"" + color + "\")");
     }
 
     private void showFlags(final String floor) {
-         RetryingSender r4 = new RetryingSender(this) {
+        RetryingSender r4 = new RetryingSender(this) {
             public CustomRequest send() {
                 knowResponse = false;
                 knowAnswer = false;
                 Map<String, String> params = new HashMap<>();
                 params.put("floor", floor);
-                return new CustomRequest(Request.Method.POST, getFlagInfo, params,
+                return new CustomRequest(Request.Method.POST, C.GET_FLAG_INFO, params,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                System.out.println(response.toString());
+                                Log.d(C.LOG_ACT2WEBVIEW, response.toString());
                                 knowResponse = true;
                                 try {
                                     JSONArray flagsJson = response.getJSONArray("flag");
@@ -306,7 +293,7 @@ public CustomRequest send() {
                                         int x = flagJson.getInt("x");
                                         int y = flagJson.getInt("y");
                                         try {
-                                            Date date = stringToDate(flagWhen);
+                                            Date date = FormatDate.stringToDate(flagWhen);
                                             long dateFlagChange = date.getTime();
                                             // ziskani aktualniho casu
                                             Long dateNow = new Date().getTime();
@@ -335,15 +322,16 @@ public CustomRequest send() {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.append(error.getMessage());
+                        Log.e(C.LOG_ACT2WEBVIEW, "" + error.getMessage());
                         knowResponse = true;
                         counterError++;
                     }
                 });
             }
-    };
-    r4.startSender();
+        };
+        r4.startSender();
     }
+
     @Override
     public void onBackPressed() {
         // zakomentovani zabrani reakci na stisk hw back

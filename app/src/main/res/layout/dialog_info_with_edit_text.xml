@@ -25,7 +25,7 @@
         android:id="@+id/etxt_in_dia"
         android:inputType="text"
         android:digits="0123456789qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLYXCVBNM"
-        android:hint="Pouze písmena a čísla jsou povolena" />
+        android:hint="@string/only_letters_and_numbers_are_allowed" />
 
     <Button
         android:id="@+id/btn_ok"
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="#66CC00"
-        android:text="OK"
+        android:text="@string/ok"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:layout_marginBottom="10dp" />

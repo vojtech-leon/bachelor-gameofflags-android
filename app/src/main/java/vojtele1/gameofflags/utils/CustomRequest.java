@@ -20,13 +20,6 @@ public class CustomRequest extends Request<JSONObject> {
     private Listener<JSONObject> listener;
     private Map<String, String> params;
 
-    public CustomRequest(String url, Map<String, String> params,
-                         Listener<JSONObject> responseListener, ErrorListener errorListener) {
-        super(Method.GET, url, errorListener);
-        this.listener = responseListener;
-        this.params = params;
-    }
-
     public CustomRequest(int method, String url, Map<String, String> params,
                          Listener<JSONObject> responseListener, ErrorListener errorListener) {
         super(method, url, errorListener);
@@ -37,7 +30,7 @@ public class CustomRequest extends Request<JSONObject> {
     protected Map<String, String> getParams()
             throws com.android.volley.AuthFailureError {
         return params;
-    };
+    }
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {

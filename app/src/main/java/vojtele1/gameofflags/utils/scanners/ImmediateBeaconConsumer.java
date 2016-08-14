@@ -10,6 +10,8 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.scanner.NonBeaconLeScanCallback;
 
+import vojtele1.gameofflags.utils.C;
+
 
 /**
  * Created by Kriz on 16. 2. 2016.
@@ -52,7 +54,7 @@ public class ImmediateBeaconConsumer extends DefaultBeaconConsumer {
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {
-            Log.e("Ble Scan", "Error while conducting a BLE Scan", e);
+            Log.e(C.LOG_BLESCAN, "Error while conducting a BLE Scan", e);
         }
     }
 

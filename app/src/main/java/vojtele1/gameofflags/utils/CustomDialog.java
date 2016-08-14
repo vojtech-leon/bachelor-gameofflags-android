@@ -41,9 +41,9 @@ public class CustomDialog {
 
     /**
      * zobrazi dialog daneho typu
-     * @param context
-     * @param textDialog
-     * @param onDismissListener
+     * @param context context
+     * @param textDialog zobrazovany text
+     * @param onDismissListener reakce po zmizeni dialogu
      * @param type - true znamena alert, false je info dialog
      */
     private static void showDialog(Context context, String textDialog, DialogInterface.OnDismissListener onDismissListener, Boolean type) {
@@ -123,12 +123,15 @@ public class CustomDialog {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
+                // zablokovani dismissu
                 //dialog.dismiss();
             }
         });
     }
 
     public static void dismissDialog() {
-        dialog.dismiss();
+        if (dialog != null) {
+            dialog.dismiss();
+        }
     }
 }

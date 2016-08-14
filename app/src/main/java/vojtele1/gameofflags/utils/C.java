@@ -1,10 +1,5 @@
 package vojtele1.gameofflags.utils;
 
-import android.content.Context;
-import android.os.Build;
-import android.provider.Settings;
-import android.text.TextUtils;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -19,6 +14,14 @@ public class C {
     public static final String LOG_BLESCAN = "BLE Scan";
     public static final String LOG_WIFISCAN = "Wifi Scan";
     public static final String LOG_CELLSCAN = "GSM Scan";
+    public static final String LOG_NOTIFICATION = "Notification";
+    public static final String LOG_ALARMRECEIVER = "AlarmReceiver";
+    public static final String LOG_RETRYINGSENDER = "RetryingSender";
+    public static final String LOG_WEBVIEWONCLICK = "WebviewOnClick";
+    public static final String LOG_ACT1LOGIN = "Act1Login";
+    public static final String LOG_ACT2WEBVIEW = "Act2WebView";
+    public static final String LOG_ACT3AR = "Act3AR";
+    public static final String LOG_ACT4SETTINGS = "Act4Settings";
     /**
      * Jak dlouho ma probihat skenovani pri sberu dat
      */
@@ -51,23 +54,19 @@ public class C {
     public static final float GEOFENCE_RADIUS_IN_METERS = 1600; // 1 mile, 1.6 km
 
     /**
-     * Mapa s pozici Fakulty pro geofencing
+     * souradnice Fakulty pro geofencing
      */
     public static final HashMap<String, LatLng> GEOFENCING_LANDMARKS = new HashMap<>();
     static {
         // poloha FIM
-        GEOFENCING_LANDMARKS.put("Doma", new LatLng(50.505316, 16.007224));
-
         GEOFENCING_LANDMARKS.put("FIM", new LatLng(50.204474, 15.829622));
     }
 
     /**
-     * veskere MAC adresy eduroamu na FIM, ktere jsem ziskal
+     * veskere MAC adresy eduroamu na FIM, ktere byly ziskany
      */
     public static final ArrayList<String> MAC_EDUROAM = new ArrayList<>();
     static {
-        MAC_EDUROAM.add("c8:3a:35:11:c6:70");// adresa doma
-
         MAC_EDUROAM.add("00:1a:e3:d2:d3:50");
         MAC_EDUROAM.add("00:25:45:24:7e:bf");
         MAC_EDUROAM.add("00:25:45:24:7e:b0");
@@ -111,4 +110,30 @@ public class C {
     }
 
     public static final String[] EXCEPTION_EMAIL = { "vojtele1@uhk.cz" };
+
+    public static final String SERVER_URL = "http://gameofflags-vojtele1.rhcloud.com/android/";
+
+    public static final String WEBVIEW_SCORE_FRACTION = SERVER_URL + "webviewscorefraction";
+
+    public static final String GET_FLAG_INFO_USER = SERVER_URL + "getflaginfouser";
+
+    public static final String LOGIN_PLAYER = SERVER_URL + "loginplayer";
+
+    public static final String CHANGE_PLAYER_NAME = SERVER_URL + "changeplayername";
+
+    public static final String WEBVIEW_PLAYER = SERVER_URL + "webviewplayer";
+
+    public static final String GET_FLAG_INFO = SERVER_URL + "getflaginfo";
+
+    public static final String SEND_SCAN = SERVER_URL + "sendscan";
+
+    public static final String CHANGE_PLAYER_SCORE = SERVER_URL + "changeplayerscore";
+
+    public static final String CHANGE_FLAG_OWNER = SERVER_URL + "changeflagowner";
+
+    public static final String GET_QR_CODES = SERVER_URL + "getqrcodes";
+
+    public static final String CHANGE_FRACTION = SERVER_URL + "changefraction";
+
+    public static final String GET_PLAYER_FRACTION = SERVER_URL + "getplayerfraction";
 }

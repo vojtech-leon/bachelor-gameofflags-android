@@ -6,12 +6,12 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import java.io.File;
 
 import vojtele1.gameofflags.R;
+import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
 
 import static android.support.v4.content.FileProvider.getUriForFile;
@@ -22,7 +22,7 @@ import static android.support.v4.content.FileProvider.getUriForFile;
  * @author Bc. Radek Brůha <bruhara1@uhk.cz>
  */
 @SuppressWarnings({ "ConstantConditions", "unchecked" })
-public class CrashActivity extends AppCompatActivity {
+public class CrashActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

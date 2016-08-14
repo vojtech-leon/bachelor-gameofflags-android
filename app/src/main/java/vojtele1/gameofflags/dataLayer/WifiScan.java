@@ -9,10 +9,6 @@ public class WifiScan {
     private int frequency, channel, strength;
     long time;
 
-    //region CONSTRUCTORS / GETTERS / SETTERS
-    public WifiScan() {
-    }
-
     public WifiScan(String SSID, String MAC, int strength, int frequency) {
         this.SSID = SSID;
         this.MAC = MAC;
@@ -21,75 +17,12 @@ public class WifiScan {
         setChannelAndTechnology();
     }
 
-    public String getSSID() {
-        return SSID;
-    }
-
-    public void setSSID(String SSID) {
-        this.SSID = SSID;
-    }
-
-    public String getMAC() {
-        return MAC;
-    }
-
-    public void setMAC(String MAC) {
-        this.MAC = MAC;
-    }
-
-    public int getStrength() {
-        return strength;
-    }
-
-    public void setStrength(int strenght) {
-        this.strength = strenght;
-    }
-
-    public int getChannel() {
-        return channel;
-    }
-
-    public void setChannel(int channel) {
-        this.channel = channel;
-    }
-
-    public int getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
-    }
-
-    public String getTechnology() {
-        return technology;
-    }
-
-    public void setTechnology(String technology) {
-        this.technology = technology;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
     public void setTime(long time) {
         this.time = time;
     }
-    //endregion
 
     @Override
     public String toString() {
-       /* return "WifiScan{" +
-                "SSID='" + SSID + '\'' +
-                ", MAC='" + MAC + '\'' +
-                ", technology='802.11" + technology + "'" +
-                ", frequency=" + frequency +
-                ", channel=" + channel +
-                ", strength=" + strength +
-                ", time=" + time +
-                '}';*/
-
         return "{" +
                 "\"SSID\":" + "\"" + SSID + "\"" +
                 ",\"MAC\":" + "\"" + MAC + "\"" +

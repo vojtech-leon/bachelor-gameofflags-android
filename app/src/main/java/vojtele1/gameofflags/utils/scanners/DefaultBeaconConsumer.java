@@ -14,6 +14,8 @@ import org.altbeacon.beacon.Region;
 
 import java.util.Collection;
 
+import vojtele1.gameofflags.utils.C;
+
 
 /**
  * Created by Matej on 8.11.2015.
@@ -53,7 +55,7 @@ public class DefaultBeaconConsumer implements org.altbeacon.beacon.BeaconConsume
         try {
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
         } catch (RemoteException e) {
-            Log.e("Ble Scan", "Error while conducting a BLE Scan", e);
+            Log.e(C.LOG_BLESCAN, "Error while conducting a BLE Scan", e);
         }
     }
 

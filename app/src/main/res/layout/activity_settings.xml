@@ -20,7 +20,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Změna frakce"
+        android:text="@string/activity_settings_change_fraction"
         android:id="@+id/buttonChangeFraction"
         android:onClick="changeFraction"
         android:layout_below="@+id/add_remove_notification_button"
@@ -33,7 +33,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Odhlásit"
+        android:text="@string/logout"
         android:id="@+id/buttonLogout"
         android:onClick="logoutButton"
         android:layout_centerHorizontal="true"
@@ -47,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Tvoje frakce: "
+        android:text="@string/activity_settings_player_fraction_name"
         android:id="@+id/textView3"
         android:layout_below="@+id/buttonLogout"
         android:layout_alignParentStart="true"
@@ -66,7 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Poslední změna: "
+        android:text="@string/activity_settings_last_change"
         android:id="@+id/textView4"
         android:layout_below="@+id/textView3"
         android:layout_alignParentStart="true" />
@@ -83,7 +83,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Zpět"
+        android:text="@string/activity_settings_back"
         android:id="@+id/buttonBack"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"

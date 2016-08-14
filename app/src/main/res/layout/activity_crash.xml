@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Pridan nadpis, protoze v app neni pouzivan ActionBar, jinak je
- autor Bc. Radek Brůha <bruhara1@uhk.cz>
+Pridan nadpis, protoze v app neni pouzivan ActionBar,
+ autor je Bc. Radek Brůha <bruhara1@uhk.cz>
  -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"

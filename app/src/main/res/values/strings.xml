@@ -3,7 +3,7 @@
     <string name="app_name">Game of Flags</string>
     <string name="settings">Nastavení</string>
 
-    <string name="sign_in_label">Přihlásit</string>
+    <string name="sign_in">Přihlásit</string>
     <string name="fb_app_id">919073338174996</string>
 
 
@@ -28,18 +28,61 @@
         Geofence transition error: invalid transition type %1$d
     </string>
 
-    <!-- Transition type strings -->
-    <string name="geofence_transition_entered">Vítej zpět </string>
-    <string name="unknown_geofence_transition">Unknown Transition - nahlaste adminovi</string>
-
-    <string name="geofence_transition_notification_text">Pomož své frakci získat dominanci ve všech patrech!</string>
-
     <string name="never">Nikdy.</string>
 
+    <!--  autor Bc. Radek Brůha <bruhara1@uhk.cz> -->
     <string name="activity_crash_title">An Unexpected Crash Occurred</string>
     <string name="activity_crash_button">Send Crash Report By Email</string>
     <string name="activity_crash_email_subject">[UHK Navigation] Crash Report</string>
     <string name="activity_crash_email_text">Hello,\nI\'m sending crash report.\n\nThank you for solving this problem.</string>
     <string name="activity_crash_email_attachment">[%1$s] This exception was generated on %2$s %3$s (Android %4$s, API %5$d) with %6$,d / %7$,d MB RAM:\n\n%8$s</string>
+
+
+    <string name="flag_info_fraction">"Frakce: "</string>
+    <string name="flag_info_taken">"Zabrána: "</string>
+    <string name="flag_info_took">"Zabral: "</string>
+    <string name="flag_info_situation">"Stav: "</string>
+    <string name="flag_info_flag">"Vlajka: "</string>
+    <string name="only_letters_and_numbers_are_allowed">Pouze písmena a čísla jsou povolena</string>
+    <string name="ok">OK</string>
+    <string name="no">NO</string>
+    <string name="yes">YES</string>
+    <string name="activity_webview_take_flag">Zaber vlajku</string>
+    <string name="activity_webview_fraction_1">Frakce 1</string>
+    <string name="activity_webview_fraction_2">Frakce 2</string>
+    <string name="activity_webview_first_floor">1. patro</string>
+    <string name="activity_webview_second_floor">2. patro</string>
+    <string name="activity_webview_third_floor">3. patro</string>
+    <string name="activity_webview_fourth_floor">4. patro</string>
+    <string name="activity_webview_taken_flags">"Nasbíraných vlajek: "</string>
+    <string name="activity_settings_back">Zpět</string>
+    <string name="activity_settings_last_change">"Poslední změna: "</string>
+    <string name="activity_settings_player_fraction_name">"Tvoje frakce: "</string>
+    <string name="logout">Odhlásit</string>
+    <string name="activity_settings_change_fraction">Změna frakce</string>
+    <string name="activity_login_aplication_logo">Logo aplikace</string>
+    <string name="flash">blesk</string>
+
+    <string name="webview_on_click_flag_you_another_fraction">zabrána tebou za druhou frakci.</string>
+    <string name="webview_on_click_flag_you">zabrána tebou.</string>
+    <string name="webview_on_click_flag_your_fraction">patří tvé frakci.</string>
+    <string name="webview_on_click_flag_wait_to">"čerstvě zabrána, počkej do "</string>
+    <string name="webview_on_click_flag_take">zaber ji!</string>
+    <string name="act1_login_failed">Přihlášení se nezdařilo.</string>
+    <string name="act1_set_your_nickname">"Zadejte svoji přezdívku: "</string>
+    <string name="act1_nickname_must_have_atleast_4">Přezdívka musí být alespoň 4 znaky.</string>
+    <string name="act1_you_were_renamed_new_nickname_is">"Byl jsi přejmenován, nová přezdívka je: "</string>
+    <string name="act1_welcome_in_game">"Vítej ve hře "</string>
+    <string name="act1_your_fraction_is">", tvoje frakce je: "</string>
+    <string name="act1_this_nickname_exists">Zadaná přezdívka již existuje.</string>
+    <string name="act3_you_cant_lose_flag_vision">Nesmíš ztratit vlajku z dohledu!</string>
+    <string name="act3_flag_was_taken">Vlajka byla zabrána!</string>
+    <string name="act3_this_flag_taken_already_you">Tuto vlajku jsi již zabral.</string>
+    <string name="act3_this_flag_own_your_fraction">Tuto vlajku již tvoje frakce vlastní.</string>
+    <string name="act3_change_possible">"Změna možná: "</string>
+    <string name="act4_please_start_location">Zapněte prosím polohu (po nastavení můžete vypnout).</string>
+    <string name="act4_fraction_has_been_changed">Frakce byla změněna.</string>
+    <string name="act4_fraction_cant_be_change_possible">"Frakci nelze změnit!,\nZměna možná: "</string>
+    <string name="act4_really_change_fraction">Opravdu chcete změnit frakci?</string>
 
 </resources>

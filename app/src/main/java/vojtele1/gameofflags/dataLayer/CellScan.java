@@ -32,15 +32,6 @@ public class CellScan {
 
     @Override
     public String toString() {
-        /*return "CellScan{" +
-                "cid='" + cid + '\'' +
-                ", lac='" + lac + '\'' +
-                ", psc='" + psc + '\'' +
-                ", rssi=" + rssi +
-                ", type=" + type +
-                ", time=" + time +
-                '}';*/
-
         return "{" +
                 "\"cid\":" + "\"" + cid + "\"" +
                 ",\"lac\":" + "\"" + lac + "\"" +
@@ -51,48 +42,24 @@ public class CellScan {
                 "}";
     }
 
-    public int getCid() {
-        return cid;
-    }
-
     public void setCid(int cid) {
         this.cid = cid;
-    }
-
-    public int getLac() {
-        return lac;
     }
 
     public void setLac(int lac) {
         this.lac = lac;
     }
 
-    public int getPsc() {
-        return psc;
-    }
-
     public void setPsc(int psc) {
         this.psc = psc;
-    }
-
-    public int getRssi() {
-        return rssi;
     }
 
     public void setRssi(int rssi) {
         this.rssi = rssi;
     }
 
-    public int getType() {
-        return type;
-    }
-
     public void setType(int type) {
         this.type = type;
-    }
-
-    public long getTime() {
-        return time;
     }
 
     public void setTime(long time) {

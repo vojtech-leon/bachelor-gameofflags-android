@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ import vojtele1.gameofflags.utils.BaseActivity;
 import vojtele1.gameofflags.utils.C;
 import vojtele1.gameofflags.utils.CustomDialog;
 import vojtele1.gameofflags.utils.CustomRequest;
+import vojtele1.gameofflags.utils.FormatDate;
 import vojtele1.gameofflags.utils.RetryingSender;
 import vojtele1.gameofflags.utils.crashReport.ExceptionHandler;
 
@@ -63,11 +65,6 @@ public class Act4Settings extends BaseActivity {
      * Jestli jsou notifikace pridany
      */
     private boolean notificationAdded;
-
-    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-
-    String changeFraction = adresa + "changefraction";
-    String getPlayerFraction = adresa + "getplayerfraction";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,7 +141,7 @@ public class Act4Settings extends BaseActivity {
         } else {
             Toast.makeText(
                     this,
-                    "Zapněte prosím polohu (po nastavení můžete vypnout).",
+                    R.string.act4_please_start_location,
                     Toast.LENGTH_LONG
             ).show();
         }
@@ -157,13 +154,11 @@ public class Act4Settings extends BaseActivity {
                 // zjisti frakci a cas posledni zmeny
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
-                return
-
-                 new CustomRequest(Request.Method.POST,  getPlayerFraction, params,
+                return new CustomRequest(Request.Method.POST,  C.GET_PLAYER_FRACTION, params,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                System.out.println(response.toString());
+                                Log.d(C.LOG_ACT4SETTINGS, response.toString());
                                 knowResponse = true;
                                 try {
                                     JSONArray players = response.getJSONArray("player");
@@ -185,11 +180,11 @@ public class Act4Settings extends BaseActivity {
                                         knowAnswer = true;
                                     } else {
                                         try {
-                                            Date date = stringToDate(playerFractionWhen);
+                                            Date date = FormatDate.stringToDate(playerFractionWhen);
                                             // ulozi prijaty cas
                                             dateFractionChange = date.getTime();
                                             // preformatuje prijaty cas do bezneho ciselneho tvaru
-                                            String cas = dateToString(date);
+                                            String cas = FormatDate.dateToString(date);
                                             // vypise cas do textView
                                             fraction_when.setText(cas);
 
@@ -205,7 +200,7 @@ public class Act4Settings extends BaseActivity {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.append(error.getMessage());
+                        Log.e(C.LOG_ACT4SETTINGS, "" + error.getMessage());
                         knowResponse = true;
                         counterError++;
                     }
@@ -219,15 +214,14 @@ public class Act4Settings extends BaseActivity {
             public CustomRequest send() {
                 knowResponse = false;
                 knowAnswer = false;
-                // zjisti frakci a cas posledni zmeny
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
                 params.put("ID_fraction", newPlayerFraction);
-                return new CustomRequest(Request.Method.POST, changeFraction, params,
+                return new CustomRequest(Request.Method.POST, C.CHANGE_FRACTION, params,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                System.out.println(response.toString());
+                                Log.d(C.LOG_ACT4SETTINGS, response.toString());
                                 knowResponse = true;
                                 String answer = "";
                                 try {
@@ -240,7 +234,7 @@ public class Act4Settings extends BaseActivity {
                                 if (answer.equals("ano")) {
                                     knowAnswer = true;
                                     //zobrazi zpravu o uspesne zmene frakce
-                                    CustomDialog.showInfoDialog(Act4Settings.this, "Frakce byla změněna.", new DialogInterface.OnDismissListener() {
+                                    CustomDialog.showInfoDialog(Act4Settings.this, getString(R.string.act4_fraction_has_been_changed), new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialogInterface) {
                                             // obnovi data v textview
@@ -252,7 +246,7 @@ public class Act4Settings extends BaseActivity {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.append(error.getMessage());
+                        Log.e(C.LOG_ACT4SETTINGS, "" + error.getMessage());
                         knowResponse = true;
                         counterError++;
                     }
@@ -267,11 +261,11 @@ public class Act4Settings extends BaseActivity {
         Long dateNow = new Date().getTime();
         // pokud se frakce menila pred mene jak tydnem, tak ji nelze zmenit
         if (dateNow < dateFractionChange+7*86400000) {
-            CustomDialog.showAlertDialog(Act4Settings.this, "Frakci nelze změnit!,\nZměna možná: " + objectToString(dateFractionChange+7*86400000));
+            CustomDialog.showAlertDialog(Act4Settings.this, getString(R.string.act4_fraction_cant_be_change_possible) + FormatDate.objectToString(dateFractionChange+7*86400000));
         }
         else {
             // informuje hrace o zmene frakce
-            CustomDialog.showAlertDialogYesNo(Act4Settings.this, "Opravdu chcete změnit frakci?", new View.OnClickListener() {
+            CustomDialog.showAlertDialogYesNo(Act4Settings.this, getString(R.string.act4_really_change_fraction), new View.OnClickListener() {
                 public void onClick(View view) {
                     // pokud je id frakce 1, zmeni ho na 2 a naopak
                     if (playerFraction.equals("1")) {

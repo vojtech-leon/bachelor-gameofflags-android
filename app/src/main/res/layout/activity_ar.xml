@@ -16,6 +16,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:onClick="useFlash"
-        android:background="@drawable/ic_flash" />
+        android:background="@drawable/ic_flash"
+        android:contentDescription="@string/flash" />
 
 </RelativeLayout>

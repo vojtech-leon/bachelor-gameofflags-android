@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Database pro ukládání scanů, než se pošlou na server
  *
- * Created by Leon on 18.02.2016.
+ * Created by Leon Vojtěch on 18.02.2016.
  */
 public class Scans {
     protected static final String DATABASE_NAME = "gameofflags";
@@ -23,7 +23,7 @@ public class Scans {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_Fingerprint = "fingerprint";
     public static final String COLUMN_Date = "date";
-    public static final String COLUMN_Odeslano = "odeslano";
+    public static final String COLUMN_Send = "send";
     public static final String COLUMN_Flag = "flag";
 
     private SQLiteOpenHelper openHelper;
@@ -39,7 +39,7 @@ public class Scans {
                     + COLUMN_ID + " INTEGER PRIMARY KEY,"
                     + COLUMN_Fingerprint + " TEXT NOT NULL,"
                     + COLUMN_Date + " DATETIME NOT NULL,"
-                    + COLUMN_Odeslano + " BOOLEAN NOT NULL,"
+                    + COLUMN_Send + " BOOLEAN NOT NULL,"
                     + COLUMN_Flag + " INTEGER NOT NULL"
                     + ");");
         }
@@ -60,23 +60,22 @@ public class Scans {
         openHelper = new DatabaseHelper(ctx);
     }
     public static final String[] columns = { COLUMN_ID, COLUMN_Fingerprint, COLUMN_Date,
-            COLUMN_Odeslano, COLUMN_Flag };
+            COLUMN_Send, COLUMN_Flag };
 
     protected static final String ORDER_BY = COLUMN_ID + " DESC";
 
-
+    /**
+     * @return vsechny scany z db
+     */
     public Cursor getScans() {
         SQLiteDatabase db = openHelper.getReadableDatabase();
         return db.query(TB_NAME, columns, null, null, null, null, ORDER_BY);
     }
 
-    public Cursor getScan(long id) {
-        SQLiteDatabase db = openHelper.getReadableDatabase();
-        String[] selectionArgs = { String.valueOf(id) };
-        return db.query(TB_NAME, columns, COLUMN_ID + "= ?", selectionArgs,
-                null, null, ORDER_BY);
-    }
-
+    /**
+     * smaze scan z vnitrni db
+     * @param id - identifikator scanu
+     */
     public void deleteScan(long id) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         String[] selectionArgs = { String.valueOf(id) };
@@ -84,27 +83,33 @@ public class Scans {
         db.delete(TB_NAME, COLUMN_ID + "= ?", selectionArgs);
     }
 
+    /**
+     * vlozi novy scan do vnitrni db, automaticky pripradi datum vytvoreni
+     * @param fingerprint - ziskany otisk
+     * @param flag - misto, kde byl otisk porizen
+     */
     public void insertScan(String fingerprint, int flag) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         Date date = new Date();
         ContentValues values = new ContentValues();
         values.put(COLUMN_Fingerprint, fingerprint);
         values.put(COLUMN_Date, date.getTime() / 1000);  // je to v ms a UTC timestamp, prevedeno na s
-        values.put(COLUMN_Odeslano, false);
+        values.put(COLUMN_Send, false);
         values.put(COLUMN_Flag, flag);
 
         db.insert(TB_NAME, null, values);
     }
+
+    /**
+     * zmeni hodnotu odeslano na true, kde souhlasi cas vytvoreni
+     * @param date - cas porizeni scanu
+     */
     public void updateScan(String date) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         String[] selectionArgs = { date };
-        values.put(COLUMN_Odeslano, true);
+        values.put(COLUMN_Send, true);
 
         db.update(TB_NAME, values, COLUMN_Date + "= ?", selectionArgs);
-    }
-
-    public void close() {
-        openHelper.close();
     }
 }

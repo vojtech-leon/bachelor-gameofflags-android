@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -36,8 +37,6 @@ import vojtele1.gameofflags.utils.C;
 public class Notification {
 
     RequestQueue requestQueue;
-    String adresa = "http://gameofflags-vojtele1.rhcloud.com/android/";
-    String webViewScoreFraction = adresa + "webviewscorefraction";
     int fraction1Score, fraction2Score, counterError;
     boolean knowScoreF1, knowScoreF2;
     boolean knowResponseF1, knowResponseF2;
@@ -46,45 +45,44 @@ public class Notification {
     /**
      * Umozni nacitat a ukladat hodnoty do pameti
      */
-    private SharedPreferences mSharedPreferences;
+    private SharedPreferences sharedPreferences;
     /**
      * V jake frakci byl hrac naposled
      */
-    private String mPlayerFraction;
+    private String playerFraction;
 
     public Notification(Context context) {
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
         // Retrieve an instance of the SharedPreferences object.
-        mSharedPreferences = context.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
+        sharedPreferences = context.getSharedPreferences(C.SHARED_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
 
-        // Get the value of mPlayerFraction from SharedPreferences. Set to 0 (chyba) as a default.
-        mPlayerFraction = mSharedPreferences.getString(C.PLAYER_FRACTION, "0");
+        // Get the value of playerFraction from SharedPreferences. Set to 0 (chyba) as a default.
+        playerFraction = sharedPreferences.getString(C.PLAYER_FRACTION, "0");
     }
-    public void notifikuj() {
+    public void sendNotification() {
         getFractionScore(knowScoreF1, knowScoreF2);
-        zjisti();
+        getInfo();
     }
-    private void zjisti() {
+    private void getInfo() {
         // Looper.getMainLooper() je potreba kvuli service(geofencing), protoze service neni UI
         Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (knowResponseF1 && knowResponseF2) {
-
-                    System.out.println("Pocet chyb: " + counterError);
+                    Log.e(C.LOG_NOTIFICATION, "Pocet chyb pri stahovani: " + counterError);
                     if (counterError >= 200) {
-                        System.out.println("konec, odpoved bohuzel nedosla");
+                        Log.e(C.LOG_NOTIFICATION, "odpoved nedorazila");
                     } else if (!knowScoreF1 || !knowScoreF2) {
                         getFractionScore(knowScoreF1, knowScoreF2);
-                        zjisti();
+                        getInfo();
                     }  else { // vim score, tvorim zpravu pro notifikaci
                         int playerFractionScore, opositeFractionScore;
-                        switch (mPlayerFraction) {
+                        switch (playerFraction) {
                             case "0":
-                                System.out.println("Alarm notifikace - neznam hracovu frakci.");
+                                Log.e(C.LOG_NOTIFICATION, "neznam hracovu frakci");
                                 return; // neni potreba pokracovat
 
                             case "1":
@@ -98,7 +96,7 @@ public class Notification {
                         }
 
                         if (playerFractionScore > opositeFractionScore + 1) {// tedy vedou minimalne o 2 body
-                            System.out.println("alarm notifikace - nenotifikuji, hracova frakce vede dostatecne.");
+                            Log.i(C.LOG_NOTIFICATION, "nenotifikuji, hracova frakce vede dostatecne.");
                             return; // neni potreba pokracovat
                         } else if (playerFractionScore > opositeFractionScore) { // vedou pouze o bod
                             message = "Tvá frakce nepatrně vede, pomož jí získat větší náskok!";
@@ -109,12 +107,11 @@ public class Notification {
                         } else { // prohrava pouze o bod
                             message = "Tvá frakce nepatrně prohrává, pomož jí dohnat ztrátu!";
                         }
-
-                        System.out.println("vim vse, notifikuji");
+                        Log.i(C.LOG_NOTIFICATION, "notifikuji");
                         createNotification(context, "Game of Flags", message, "Game of Flags tě potřebuje!");
                     }
                 } else {
-                    zjisti();
+                    getInfo();
                 }
             }
         }, 1000);
@@ -122,9 +119,9 @@ public class Notification {
     private void getFractionScore(boolean f1, boolean f2) {
         if (!f1) {
             knowResponseF1 = false;
-            Map<String, String> params2 = new HashMap();
-            params2.put("ID_fraction", "1");
-            CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params2,
+            Map<String, String> params = new HashMap<>();
+            params.put("ID_fraction", "1");
+            CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST, C.WEBVIEW_SCORE_FRACTION, params,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -150,13 +147,13 @@ public class Notification {
                 }
             });
 
-            requestQueue.add(jsObjRequest2);
+            requestQueue.add(jsObjRequest);
         }
         if (!f2) {
             knowResponseF2 = false;
-            Map<String, String> params3 = new HashMap();
-            params3.put("ID_fraction", "2");
-            CustomRequest jsObjRequest3 = new CustomRequest(Request.Method.POST, webViewScoreFraction, params3,
+            Map<String, String> params2 = new HashMap<>();
+            params2.put("ID_fraction", "2");
+            CustomRequest jsObjRequest2 = new CustomRequest(Request.Method.POST, C.WEBVIEW_SCORE_FRACTION, params2,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -181,7 +178,7 @@ public class Notification {
                     counterError++;
                 }
             });
-            requestQueue.add(jsObjRequest3);
+            requestQueue.add(jsObjRequest2);
         }
     }
     private void createNotification(Context context, String msg, String msgText, String msgAlert) {
@@ -189,12 +186,10 @@ public class Notification {
         PendingIntent notificationIntent = PendingIntent.getActivity(context, 0,
                 new Intent(context, Act1Login.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder mBuilder = new
+        NotificationCompat.Builder builder = new
                 NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.app_logo)
-                        // In a real app, you may want to use a library like Volley
-                        // to decode the Bitmap.
-                // ta ikona, co je stale videt
+                // ta ikona, ktera je stale videt
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                         R.drawable.app_logo))
                 .setContentTitle(msg)
@@ -206,17 +201,17 @@ public class Notification {
         bigTextStyle.setBigContentTitle(msg);
         bigTextStyle.bigText(msgText);
 
-        mBuilder.setStyle(bigTextStyle);
+        builder.setStyle(bigTextStyle);
 
-        mBuilder.setContentIntent(notificationIntent);
+        builder.setContentIntent(notificationIntent);
 
-        mBuilder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+        builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
 
-        mBuilder.setAutoCancel(true);
+        builder.setAutoCancel(true);
 
-        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(0, mBuilder.build());
+        notificationManager.notify(0, builder.build());
 
     }
 }

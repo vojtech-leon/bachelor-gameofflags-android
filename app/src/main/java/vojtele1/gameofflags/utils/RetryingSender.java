@@ -2,11 +2,11 @@
 package vojtele1.gameofflags.utils;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -14,7 +14,7 @@ import com.android.volley.toolbox.Volley;
 import vojtele1.gameofflags.R;
 
 /**
- * Created by NB on 4.7.2016.
+ * Created by Leon on 4.7.2016.
  *
  */
 public class RetryingSender {
@@ -23,10 +23,8 @@ public class RetryingSender {
     protected boolean knowAnswer;
     protected int counterError;
     RequestQueue requestQueue;
-    AlertDialog alertDialog;
     /**
      * Pro zjisteni, jestli progress dialog v showLoadingProgress() bezi
-     * a umoznuje jeho ukonceni.
      */
     protected ProgressDialog progressDialog;
 
@@ -88,7 +86,7 @@ public class RetryingSender {
                             @Override
                             public void run() {
                                 if (knowResponse) {
-                                    System.out.println("Pocet chyb: " + counterError);
+                                    Log.d(C.LOG_RETRYINGSENDER, "Pocet chyb: " + counterError);
                                     if (counterError >= 20) {
                                         showInfoDialog("Problém s připojením, zkuste to prosím znovu.", finish, popup);
                                         hideLoadingProgress();
@@ -97,7 +95,7 @@ public class RetryingSender {
                                         startSender(finish);
                                     } else {
                                         hideLoadingProgress();
-                                        System.out.println("Loading dokoncen.");
+                                        Log.i(C.LOG_RETRYINGSENDER, "Loading dokončen.");
                                     }
                                 } else {
                                     startSender(finish);
