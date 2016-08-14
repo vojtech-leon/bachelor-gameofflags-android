@@ -157,7 +157,7 @@ public class Notification {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            System.out.println(response.toString());
+                            Log.d(C.LOG_NOTIFICATION, response.toString());
                             knowResponseF2 = true;
 
                             try {
@@ -173,7 +173,7 @@ public class Notification {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    System.out.println(error.getMessage());
+                    Log.e(C.LOG_NOTIFICATION, "" + error.getMessage());
                     knowResponseF2 = true;
                     counterError++;
                 }

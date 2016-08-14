@@ -153,7 +153,7 @@ public class WebviewOnClick {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    System.out.append(error.getMessage());
+                    Log.e(C.LOG_WEBVIEWONCLICK, "" + error.getMessage());
                     knowResponse = true;
                     counterError++;
                 }
